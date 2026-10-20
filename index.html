@@ -124,7 +124,11 @@
             .container>*:not(.modal){display:none!important}
             .modal{position:static!important;background:white!important;padding:0!important;display:block!important}
             .modal-content{max-height:none!important;overflow:visible!important;max-width:100%!important;box-shadow:none!important;border-radius:0!important;padding:0!important}
-            .ficha{padding:.3cm!important;page-break-inside:avoid!important}
+            html,body{height:auto!important;min-height:0!important;margin:0!important;padding:0!important}
+            .container{padding:0!important;margin:0!important;min-height:0!important;height:auto!important;max-width:none!important;box-shadow:none!important;border-radius:0!important;overflow:visible!important}
+            .close-modal{display:none!important}
+            .ficha{padding:.3cm!important;overflow:hidden!important;page-break-inside:auto!important;break-inside:auto!important;page-break-before:avoid!important;break-before:avoid!important;page-break-after:avoid!important;break-after:avoid!important}
+            .ficha table td{padding:.2rem .4rem!important;line-height:1.2!important}
             .modal-content>div:last-child{display:none!important}
             @page{size:letter portrait;margin:.5cm}
         }
@@ -518,7 +522,7 @@
 // ============================================================
 // CONFIGURACIÓN
 // ============================================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby59fu8MNYkfEEOMl1njJl7cquT00NtkW49pcMwYAiODSePizh0839D7eWSul0SaY9n/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHn2mJDTyEx53QSau1_nQMWmr3vnTH8UFzvXslixzyBlys3ZCJBfqCl92EKJB9sttb/exec';
 const LOGO_BET = `<span style="font-size:1.4rem;font-weight:900;letter-spacing:-1px;color:#1a1a1a;">B<span style="color:#8bc34a;">ET</span></span>`;
 
 // ============================================================
@@ -1493,6 +1497,22 @@ function cerrarFicha(){
     if(moduloActual) limpiarFormulario(moduloActual);
 }
 
+// Nombre completo de la persona de la ficha activa (para el nombre del PDF/archivo al imprimir)
+function nombreFichaActual(){
+    let n = (moduloActual === 'headcount' || !datosFormulario.nombres || datosFormulario.apellidoPaterno)
+        ? cnc(datosFormulario.apellidoPaterno||'', datosFormulario.apellidoMaterno||'', datosFormulario.nombres||'')
+        : String(datosFormulario.nombres||'').trim().toUpperCase();
+    return n.replace(/[\\\/:*?"<>|]/g,'').replace(/\s+/g,' ').trim();
+}
+let _tituloOriginal = document.title;
+// El navegador usa document.title como nombre del PDF → se pone el nombre de la persona al imprimir
+window.addEventListener('beforeprint', ()=>{
+    if(document.getElementById('fichaModal').classList.contains('show')){
+        const n = nombreFichaActual();
+        if(n){ _tituloOriginal = document.title; document.title = n; }
+    }
+});
+window.addEventListener('afterprint', ()=>{ document.title = _tituloOriginal; });
 function imprimirFicha(){window.print();}
 function mostrarToast(msg,esError=false){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(esError?' error':'');setTimeout(()=>t.classList.remove('show'),3500);}
 function mostrarLoading(show){document.getElementById('loading').classList.toggle('show',show);}
