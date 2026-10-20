@@ -105,6 +105,9 @@
         @keyframes slideIn { from{transform:translateX(400px);opacity:0} to{transform:translateX(0);opacity:1} }
         .loading { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.7); z-index:3000; justify-content:center; align-items:center; }
         .loading.show { display:flex; }
+        .loading { flex-direction:column; gap:1.25rem; cursor:wait; }
+        .loading-msg { color:#fff; font-size:1.15rem; font-weight:700; letter-spacing:.04em; text-align:center; padding:0 1rem; text-shadow:0 2px 6px rgba(0,0,0,.5); }
+        .loading-sub { color:#d1d5db; font-size:.85rem; font-weight:500; text-align:center; }
         .spinner { border:4px solid rgba(255,255,255,.3); border-top:4px solid var(--lime); border-radius:50%; width:60px; height:60px; animation:spin 1s linear infinite; }
         @keyframes spin { to{transform:rotate(360deg)} }
         .search-results-list { margin-top:.75rem; border:1px solid var(--lime); border-radius:8px; overflow:hidden; }
@@ -483,6 +486,10 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                     <span id="errorTelRecados" style="display:none;color:#ef4444;font-size:.8rem;margin-top:.25rem;">⚠️ Los teléfonos no pueden ser iguales</span>
                     <span id="errorTelRecadosLen" style="display:none;color:#ef4444;font-size:.8rem;margin-top:.25rem;">⚠️ Debe tener exactamente 10 dígitos</span>
                 </div>
+                <div class="form-group">
+                    <label>Nombre Contacto <span style="color:#ef4444;font-weight:700;">*</span></label>
+                    <input type="text" id="nombreContacto" name="nombreContacto" placeholder="Nombre de la persona de recados" class="campo-editable" required>
+                </div>
             </div>
             <!-- UNIDAD -->
             <h3 class="subsection-title">Datos de la Unidad</h3>
@@ -538,13 +545,24 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 </div>
                 <div id="resultVac"></div>
             </div>
+            <div class="foto-box" style="padding:1.25rem;">
+                <h3>Fotografía del Empleado <span style="color:#ef4444;font-weight:700;">*</span></h3>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem;">
+                    <div id="previewFotoVac" style="width:160px;height:160px;border:3px solid #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;">
+                        <span style="color:#9ca3af;font-size:3rem;">👤</span>
+                    </div>
+                    <input type="file" id="fotoVac" accept="image/*" style="display:none;" onchange="cargarFotoMod('vac',event)">
+                    <button type="button" onclick="document.getElementById('fotoVac').click()" class="btn-primary">Seleccionar Foto</button>
+                    <p style="color:#6b7280;font-size:.875rem;">Obligatoria • Formatos: JPG, PNG • Máx: 2MB</p>
+                </div>
+            </div>
             <div class="form-grid">
                 <div class="form-group"><label>Nombre Completo</label><input type="text" id="vacNombres" name="nombres" placeholder="Nombre completo" readonly></div>
                 <div class="form-group"><label>AP <span id="badge-AP-vac" class="catalog-badge catalog-loading">cargando...</span></label><select id="vacAp" name="ap"><option value="">Seleccionar...</option></select></div>
                 <div class="form-group"><label>Usuario Beta</label><input type="text" id="vacusuarioBeta" name="usuarioBeta" placeholder="Usuario Beta" readonly></div>
                 <div class="form-group"><label>CURP</label><input type="text" id="vacCurp" name="curp" placeholder="CURP" readonly></div>
                 <div class="form-group"><label>NSS</label><input type="text" id="vacNss" name="nss" placeholder="NSS" readonly></div>
-                <div class="form-group"><label>Quien Autoriza</label><input type="text" id="vacApp" name="app" placeholder="Nombre Jefe Directo" class="campo-editable"></div>
+                <div class="form-group"><label>Quien Autoriza</label><select id="vacApp" name="app"><option value="">Seleccionar...</option></select></div>
                 <div class="form-group"><label>Años de Antigüedad</label><input type="number" id="vacAnios" name="anios" placeholder="Años" class="campo-editable"></div>
                 <div class="form-group"><label>Meses</label><input type="number" id="vacMeses" name="meses" placeholder="Meses" class="campo-editable"></div>
                 <div class="form-group"><label>Días</label><input type="number" id="vacDias" name="dias" placeholder="Días" class="campo-editable"></div>
@@ -576,15 +594,26 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 </div>
                 <div id="resultBaja"></div>
             </div>
+            <div class="foto-box" style="padding:1.25rem;">
+                <h3>Fotografía del Empleado <span style="color:#ef4444;font-weight:700;">*</span></h3>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem;">
+                    <div id="previewFotoBaja" style="width:160px;height:160px;border:3px solid #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;">
+                        <span style="color:#9ca3af;font-size:3rem;">👤</span>
+                    </div>
+                    <input type="file" id="fotoBaja" accept="image/*" style="display:none;" onchange="cargarFotoMod('baja',event)">
+                    <button type="button" onclick="document.getElementById('fotoBaja').click()" class="btn-primary">Seleccionar Foto</button>
+                    <p style="color:#6b7280;font-size:.875rem;">Obligatoria • Formatos: JPG, PNG • Máx: 2MB</p>
+                </div>
+            </div>
             <div class="form-grid">
                 <div class="form-group"><label>Nombre Completo</label><input type="text" id="bajaNombres" name="nombres" placeholder="Nombre completo" readonly></div>
                 <div class="form-group"><label>AP <span id="badge-AP-baja" class="catalog-badge catalog-loading">cargando...</span></label><select id="bajaAp" name="ap"><option value="">Seleccionar...</option></select></div>
                 <div class="form-group"><label>Usuario Beta</label><input type="text" id="bajausuarioBeta" name="usuarioBeta" placeholder="Usuario Beta" readonly></div>
                 <div class="form-group"><label>CURP</label><input type="text" id="bajaCurp" name="curp" placeholder="CURP" readonly></div>
                 <div class="form-group"><label>NSS</label><input type="text" id="bajaNss" name="nss" placeholder="NSS" readonly></div>
-                <div class="form-group"><label>Quien Autoriza</label><input type="text" id="bajaApp" name="app" placeholder="Nombre Jefe Directo" class="campo-editable"></div>
+                <div class="form-group"><label>Quien Autoriza</label><select id="bajaApp" name="app"><option value="">Seleccionar...</option></select></div>
                 <div class="form-group"><label>Fecha de Baja</label><input type="date" id="bajaFecha" name="fechaBaja" class="campo-editable"></div>
-                <div class="form-group"><label>Motivo de Baja</label><select id="bajaMotivo" name="motivoBaja"><option value="">Seleccionar...</option><option value="RENUNCIA">Renuncia Voluntaria</option><option value="DESPIDO">Despido</option><option value="TERMINO_CONTRATO">Término de Contrato</option><option value="ABANDONO">Abandono de Empleo</option><option value="OTRO">Otro</option></select></div>
+                <div class="form-group"><label>Motivo de Baja <span id="badge-MOTIVO DE BAJA" class="catalog-badge catalog-loading">cargando...</span></label><select id="bajaMotivo" name="motivoBaja"><option value="">Seleccionar...</option></select></div>
                 <div class="form-group"><label>Renuncia Firmada</label><select id="bajaRenuncia" name="renunciaFirmada"><option value="">Seleccionar...</option><option value="SI">Sí</option><option value="NO">No</option><option value="PENDIENTE">Pendiente</option></select></div>
                 <div class="form-group"><label>Finiquito</label><select id="bajaFiniquito" name="finiquito"><option value="">Seleccionar...</option><option value="FIRMADO">Firmado</option><option value="PENDIENTE">Pendiente</option></select></div>
             </div>
@@ -610,6 +639,17 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                     <button type="button" class="btn-primary" onclick="buscarEmpleado('incapacidades')">Buscar</button>
                 </div>
                 <div id="resultIncap"></div>
+            </div>
+            <div class="foto-box" style="padding:1.25rem;">
+                <h3>Fotografía del Empleado <span style="color:#ef4444;font-weight:700;">*</span></h3>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem;">
+                    <div id="previewFotoIncap" style="width:160px;height:160px;border:3px solid #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;">
+                        <span style="color:#9ca3af;font-size:3rem;">👤</span>
+                    </div>
+                    <input type="file" id="fotoIncap" accept="image/*" style="display:none;" onchange="cargarFotoMod('incap',event)">
+                    <button type="button" onclick="document.getElementById('fotoIncap').click()" class="btn-primary">Seleccionar Foto</button>
+                    <p style="color:#6b7280;font-size:.875rem;">Obligatoria • Formatos: JPG, PNG • Máx: 2MB</p>
+                </div>
             </div>
             <div class="form-grid">
                 <div class="form-group"><label>Nombre Completo</label><input type="text" id="incapNombres" name="nombres" placeholder="Nombre completo" readonly></div>
@@ -644,13 +684,13 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
 </div>
 
 <div id="toast" class="toast"></div>
-<div class="loading" id="loading"><div class="spinner"></div></div>
+<div class="loading" id="loading"><div class="spinner"></div><div class="loading-msg" id="loadingMsg">Cargando, espera...</div><div class="loading-sub">No cierres ni toques la pantalla</div></div>
 
 <script>
 // ============================================================
 // CONFIGURACIÓN
 // ============================================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybrRq6F_3VYg_cyYtoYE-IhKvnLUZly3vpGBRDBE8J4-R-tVRsi_cI20nJ23raekAb/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwbkrrnHB7VJQQk20a3HQK4SPtaD6es6F_tHpRNoOOYDJg8J3yonoGyn8e2yxw8UU4n/exec';
 const LOGO_BET = `<span style="font-size:1.4rem;font-weight:900;letter-spacing:-1px;color:#1a1a1a;">B<span style="color:#8bc34a;">ET</span></span>`;
 
 // ============================================================
@@ -660,6 +700,8 @@ let datosFormulario = {};
 let moduloActual = '';
 let datosEmpleadosLocal = JSON.parse(localStorage.getItem('empleadosBETA') || '{}');
 let fotoBase64 = '';
+const fotosMod = { vac:'', baja:'', incap:'' };
+const FOTO_PLACEHOLDER = '<span style="color:#9ca3af;font-size:3rem;">👤</span>';
 let cacheCatalogos = {};
 const tipoBusqueda = { vac: 'curp', baja: 'curp', incap: 'curp' };
 const USUARIOS_NSS_OBLIGATORIO = ['BMEXS', 'BMEXM'];
@@ -674,6 +716,26 @@ function cargarFoto(event) {
     const reader = new FileReader();
     reader.onload = e => { fotoBase64=e.target.result; document.getElementById('previewFoto').innerHTML=`<img src="${fotoBase64}" style="width:100%;height:100%;object-fit:cover;">`; };
     reader.readAsDataURL(file);
+}
+
+function cargarFotoMod(p, event) {
+    const file = event.target.files[0]; if(!file) return;
+    if(file.size>2*1024*1024){alert('⚠️ Máximo 2MB'); event.target.value=''; return;}
+    if(!file.type.startsWith('image/')){alert('⚠️ Imagen inválida'); event.target.value=''; return;}
+    const suf = {vac:'Vac',baja:'Baja',incap:'Incap'}[p];
+    const reader = new FileReader();
+    reader.onload = e => {
+        fotosMod[p] = e.target.result;
+        document.getElementById('previewFoto'+suf).innerHTML = `<img src="${fotosMod[p]}" style="width:100%;height:100%;object-fit:cover;">`;
+        document.getElementById('previewFoto'+suf).style.borderColor = '#d1d5db';
+    };
+    reader.readAsDataURL(file);
+}
+function resetFotoMod(p) {
+    const suf = {vac:'Vac',baja:'Baja',incap:'Incap'}[p];
+    fotosMod[p] = '';
+    const pv = document.getElementById('previewFoto'+suf); if(pv){ pv.innerHTML = FOTO_PLACEHOLDER; pv.style.borderColor = '#d1d5db'; }
+    const inp = document.getElementById('foto'+suf); if(inp) inp.value = '';
 }
 
 // ============================================================
@@ -753,6 +815,8 @@ function limpiarFormulario(modulo) {
         form.querySelectorAll('textarea').forEach(el => { el.value = ''; });
         form.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
 
+        resetFotoMod({vacaciones:'vac',bajas:'baja',incapacidades:'incap'}[modulo]);
+
         // Limpiar resultado de búsqueda
         const mapaResult = { vacaciones: 'resultVac', bajas: 'resultBaja', incapacidades: 'resultIncap' };
         const mapaSearch = { vacaciones: 'searchTermVac', bajas: 'searchTermBaja', incapacidades: 'searchTermIncap' };
@@ -786,6 +850,11 @@ function setTipoBusqueda(prefix, tipo, btn) {
 function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
 
 async function buscarEmpleado(modulo) {
+    mostrarLoading(true,'Buscando empleado, espera...');
+    try{ await _buscarEmpleadoInner(modulo); }
+    finally{ mostrarLoading(false); }
+}
+async function _buscarEmpleadoInner(modulo) {
     const cfg={vacaciones:{prefix:'vac',resultId:'resultVac'},bajas:{prefix:'baja',resultId:'resultBaja'},incapacidades:{prefix:'incap',resultId:'resultIncap'}};
     const{prefix,resultId}=cfg[modulo];
     const tipo=tipoBusqueda[prefix];
@@ -928,6 +997,15 @@ function guardarModulo(modulo) {
     datosFormulario = { modulo };
     fd.forEach((v,k) => { if(k !== 'fotoEmpleado') datosFormulario[k] = aMayus(v); });
     if(modulo === 'headcount' && fotoBase64) datosFormulario.foto = fotoBase64;
+    const _pf = {vacaciones:'vac',bajas:'baja',incapacidades:'incap'}[modulo];
+    if(_pf){
+        if(!fotosMod[_pf]){
+            const _pv = document.getElementById('previewFoto'+{vac:'Vac',baja:'Baja',incap:'Incap'}[_pf]);
+            if(_pv){ _pv.style.borderColor = '#ef4444'; _pv.scrollIntoView({behavior:'smooth',block:'center'}); }
+            mostrarToast('⚠️ La fotografía es obligatoria', true); return;
+        }
+        datosFormulario.foto = fotosMod[_pf];
+    }
     if(modulo === 'headcount'){
         datosFormulario.idTienda = document.getElementById('idTienda').value;
         datosFormulario.bancoNomina = document.getElementById('bancoNominaSearch').value;
@@ -996,11 +1074,14 @@ function guardarModulo(modulo) {
         if(tr.length !== 10){ mostrarToast('⚠️ El Teléfono de Recados debe tener 10 dígitos', true); document.getElementById('telefonoRecados').focus(); return; }
         if(tc && tc.length !== 10){ mostrarToast('⚠️ El Teléfono Celular debe tener 10 dígitos', true); document.getElementById('telefonoCelular').focus(); return; }
         if(tc && tr && tc === tr){ mostrarToast('⚠️ Los teléfonos no pueden ser iguales', true); return; }
+        const nCont = (document.getElementById('nombreContacto').value || '').trim();
+        if(!nCont){ mostrarToast('⚠️ El Nombre Contacto es obligatorio', true); document.getElementById('nombreContacto').focus(); return; }
     }
 
     // Guardar en local
     if(datosFormulario.curp){
-        datosEmpleadosLocal[datosFormulario.curp] = {...datosEmpleadosLocal[datosFormulario.curp], ...datosFormulario};
+        const _loc = {...datosFormulario}; if(modulo !== 'headcount') delete _loc.foto;   // no saturar localStorage con fotos
+        datosEmpleadosLocal[datosFormulario.curp] = {...datosEmpleadosLocal[datosFormulario.curp], ..._loc};
         localStorage.setItem('empleadosBETA', JSON.stringify(datosEmpleadosLocal));
     }
 
@@ -1038,7 +1119,7 @@ function validarTelefonosDiferentes(){
 // CATÁLOGOS
 // ============================================================
 async function cargarListasDesplegables() {
-    for(const campo of['AP','RECLUTADOR','FUENTE_RECLUTAMIENTO','ESTATUS','JEFE INMEDIATO','SEXO','ESTATUS_CONTRATO','ESCOLARIDAD']){
+    for(const campo of['AP','RECLUTADOR','FUENTE_RECLUTAMIENTO','ESTATUS','JEFE INMEDIATO','SEXO','ESTATUS_CONTRATO','ESCOLARIDAD','MOTIVO DE BAJA']){
         await cargarCampo(campo);
     }
     await cargarPrenominista();
@@ -1046,13 +1127,13 @@ async function cargarListasDesplegables() {
 }
 
 async function cargarCampo(campo) {
-    const mi={'AP':'ap','RECLUTADOR':'reclutador','FUENTE_RECLUTAMIENTO':'fuenteReclutamiento','ESTATUS':'estatus','JEFE INMEDIATO':'jefeInmediato','SEXO':'sexo','ESTATUS_CONTRATO':'estatusContrato','GASOLINA_TOKA':'gasolinaPorToka','ESCOLARIDAD':'escolaridad'};
+    const mi={'AP':'ap','RECLUTADOR':'reclutador','FUENTE_RECLUTAMIENTO':'fuenteReclutamiento','ESTATUS':'estatus','JEFE INMEDIATO':'jefeInmediato','SEXO':'sexo','ESTATUS_CONTRATO':'estatusContrato','GASOLINA_TOKA':'gasolinaPorToka','ESCOLARIDAD':'escolaridad','MOTIVO DE BAJA':'bajaMotivo'};
     const eid=mi[campo]; const badge=document.getElementById(`badge-${campo}`);
-    if(cacheCatalogos[campo]){llenarSelect(eid,cacheCatalogos[campo]);if(campo==='AP')sincAP(cacheCatalogos[campo]);if(badge){badge.textContent=cacheCatalogos[campo].length+' opciones';badge.className='catalog-badge catalog-ok';}return;}
+    if(cacheCatalogos[campo]){llenarSelect(eid,cacheCatalogos[campo]);if(campo==='AP')sincAP(cacheCatalogos[campo]);if(campo==='JEFE INMEDIATO')sincJefe(cacheCatalogos[campo]);if(badge){badge.textContent=cacheCatalogos[campo].length+' opciones';badge.className='catalog-badge catalog-ok';}return;}
     try{
         const res=await fetch(`${SCRIPT_URL}?action=getDatos&campo=${encodeURIComponent(campo)}`);
         const r=await res.json();
-        if(r.status==='success'&&r.data.length>0){cacheCatalogos[campo]=r.data;llenarSelect(eid,r.data);if(campo==='AP')sincAP(r.data);if(badge){badge.textContent=r.data.length+' opciones';badge.className='catalog-badge catalog-ok';}}
+        if(r.status==='success'&&r.data.length>0){cacheCatalogos[campo]=r.data;llenarSelect(eid,r.data);if(campo==='AP')sincAP(r.data);if(campo==='JEFE INMEDIATO')sincJefe(r.data);if(badge){badge.textContent=r.data.length+' opciones';badge.className='catalog-badge catalog-ok';}}
         else{if(badge){badge.textContent='sin datos';badge.className='catalog-badge catalog-fail';}if(campo==='AP')bAP('sin datos','catalog-fail');}
     }catch{if(badge){badge.textContent='error';badge.className='catalog-badge catalog-fail';}if(campo==='AP')bAP('error','catalog-fail');}
 }
@@ -1073,6 +1154,7 @@ async function cargarPrenominista() {
     }
 }
 
+function sincJefe(data){['vacApp','bajaApp'].forEach(id=>llenarSelect(id,data));}
 function sincAP(data){['vacAp','bajaAp','incapAp'].forEach(id=>llenarSelect(id,data));bAP(data.length+' opciones','catalog-ok');}
 function bAP(t,c){['badge-AP-vac','badge-AP-baja','badge-AP-incap'].forEach(id=>{const b=document.getElementById(id);if(b){b.textContent=t;b.className='catalog-badge '+c;}});}
 function llenarSelect(id,opciones){
@@ -1089,6 +1171,12 @@ function llenarSelect(id,opciones){
 // AUTO-LLENADO USUARIO BETA
 // ============================================================
 async function autoLlenarUsuarioBeta() {
+    const _ub=document.getElementById('usuarioBeta').value.trim(); if(!_ub)return;
+    mostrarLoading(true,'Cargando usuario, espera...');
+    try{ await _autoLlenarUsuarioBetaInner(); }
+    finally{ mostrarLoading(false); }
+}
+async function _autoLlenarUsuarioBetaInner() {
     const ub=document.getElementById('usuarioBeta').value.trim(); if(!ub)return;
     actualizarNssObligatorio(ub);
     // Si cambió el Usuario Beta, se limpia el NSS del anterior (el nuevo se trae de la hoja)
@@ -1455,7 +1543,7 @@ function aplicarDatosTabulador(d){
 }
 
 function aplicarDatosUB(d){
-    const m={'USUARIO BETA':'usuarioBeta','NOMBRE(S)':'nombres','NOMBRES':'nombres','APELLIDO PATERNO':'apellidoPaterno','APELLIDO MATERNO':'apellidoMaterno','CURP':'curp','RFC':'rfc','NSS':'nss','IDMEX':'idmex','PUESTO':'puesto','DEPARTAMENTO':'departamento','FECHA REAL DE INGRESO':'fechaRealIngreso','SUCURSAL':'sucursal','FORMATO':'formato','CLIENTE':'cliente','PROYECTO':'proyecto','DETERMINANTE':'determinante','ENTIDAD FEDERATIVA':'entidadFederativa','MUNICIPIO':'municipio','FECHA DE NACIMIENTO':'fechaNacimiento','LUGAR DE NACIMIENTO':'lugarNacimiento','NACIONALIDAD':'nacionalidad','ESCOLARIDAD':'escolaridad','NO. DE LICENCIA':'noLicencia','NO. CRÉDITO INFONAVIT':'noCreditoInfonavit','CALLE':'calle','NO. EXTERIOR':'noExt','NO. INTERIOR':'noInt','COLONIA':'colonia','ALCALDÍA/MUNICIPIO':'alcaldiaMunicipio','ENTIDAD FEDERATIVA DIRECCIÓN':'entidadFederativaDireccion','C.P.':'cp','CORREO ELECTRÓNICO':'correoElectronico','TELÉFONO CELULAR':'telefonoCelular','TELÉFONO DE RECADOS':'telefonoRecados','PLACA':'placa','MARCA':'marca','SUBMARCA':'submarca','COLOR':'color','ESQUEMA UNIDADES':'esquemaUnidades','PROPIETARIO':'propietario','ASEGURADORA':'aseguradora','NO. DE PÓLIZA':'noPoliza','ID TIENDA':'idTienda','CLAVE BANCO':'claveBanco','SEXO':'sexo','ESTADO CIVIL':'estadoCivil','ESTATUS':'estatus','AP':'ap','RECLUTADOR':'reclutador','JEFE INMEDIATO':'jefeInmediato','FUENTE DE RECLUTAMIENTO':'fuenteReclutamiento','FUENTE_RECLUTAMIENTO':'fuenteReclutamiento'};
+    const m={'USUARIO BETA':'usuarioBeta','NOMBRE(S)':'nombres','NOMBRES':'nombres','APELLIDO PATERNO':'apellidoPaterno','APELLIDO MATERNO':'apellidoMaterno','CURP':'curp','RFC':'rfc','NSS':'nss','IDMEX':'idmex','PUESTO':'puesto','DEPARTAMENTO':'departamento','FECHA REAL DE INGRESO':'fechaRealIngreso','SUCURSAL':'sucursal','FORMATO':'formato','CLIENTE':'cliente','PROYECTO':'proyecto','DETERMINANTE':'determinante','ENTIDAD FEDERATIVA':'entidadFederativa','MUNICIPIO':'municipio','FECHA DE NACIMIENTO':'fechaNacimiento','LUGAR DE NACIMIENTO':'lugarNacimiento','NACIONALIDAD':'nacionalidad','ESCOLARIDAD':'escolaridad','NO. DE LICENCIA':'noLicencia','NO. CRÉDITO INFONAVIT':'noCreditoInfonavit','CALLE':'calle','NO. EXTERIOR':'noExt','NO. INTERIOR':'noInt','COLONIA':'colonia','ALCALDÍA/MUNICIPIO':'alcaldiaMunicipio','ENTIDAD FEDERATIVA DIRECCIÓN':'entidadFederativaDireccion','C.P.':'cp','CORREO ELECTRÓNICO':'correoElectronico','TELÉFONO CELULAR':'telefonoCelular','TELÉFONO DE RECADOS':'telefonoRecados','NOMBRE CONTACTO':'nombreContacto','PLACA':'placa','MARCA':'marca','SUBMARCA':'submarca','COLOR':'color','ESQUEMA UNIDADES':'esquemaUnidades','PROPIETARIO':'propietario','ASEGURADORA':'aseguradora','NO. DE PÓLIZA':'noPoliza','ID TIENDA':'idTienda','CLAVE BANCO':'claveBanco','SEXO':'sexo','ESTADO CIVIL':'estadoCivil','ESTATUS':'estatus','AP':'ap','RECLUTADOR':'reclutador','JEFE INMEDIATO':'jefeInmediato','FUENTE DE RECLUTAMIENTO':'fuenteReclutamiento','FUENTE_RECLUTAMIENTO':'fuenteReclutamiento'};
     const cf=new Set(['fechaRealIngreso','fechaNacimiento']);
     function pf(v){if(!v)return'';const s=v.toString().trim();if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;const mm=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(mm){const[,dd,mo,y]=mm;return y+'-'+mo.padStart(2,'0')+'-'+dd.padStart(2,'0');}const f=new Date(s);if(!isNaN(f))return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');return s;}
     Object.keys(m).forEach(c=>{if(d[c]!==undefined&&d[c]!==null&&d[c]!==''){const el=document.getElementById(m[c]);if(!el)return;el.value=cf.has(m[c])?pf(d[c]):d[c];}});
@@ -1616,6 +1704,7 @@ function generarFichaVacaciones(){
     document.getElementById('fichaContent').innerHTML=`
         ${logoBar('orange','Solicitud de Vacaciones')}
         <div style="background:#111111;border-bottom:3px solid #93d502;letter-spacing:.05em;color:white;padding:.6rem 1rem;margin:.5rem 0 .5rem;font-weight:600;font-size:1rem;">DATOS DEL EMPLEADO</div>
+        ${fotoFichaHTML()}
         <table class="ficha-table">
             <tr><td>NOMBRE COMPLETO</td><td>${datosFormulario.nombres||'N/A'}</td></tr>
             <tr><td>USUARIO BETA</td><td>${datosFormulario.usuarioBeta||'N/A'}</td></tr>
@@ -1641,6 +1730,7 @@ function generarFichaBajas(){
     document.getElementById('fichaContent').innerHTML=`
         ${logoBar('red','Formato de Baja de Empleado')}
         <div style="background:#111111;border-bottom:3px solid #93d502;letter-spacing:.05em;color:white;padding:.6rem 1rem;margin:.5rem 0 .5rem;font-weight:600;font-size:1rem;">DATOS DEL EMPLEADO</div>
+        ${fotoFichaHTML()}
         <table class="ficha-table">
             <tr><td>NOMBRE COMPLETO</td><td>${datosFormulario.nombres||'N/A'}</td></tr>
             <tr><td>USUARIO BETA</td><td>${datosFormulario.usuarioBeta||'N/A'}</td></tr>
@@ -1665,6 +1755,7 @@ function generarFichaIncapacidades(){
     document.getElementById('fichaContent').innerHTML=`
         ${logoBar('yellow','Registro de Incapacidad')}
         <div style="background:#111111;border-bottom:3px solid #93d502;letter-spacing:.05em;color:white;padding:.6rem 1rem;margin:.5rem 0 .5rem;font-weight:600;font-size:1rem;">DATOS DEL EMPLEADO</div>
+        ${fotoFichaHTML()}
         <table class="ficha-table">
             <tr><td>NOMBRE COMPLETO</td><td>${datosFormulario.nombres||'N/A'}</td></tr>
             <tr><td>USUARIO BETA</td><td>${datosFormulario.usuarioBeta||'N/A'}</td></tr>
@@ -1683,6 +1774,10 @@ function generarFichaIncapacidades(){
         <div style="margin-top:3rem;text-align:center;"><div style="border-top:2px solid #000;padding-top:.5rem;margin:3rem auto 0;max-width:300px;"><strong>Recursos Humanos</strong></div></div>`;
 }
 
+function fotoFichaHTML(){
+    const f = datosFormulario.foto || '';
+    return f ? `<div style="display:flex;justify-content:center;margin:.5rem 0 1rem;"><div style="width:140px;height:160px;border:2px solid #000;overflow:hidden;"><img src="${f}" style="width:100%;height:100%;object-fit:cover;"></div></div>` : '';
+}
 function tr2(label, val){return `<tr><td style="background:#f1f7de;padding:.3rem .5rem;border:1px solid #bfc4b0;font-weight:700;width:35%;">${label}</td><td style="padding:.3rem .5rem;border:1px solid #bfc4b0;">${val}</td></tr>`;}
 
 // ============================================================
@@ -1713,7 +1808,16 @@ window.addEventListener('beforeprint', ()=>{
 window.addEventListener('afterprint', ()=>{ document.title = _tituloOriginal; });
 function imprimirFicha(){window.print();}
 function mostrarToast(msg,esError=false){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(esError?' error':'');setTimeout(()=>t.classList.remove('show'),3500);}
-function mostrarLoading(show){document.getElementById('loading').classList.toggle('show',show);}
+let _loadingTimer=null;
+function mostrarLoading(show,msg){
+    const el=document.getElementById('loading');
+    const m=document.getElementById('loadingMsg');
+    if(m)m.textContent=msg||'Cargando, espera...';
+    el.classList.toggle('show',!!show);
+    clearTimeout(_loadingTimer);
+    // Seguro: si algo se cuelga, la pantalla se desbloquea sola a los 60 s
+    if(show)_loadingTimer=setTimeout(()=>el.classList.remove('show'),60000);
+}
 
 // ============================================================
 // INICIALIZACIÓN
