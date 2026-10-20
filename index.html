@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script>(function(){try{var t=localStorage.getItem('temaBET');if(!t)t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión de Empleados - BET</title>
@@ -133,9 +134,128 @@
             @page{size:letter portrait;margin:.5cm}
         }
         @media (max-width:768px){.container{padding:0 1rem 1.5rem}.header{margin:0 -1rem 1.25rem;padding:1rem}.header h1{font-size:1.05rem}.form-grid{grid-template-columns:1fr}.search-row{flex-direction:column}}
+    
+        /* TODO EN MAYÚSCULAS */
+        input[type="text"], textarea { text-transform: uppercase; }
+        input[type="text"]::placeholder, textarea::placeholder { text-transform: none; }
+    
+        /* LOGIN */
+        #loginOverlay{display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#111111 0%,#2a2a2a 100%);align-items:center;justify-content:center;padding:1rem;}
+        #loginOverlay.show{display:flex;}
+        body.sin-sesion .container{display:none;}
+        .login-box{background:#fff;border-radius:14px;padding:2rem;width:100%;max-width:380px;border-top:6px solid var(--lime);box-shadow:0 20px 60px rgba(0,0,0,.5);}
+        .login-box h2{font-size:1.1rem;letter-spacing:.08em;text-transform:uppercase;color:var(--black);margin-bottom:.25rem;}
+        .login-box p{font-size:.78rem;color:var(--mut);margin-bottom:1.25rem;}
+        .login-box label{display:block;margin-bottom:.3rem;}
+        .login-box input{width:100%;padding:.75rem;border:1.5px solid var(--line);border-radius:8px;font-size:.95rem;margin-bottom:1rem;font-family:inherit;}
+        .login-box input:focus{outline:none;border-color:var(--lime);}
+        .login-box button{width:100%;justify-content:center;background:var(--lime);color:var(--black);}
+        #loginError{color:var(--red);font-size:.8rem;font-weight:700;min-height:1.1rem;margin-bottom:.75rem;}
+        .user-chip{margin-left:auto;display:flex;align-items:center;gap:.6rem;color:#fff;font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;}
+        .user-chip button{padding:.35rem .8rem;font-size:.7rem;background:rgba(255,255,255,.15);color:#fff;border-radius:8px;}
+    
+        /* ===== MODO OSCURO ===== */
+        html{transition:background .25s;}
+        html[data-theme="dark"]{ color-scheme:dark;
+            --black:#f1f4e8; --bg:#0d0f0b; --line:#363b2d; --txt:#e8ebe0; --mut:#a9ae9e;
+            --lime-soft:#1d2808; --gray-50:#1a1d15; --gray-200:#363b2d; }
+        html[data-theme="dark"] .container{ background:#171a13; box-shadow:0 2px 16px rgba(0,0,0,.65); }
+        html[data-theme="dark"] input, html[data-theme="dark"] select, html[data-theme="dark"] textarea{ background:#20241a; border-color:#3d4333; color:var(--txt); }
+        html[data-theme="dark"] input::placeholder, html[data-theme="dark"] textarea::placeholder{ color:#7d836f; }
+        html[data-theme="dark"] input.campo-editable{ background:#20241a !important; color:var(--txt) !important; border-color:#3d4333 !important; }
+        html[data-theme="dark"] input[readonly], html[data-theme="dark"] input.campo-bloqueado{ background:#12150e !important; color:#9aa08e !important; border-color:#2c3125 !important; }
+        html[data-theme="dark"] #nss.nss-opcional{ background:#20241a !important; border-color:#3d4333 !important; }
+        html[data-theme="dark"] #nss.nss-requerido{ background:#3a1717 !important; }
+        html[data-theme="dark"] .tab-combo-lista, html[data-theme="dark"] .banco-dropdown{ background:#1e2218; }
+        html[data-theme="dark"] .tab-combo-item .tc-total{ color:var(--lime); }
+        html[data-theme="dark"] .btn-secondary{ background:#2b3023; color:var(--txt); }
+        html[data-theme="dark"] .btn-secondary:hover{ background:#363c2c; }
+        html[data-theme="dark"] .search-type-btn{ background:#20241a; border-color:#3d4333; }
+        html[data-theme="dark"] .aviso-bloqueado, html[data-theme="dark"] .foto-box{ background:#1b1f15; border-color:#3d4333; color:var(--txt); }
+        html[data-theme="dark"] .alert-success, html[data-theme="dark"] .catalog-ok{ background:#1d2808; border-color:#4d6b00; color:#c8ef7a; }
+        html[data-theme="dark"] .alert-error, html[data-theme="dark"] .catalog-fail{ background:#3a1717; border-color:#7f1d1d; color:#ffb4b4; }
+        html[data-theme="dark"] .alert-warning, html[data-theme="dark"] .catalog-loading{ background:#3a3412; border-color:#6b5d10; color:#f3e08a; }
+        html[data-theme="dark"] .id-tienda-ok{ color:#c8ef7a; }
+        html[data-theme="dark"] .id-tienda-error{ color:#ffb4b4; }
+        html[data-theme="dark"] .container [style*="background:#f1f7de"]{ background:#1d2808 !important; color:#c8ef7a !important; }
+        html[data-theme="dark"] .container [style*="background:#fff1f2"]{ background:#3a1717 !important; color:#ffb4b4 !important; }
+        html[data-theme="dark"] .container [style*="background:#f9fafb"]{ background:#20241a !important; border-color:#3d4333 !important; }
+        /* La ficha (documento imprimible) siempre se ve clara */
+        html[data-theme="dark"] .modal-content{ --black:#111111; --txt:#151515; --mut:#5a5e52; --line:#d9dccf; --bg:#f1f2ee; --lime-soft:#f1f7de; --gray-50:#f7f8f2; --gray-200:#d9dccf; color:#151515; color-scheme:light; }
+
+        html[data-theme="dark"] .modal, html[data-theme="dark"] .modal-content, html[data-theme="dark"] .ficha{ color-scheme:light; }
+        html[data-theme="dark"] .modal-content{ background:#fff; }
+        html[data-theme="dark"] .ficha{ background:#fff; color:#151515; }
+        /* Botón de tema */
+        .theme-btn{ padding:.35rem .8rem !important; font-size:.7rem !important; background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:999px !important; box-shadow:none !important; cursor:pointer; letter-spacing:.04em; white-space:nowrap; }
+        .theme-btn:hover{ background:rgba(255,255,255,.28); }
+        .theme-login{ position:absolute; top:1rem; right:1rem; z-index:5; background:rgba(0,0,0,.35); }
+        html[data-theme="light"] .theme-login{ background:#111; color:#fff; }
+
+        /* ===== LOGIN: fondo y animación ===== */
+        html[data-theme="light"] #loginOverlay{ background:radial-gradient(circle at 15% 15%,#f7fbe8 0%,#dfeeb0 70%,#cfe58a 100%); }
+        html[data-theme="dark"]  #loginOverlay{ background:radial-gradient(circle at 15% 15%,#22320a 0%,#0d0f0b 65%); }
+        #loginOverlay{ overflow:hidden; }
+        #loginFx{ position:absolute; inset:0; width:100%; height:100%; z-index:0; }
+        #loginLogos{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:1; }
+        .fl-logo{ position:absolute; bottom:-160px; background:#fff; border-radius:16px; padding:8px 14px; box-shadow:0 8px 24px rgba(0,0,0,.25); opacity:0; animation:flotarLogo linear infinite; will-change:transform,opacity; }
+        .fl-logo img{ display:block; height:100%; width:auto; }
+        @keyframes flotarLogo{
+            0%   { transform:translateY(0) rotate(-8deg); opacity:0; }
+            12%  { opacity:var(--op,.25); }
+            88%  { opacity:var(--op,.25); }
+            100% { transform:translateY(-130vh) rotate(14deg); opacity:0; }
+        }
+        .login-box{ position:relative; z-index:2; animation:loginEntra .7s cubic-bezier(.2,.8,.2,1) both; backdrop-filter:blur(2px); }
+        html[data-theme="dark"] .login-box{ background:#171a13; border-top-color:var(--lime); box-shadow:0 20px 60px rgba(0,0,0,.7), 0 0 0 1px #2c3125, 0 0 40px rgba(147,213,2,.12); }
+        html[data-theme="dark"] .login-box input{ background:#20241a; border-color:#3d4333; color:var(--txt); }
+        .login-logo{ display:flex; justify-content:center; margin-bottom:1rem; }
+        .login-logo img{ height:54px; width:auto; border-radius:10px; background:#fff; padding:4px 12px; box-shadow:0 2px 10px rgba(0,0,0,.2); animation:pulsoLogo 3s ease-in-out infinite; }
+        .login-box::before{ content:""; position:absolute; left:0; right:0; top:-6px; height:6px; border-radius:14px 14px 0 0;
+            background:linear-gradient(90deg,#93d502,#4d6b00,#93d502); background-size:200% 100%; animation:brilloBarra 3s linear infinite; }
+        .login-box.shake{ animation:sacudir .4s; }
+        @keyframes loginEntra{ from{ opacity:0; transform:translateY(28px) scale(.96); } to{ opacity:1; transform:none; } }
+        @keyframes pulsoLogo{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.06); } }
+        @keyframes brilloBarra{ from{ background-position:0 0; } to{ background-position:200% 0; } }
+        @keyframes sacudir{ 0%,100%{ transform:translateX(0); } 20%,60%{ transform:translateX(-8px); } 40%,80%{ transform:translateX(8px); } }
+        @media (prefers-reduced-motion:reduce){ .fl-logo,.login-box,.login-box::before,.login-logo img{ animation:none !important; } .fl-logo{ opacity:.12; } }
     </style>
 </head>
 <body>
+<script>
+// Agrega usuario/contraseña de la sesión a todas las consultas GET al Apps Script
+window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem('sesionBET')||'null'); }catch(_){ return null; } };
+(function(){
+    const _f = window.fetch.bind(window);
+    window.fetch = function(url, opts){
+        try{
+            const u = String(url);
+            const esGet = !opts || !opts.method || String(opts.method).toUpperCase() === 'GET';
+            if(esGet && u.indexOf('script.google.com/macros') !== -1 && u.indexOf('action=login') === -1){
+                const ses = window.getSesionBET();
+                if(ses) url = u + (u.indexOf('?') === -1 ? '?' : '&') + 'u=' + encodeURIComponent(ses.usuario) + '&k=' + encodeURIComponent(ses.clave);
+            }
+        }catch(_){}
+        return _f(url, opts);
+    };
+})();
+</script>
+<div id="loginOverlay">
+    <canvas id="loginFx"></canvas>
+    <div id="loginLogos"></div>
+    <button type="button" class="theme-btn theme-login" onclick="toggleTema()">🌙 Oscuro</button>
+    <div class="login-box">
+        <div class="login-logo" id="loginLogoWrap"></div>
+        <h2>Iniciar sesión</h2>
+        <p>Sistema de Gestión de Empleados · Beta Last Mile</p>
+        <label for="loginUsuario">Usuario</label>
+        <input type="text" id="loginUsuario" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginClave').focus()">
+        <label for="loginClave">Contraseña</label>
+        <input type="password" id="loginClave" autocomplete="current-password" onkeydown="if(event.key==='Enter')iniciarSesion()">
+        <div id="loginError"></div>
+        <button type="button" id="loginBtn" onclick="iniciarSesion()">Entrar</button>
+    </div>
+</div>
 <div class="container">
     <div class="header">
         <div class="logo-chip"><img src="data:image/jpeg;base64,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" alt="BET"></div>
@@ -143,6 +263,7 @@
             <h1>Sistema de Gestión de Empleados</h1>
             <p>Beta Last Mile &nbsp;|&nbsp; Gestión integral de personal</p>
         </div>
+        <div class="user-chip" id="userChip" style="display:none;"><button type="button" class="theme-btn" onclick="toggleTema()">🌙 Oscuro</button><span id="userNombre"></span><button type="button" onclick="cerrarSesion()">Cerrar sesión</button></div>
     </div>
     <div class="tabs">
         <button class="tab active" onclick="cambiarTab(0)">Headcount</button>
@@ -529,7 +650,7 @@
 // ============================================================
 // CONFIGURACIÓN
 // ============================================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxo6z3dAYW7gZS2D1cutsK9cZEzqV3gO3FzdkLyhxo8OWzn10fbQjh6YbOyvKqFwjp9/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybrRq6F_3VYg_cyYtoYE-IhKvnLUZly3vpGBRDBE8J4-R-tVRsi_cI20nJ23raekAb/exec';
 const LOGO_BET = `<span style="font-size:1.4rem;font-weight:900;letter-spacing:-1px;color:#1a1a1a;">B<span style="color:#8bc34a;">ET</span></span>`;
 
 // ============================================================
@@ -805,7 +926,7 @@ function guardarModulo(modulo) {
     const form = document.getElementById(`form${cap(modulo)}`);
     const fd = new FormData(form);
     datosFormulario = { modulo };
-    fd.forEach((v,k) => { if(k !== 'fotoEmpleado') datosFormulario[k] = v; });
+    fd.forEach((v,k) => { if(k !== 'fotoEmpleado') datosFormulario[k] = aMayus(v); });
     if(modulo === 'headcount' && fotoBase64) datosFormulario.foto = fotoBase64;
     if(modulo === 'headcount'){
         datosFormulario.idTienda = document.getElementById('idTienda').value;
@@ -1396,7 +1517,7 @@ function sincBanco(t,n){const{searchId,claveId}=gbcfg(t);const q=ubClave(n);cons
 // ============================================================
 async function enviarASheets(){
     mostrarLoading(true);
-    const p={...datosFormulario};delete p.foto;
+    const _s=getSesionBET();if(!_s){mostrarLoading(false);mostrarToast('⚠️ Inicia sesión para guardar',true);bloqueoLogin(true);return;}const p={...datosFormulario};delete p.foto;p.accesoUsuario=_s.usuario;p.accesoClave=_s.clave;
     try{const pa=new URLSearchParams();pa.append('payload',JSON.stringify(p));await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:pa.toString()});mostrarToast('✅ Datos enviados a Sheets');}
     catch(e){mostrarToast('❌ Error al enviar',true);}
     finally{mostrarLoading(false);}
@@ -1614,6 +1735,177 @@ setInterval(()=>{
         if(Object.keys(d).length>0)localStorage.setItem(`draft_${t}`,JSON.stringify(d));
     });
 },30000);
+
+// ============================================================
+// TODO EN MAYÚSCULAS
+// ============================================================
+function aMayus(v){
+    if(typeof v !== 'string') return v;
+    if(/^https?:\/\//i.test(v.trim())) return v;   // no tocar links
+    return v.toUpperCase();
+}
+document.addEventListener('input', function(e){
+    const t = e.target;
+    if(!t || t.readOnly || t.disabled) return;
+    const esTexto = (t.tagName === 'INPUT' && t.type === 'text') || t.tagName === 'TEXTAREA';
+    if(!esTexto) return;
+    const nuevo = aMayus(t.value);
+    if(nuevo === t.value) return;
+    const a = t.selectionStart, b = t.selectionEnd;
+    t.value = nuevo;
+    try{ t.setSelectionRange(a, b); }catch(_){}
+}, true);
+
+// ============================================================
+// LOGIN (usuarios en la hoja ACCESOS)
+// ============================================================
+function bloqueoLogin(mostrar){
+    document.getElementById('loginOverlay').classList.toggle('show', mostrar);
+    document.body.classList.toggle('sin-sesion', mostrar);
+    if(mostrar){ iniciarFxLogin(); setTimeout(()=>{ const i=document.getElementById('loginUsuario'); if(i) i.focus(); }, 50); }
+}
+function pintarUsuario(nombre){
+    document.getElementById('userNombre').textContent = '👤 ' + nombre;
+    document.getElementById('userChip').style.display = 'flex';
+}
+async function iniciarSesion(){
+    const usuario = document.getElementById('loginUsuario').value.trim().toUpperCase();
+    const clave   = document.getElementById('loginClave').value.trim();
+    const err = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+    err.textContent = '';
+    if(!usuario || !clave){ err.textContent = 'Captura usuario y contraseña'; return; }
+    btn.disabled = true; btn.textContent = 'Validando...';
+    try{
+        const res = await fetch(`${SCRIPT_URL}?action=login&usuario=${encodeURIComponent(usuario)}&clave=${encodeURIComponent(clave)}`, {cache:'no-store'});
+        const txt = await res.text();
+        let r;
+        try{ r = JSON.parse(txt); }
+        catch(_){
+            console.error('Respuesta no JSON del Apps Script:', txt.slice(0,500));
+            err.textContent = 'El script respondió algo inesperado (no es JSON). Revisa que la nueva versión esté publicada y que no tenga errores.';
+            btn.disabled = false; btn.textContent = 'Entrar';
+            return;
+        }
+        if(r.status === 'success'){
+            sessionStorage.setItem('sesionBET', JSON.stringify({usuario: r.usuario, clave: clave, nombre: r.nombre}));
+            location.reload();   // recarga para que los catálogos se carguen ya con la sesión
+            return;
+        }
+        err.textContent = r.message || 'Usuario o contraseña incorrectos';
+        const _bx=document.querySelector('.login-box'); _bx.classList.remove('shake'); void _bx.offsetWidth; _bx.classList.add('shake');
+    }catch(e){
+        console.error('Error de conexión al Apps Script:', e);
+        err.textContent = 'No se pudo conectar con el script (' + (e && e.message ? e.message : 'error de red') + ').';
+    }
+    btn.disabled = false; btn.textContent = 'Entrar';
+}
+function cerrarSesion(){
+    sessionStorage.removeItem('sesionBET');
+    location.reload();
+}
+
+// ============================================================
+// MODO CLARO / OSCURO
+// ============================================================
+function aplicarTema(t){
+    document.documentElement.setAttribute('data-theme', t);
+    try{ localStorage.setItem('temaBET', t); }catch(_){}
+    document.querySelectorAll('.theme-btn').forEach(b=>{ b.textContent = (t==='dark') ? '☀️ Claro' : '🌙 Oscuro'; });
+}
+function toggleTema(){
+    aplicarTema(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
+}
+aplicarTema(document.documentElement.getAttribute('data-theme') || 'light');
+
+// ============================================================
+// ANIMACIÓN DEL LOGIN: red de líneas + logo flotando
+// ============================================================
+let _fxResizeOn = false;
+function iniciarFxLogin(){
+    const cv = document.getElementById('loginFx');
+    if(!cv || cv._on) return;
+    cv._on = true;
+
+    // Logo (se reutiliza el del encabezado)
+    const src = (document.querySelector('.logo-chip img')||{}).src;
+    const wrap = document.getElementById('loginLogoWrap');
+    if(src && wrap && !wrap.firstChild){
+        const im = document.createElement('img'); im.src = src; im.alt = 'Logo'; wrap.appendChild(im);
+    }
+    const cont = document.getElementById('loginLogos');
+    if(src && cont && !cont.firstChild){
+        for(let i=0;i<9;i++){
+            const d = document.createElement('div'); d.className = 'fl-logo';
+            const h = 34 + Math.random()*46;                       // alto del chip
+            d.style.height = h + 'px';
+            d.style.left = (Math.random()*92) + '%';
+            d.style.animationDuration = (16 + Math.random()*16) + 's';
+            d.style.animationDelay = (-Math.random()*30) + 's';
+            d.style.setProperty('--op', (0.12 + Math.random()*0.2).toFixed(2));
+            if(h < 50) d.style.filter = 'blur(1.5px)';
+            const im = document.createElement('img'); im.src = src; im.alt = '';
+            d.appendChild(im); cont.appendChild(d);
+        }
+    }
+
+    const ctx = cv.getContext('2d');
+    let w = 0, h = 0; const pts = [];
+    const reducir = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function medir(){
+        const d = window.devicePixelRatio || 1;
+        w = cv.clientWidth; h = cv.clientHeight;
+        cv.width = w*d; cv.height = h*d; ctx.setTransform(d,0,0,d,0,0);
+        const n = Math.max(25, Math.min(80, Math.floor(w*h/16000)));
+        while(pts.length < n) pts.push({x:Math.random()*w, y:Math.random()*h, vx:(Math.random()-.5)*.6, vy:(Math.random()-.5)*.6});
+        pts.length = n;
+    }
+    if(!_fxResizeOn){ _fxResizeOn = true; window.addEventListener('resize', ()=>{ if(cv._on) medir(); }); }
+
+    function cuadro(){
+        if(!document.getElementById('loginOverlay').classList.contains('show')){ cv._on = false; return; }
+        ctx.clearRect(0,0,w,h);
+        const oscuro = document.documentElement.getAttribute('data-theme') === 'dark';
+        const rgb = oscuro ? '147,213,2' : '77,107,0';
+        const dist = 150;
+        for(const p of pts){
+            if(!reducir){
+                p.x += p.vx; p.y += p.vy;
+                if(p.x < 0 || p.x > w) p.vx *= -1;
+                if(p.y < 0 || p.y > h) p.vy *= -1;
+            }
+        }
+        for(let i=0;i<pts.length;i++){
+            for(let j=i+1;j<pts.length;j++){
+                const dx = pts[i].x-pts[j].x, dy = pts[i].y-pts[j].y;
+                const d2 = dx*dx+dy*dy;
+                if(d2 < dist*dist){
+                    const a = (1 - Math.sqrt(d2)/dist) * (oscuro ? .45 : .4);
+                    ctx.strokeStyle = `rgba(${rgb},${a})`; ctx.lineWidth = 1;
+                    ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); ctx.stroke();
+                }
+            }
+        }
+        ctx.fillStyle = `rgba(${rgb},${oscuro ? .8 : .7})`;
+        for(const p of pts){ ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill(); }
+        if(!reducir) requestAnimationFrame(cuadro);
+    }
+    medir(); cuadro();
+}
+
+(function initLogin(){
+    const ses = getSesionBET();
+    if(!ses){ bloqueoLogin(true); return; }
+    pintarUsuario(ses.nombre);
+    // Revalida en segundo plano (por si cambiaron la contraseña o quitaron el acceso)
+    fetch(`${SCRIPT_URL}?action=login&usuario=${encodeURIComponent(ses.usuario)}&clave=${encodeURIComponent(ses.clave)}`, {cache:'no-store'})
+        .then(r=>r.json())
+        .then(r=>{
+            if(r.status !== 'success'){ sessionStorage.removeItem('sesionBET'); bloqueoLogin(true); }
+            else pintarUsuario(r.nombre);
+        }).catch(()=>{});
+})();
 </script>
 </body>
 </html>
