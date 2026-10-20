@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Empleados - BET</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --black:#111111; --black2:#2a2a2a; --lime:#93d502; --lime-dark:#4d6b00; --lime-soft:#f1f7de;
+            --bg:#f1f2ee; --line:#d9dccf; --txt:#151515; --mut:#5a5e52; --red:#e53935;
+            --gray-50:#f7f8f2; --gray-200:#d9dccf; --gray-700:#2a2a2a; --gray-900:#111111;
+        }
+        body { font-family:'Inter','Segoe UI',Roboto,Arial,sans-serif; background:var(--bg); min-height:100vh; padding:1.25rem; color:var(--txt); }
+        .container { max-width:1400px; margin:0 auto; background:white; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,.12); padding:0 2rem 2rem; overflow:hidden; }
+        .header { display:flex; align-items:center; gap:1.25rem; margin:0 -2rem 1.75rem; padding:1.1rem 2rem; background:linear-gradient(100deg,#111111 0%,#4d6b00 100%); border-bottom:4px solid var(--lime); color:#fff; text-align:left; }
+        .header .logo-chip { background:#fff; border-radius:10px; padding:6px 12px; display:flex; align-items:center; flex:0 0 auto; }
+        .header .logo-chip img { height:48px; width:auto; display:block; }
+        .header h1 { font-size:1.4rem; color:#fff; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin:0; }
+        .header p { color:rgba(255,255,255,.8); font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; margin-top:.25rem; }
+        .tabs { display:flex; gap:.25rem; margin-bottom:1.75rem; border-bottom:2px solid var(--line); overflow-x:auto; }
+        .tab { padding:.85rem 1.75rem; background:transparent; border:none; color:var(--mut); font-weight:700; font-size:.82rem; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; border-bottom:4px solid transparent; transition:all .25s; white-space:nowrap; border-radius:0; box-shadow:none; }
+        .tab:hover { color:var(--black); background:var(--gray-50); transform:none; }
+        .tab.active { color:var(--black); border-bottom-color:var(--lime); background:var(--lime-soft); }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+        .section { margin-bottom:2.5rem; }
+        .section-title { font-size:1.05rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:linear-gradient(90deg,#111111 0%,#2a2a2a 100%); border-bottom:3px solid var(--lime); border-radius:8px 8px 0 0; padding:.7rem 1.1rem; margin-bottom:1.5rem; }
+        .subsection-title { font-size:.8rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--black); background:var(--lime-soft); border:1px solid var(--line); border-left:4px solid var(--lime); border-radius:8px; padding:.55rem 1rem; margin-top:2rem; margin-bottom:1.1rem; }
+        .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.1rem 1.25rem; }
+        .form-group { display:flex; flex-direction:column; }
+        label { font-size:.72rem; font-weight:700; color:var(--mut); letter-spacing:.05em; text-transform:uppercase; margin-bottom:.35rem; }
+        input, select, textarea { padding:.6rem .8rem; font-size:.95rem; color:var(--txt); background:#fff; border:1px solid #cdd1c0; border-radius:8px; transition:border-color .2s, box-shadow .2s; font-family:inherit; }
+        input:focus, select:focus, textarea:focus { outline:none; border-color:var(--lime); box-shadow:0 0 0 3px rgba(147,213,2,.35); }
+        textarea { resize:vertical; min-height:100px; }
+        input[readonly], input.campo-bloqueado { background:var(--bg) !important; color:#555 !important; cursor:not-allowed !important; border-color:#cdd1c0 !important; }
+        .campo-tabulador { background:var(--lime-soft) !important; color:var(--black) !important; border-color:var(--lime) !important; font-weight:600 !important; cursor:not-allowed !important; }
+        .tab-combo { position:relative; }
+        .tab-combo input { width:100%; padding-right:2rem; text-overflow:ellipsis; }
+        .tab-combo-arrow { position:absolute; right:.75rem; top:50%; transform:translateY(-50%); color:var(--mut); pointer-events:none; font-size:.8rem; }
+        .tab-combo-lista { position:absolute; top:100%; left:0; right:0; min-width:min(640px,92vw); background:white; border:1px solid var(--lime); border-radius:0 0 8px 8px; max-height:340px; overflow-y:auto; z-index:600; box-shadow:0 6px 16px rgba(0,0,0,.18); }
+        .tab-combo-grupo { position:sticky; top:0; background:var(--lime-soft); color:var(--black); font-size:.68rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:.4rem .75rem; border-bottom:1px solid var(--line); }
+        .tab-combo-item { padding:.5rem .75rem; font-size:.82rem; cursor:pointer; border-bottom:1px solid var(--gray-50); display:flex; justify-content:space-between; gap:.75rem; align-items:baseline; }
+        .tab-combo-item:hover, .tab-combo-item.activo { background:var(--lime-soft); }
+        .tab-combo-item.elegido { font-weight:700; border-left:4px solid var(--lime); }
+        .tab-combo-item .tc-total { white-space:nowrap; color:#4d6b00; font-weight:600; font-size:.75rem; }
+        .tab-combo-vacio { padding:.75rem; font-size:.82rem; color:var(--mut); }
+        input.campo-editable { background:white !important; color:var(--txt) !important; cursor:text !important; border-color:#cdd1c0 !important; }
+        input.campo-editable:focus { border-color:var(--lime) !important; box-shadow:0 0 0 3px rgba(147,213,2,.35) !important; }
+        #nss.nss-requerido { border-color:var(--red) !important; background:#fff5f5 !important; }
+        #nss.nss-opcional  { border-color:#cdd1c0 !important; background:white !important; }
+        .button-container { display:flex; justify-content:flex-end; gap:1rem; margin-top:2.5rem; padding-top:1.5rem; border-top:2px solid var(--line); }
+        button { padding:.85rem 1.75rem; font-size:.85rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; border:none; border-radius:10px; cursor:pointer; transition:all .25s; display:flex; align-items:center; gap:.5rem; font-family:inherit; }
+        .btn-primary, .btn-success, .btn-blue, .btn-orange { background:linear-gradient(90deg,#111111 0%,#4d6b00 100%); color:white; box-shadow:0 3px 8px rgba(0,0,0,.3); border-bottom:3px solid var(--lime); }
+        .btn-primary:hover, .btn-success:hover, .btn-blue:hover, .btn-orange:hover { filter:brightness(1.2); transform:translateY(-1px); }
+        .btn-red { background:linear-gradient(90deg,#111111 0%,#7f1d1d 100%); color:white; box-shadow:0 3px 8px rgba(0,0,0,.3); border-bottom:3px solid var(--red); }
+        .btn-red:hover { filter:brightness(1.2); transform:translateY(-1px); }
+        .btn-secondary { background:#e6e8dd; color:var(--black); }
+        .btn-secondary:hover { background:#d9dccf; }
+        .search-box { background:var(--gray-50); border:1px solid var(--line); border-left:4px solid var(--lime); border-radius:10px; padding:1.25rem; margin-bottom:2rem; }
+        .search-title { font-size:.9rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin-bottom:1rem; color:var(--black); }
+        .search-row { display:flex; gap:1rem; align-items:flex-end; flex-wrap:wrap; }
+        .search-row .form-group { flex:1; min-width:200px; }
+        .alert { padding:1rem; border-radius:8px; margin-top:1rem; }
+        .alert-success { background:#f1f7de; border:1px solid #93d502; color:#2f4300; }
+        .alert-error   { background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; }
+        .alert-warning { background:#fef9c3; border:1px solid #fde047; color:#854d0e; }
+        .id-tienda-group input { border-color:var(--lime); font-weight:600; }
+        .id-tienda-status { font-size:.75rem; margin-top:.3rem; height:1rem; }
+        .id-tienda-ok    { color:#2f4300; }
+        .id-tienda-error { color:#991b1b; }
+        .banco-search-wrapper { position:relative; }
+        .banco-search-wrapper input { width:100%; }
+        .banco-dropdown { position:absolute; top:100%; left:0; right:0; background:white; border:1px solid var(--lime); border-top:none; border-radius:0 0 8px 8px; max-height:220px; overflow-y:auto; z-index:500; display:none; box-shadow:0 4px 10px rgba(0,0,0,.15); }
+        .banco-dropdown.open { display:block; }
+        .banco-dropdown-item { padding:.6rem 1rem; cursor:pointer; font-size:.92rem; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eceee3; transition:background .15s; }
+        .banco-dropdown-item:last-child { border-bottom:none; }
+        .banco-dropdown-item:hover { background:var(--lime-soft); }
+        .banco-dropdown-item .banco-nombre { font-weight:500; color:var(--black); }
+        .banco-dropdown-item .banco-clave  { font-size:.78rem; background:#111; color:var(--lime); padding:.15rem .45rem; border-radius:4px; font-weight:700; }
+        .banco-dropdown-empty { padding:.75rem 1rem; color:#9ca3af; font-size:.9rem; text-align:center; }
+        .catalog-badge { display:inline-block; font-size:.65rem; padding:.15rem .4rem; border-radius:4px; margin-left:.4rem; vertical-align:middle; letter-spacing:.03em; }
+        .catalog-ok      { background:var(--lime-soft); color:#2f4300; }
+        .catalog-fail    { background:#fee2e2; color:#991b1b; }
+        .catalog-loading { background:#fef9c3; color:#854d0e; }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.8); z-index:1000; justify-content:center; align-items:center; padding:2rem; }
+        .modal.show { display:flex; }
+        .modal-content { background:white; border-radius:12px; max-width:800px; width:100%; max-height:90vh; overflow-y:auto; position:relative; }
+        .close-modal { position:absolute; top:1rem; right:1rem; background:#e6e8dd; border:none; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:1.5rem; line-height:1; color:var(--black); z-index:10; padding:0; justify-content:center; }
+        .close-modal:hover { background:var(--lime); }
+        /* FICHA + MARCA DE AGUA */
+        .ficha { position:relative; overflow:hidden; isolation:isolate; padding:2rem; background:white; }
+        .ficha::before { content:''; position:absolute; inset:-40%; z-index:0; pointer-events:none; opacity:.11; transform:rotate(-28deg); background:url(data:image/png;base64,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) center top / 300px auto repeat; }
+        .ficha > * { position:relative; z-index:1; }
+        .ficha-header { color:white; padding:1.5rem; text-align:center; font-size:1.5rem; font-weight:700; margin:-2rem -2rem 2rem -2rem; background:#111; border-bottom:4px solid var(--lime); }
+        .ficha-section { color:white; background:#111; border-bottom:3px solid var(--lime); padding:.6rem 1rem; margin:1.5rem 0 1rem; font-weight:700; letter-spacing:.06em; font-size:1rem; }
+        .ficha-table { width:100%; border-collapse:collapse; margin-bottom:1rem; }
+        .ficha-table td { padding:.6rem .75rem; border:1px solid #bfc4b0; background:rgba(255,255,255,.55); }
+        .ficha-table td:first-child { background:var(--lime-soft); font-weight:700; width:200px; color:var(--black); letter-spacing:.03em; }
+        .toast { position:fixed; top:2rem; right:2rem; background:#111; border-left:5px solid var(--lime); color:white; padding:1rem 1.5rem; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,.3); display:none; animation:slideIn .3s ease; z-index:2000; }
+        .toast.show  { display:block; }
+        .toast.error { background:#7f1d1d; border-left-color:var(--red); }
+        @keyframes slideIn { from{transform:translateX(400px);opacity:0} to{transform:translateX(0);opacity:1} }
+        .loading { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.7); z-index:3000; justify-content:center; align-items:center; }
+        .loading.show { display:flex; }
+        .spinner { border:4px solid rgba(255,255,255,.3); border-top:4px solid var(--lime); border-radius:50%; width:60px; height:60px; animation:spin 1s linear infinite; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        .search-results-list { margin-top:.75rem; border:1px solid var(--lime); border-radius:8px; overflow:hidden; }
+        .search-results-list-item { padding:.75rem 1rem; cursor:pointer; border-bottom:1px solid #eceee3; transition:background .15s; display:flex; flex-direction:column; gap:.2rem; }
+        .search-results-list-item:last-child { border-bottom:none; }
+        .search-results-list-item:hover { background:var(--lime-soft); }
+        .search-results-list-item .sri-name    { font-weight:700; color:var(--black); font-size:.95rem; }
+        .search-results-list-item .sri-details { font-size:.8rem; color:var(--mut); }
+        .search-type-row { display:flex; gap:.5rem; margin-bottom:.75rem; flex-wrap:wrap; }
+        .search-type-btn { padding:.4rem .9rem; border-radius:20px; border:1px solid #cdd1c0; background:white; color:var(--mut); font-size:.75rem; font-weight:700; letter-spacing:.05em; cursor:pointer; transition:all .2s; font-family:inherit; box-shadow:none; }
+        .search-type-btn.active { border-color:#111; background:#111; color:var(--lime); }
+        .aviso-bloqueado { background:#f8faf0; border:1px solid #d9e6b0; border-left:5px solid #111; border-radius:8px; padding:.7rem 1rem; font-size:.8rem; color:#2a2a2a; margin-bottom:1.5rem; display:flex; align-items:center; gap:.5rem; }
+        .foto-box { background:#f8faf0; border:2px dashed #aabf6a; border-radius:12px; padding:2rem; margin-bottom:2rem; text-align:center; }
+        .foto-box h3 { color:var(--black); margin-bottom:1rem; font-size:.95rem; letter-spacing:.1em; text-transform:uppercase; }
+        @media print {
+            *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+            body{background:white!important;padding:0!important}
+            .container>*:not(.modal){display:none!important}
+            .modal{position:static!important;background:white!important;padding:0!important;display:block!important}
+            .modal-content{max-height:none!important;overflow:visible!important;max-width:100%!important;box-shadow:none!important;border-radius:0!important;padding:0!important}
+            .ficha{padding:.3cm!important;page-break-inside:avoid!important}
+            .modal-content>div:last-child{display:none!important}
+            @page{size:letter portrait;margin:.5cm}
+        }
+        @media (max-width:768px){.container{padding:0 1rem 1.5rem}.header{margin:0 -1rem 1.25rem;padding:1rem}.header h1{font-size:1.05rem}.form-grid{grid-template-columns:1fr}.search-row{flex-direction:column}}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo-chip"><img src="data:image/jpeg;base64,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" alt="BET"></div>
+        <div>
+            <h1>Sistema de Gestión de Empleados</h1>
+            <p>Beta Last Mile &nbsp;|&nbsp; Gestión integral de personal</p>
+        </div>
+    </div>
+    <div class="tabs">
+        <button class="tab active" onclick="cambiarTab(0)">Headcount</button>
+        <button class="tab" onclick="cambiarTab(1)">Vacaciones</button>
+        <button class="tab" onclick="cambiarTab(2)">Bajas</button>
+        <button class="tab" onclick="cambiarTab(3)">Incapacidades</button>
+    </div>
+
+    <!-- ===== TAB 1: HEADCOUNT ===== -->
+    <div class="tab-content active" id="tab-0">
+        <form id="formHeadcount">
+        <section class="section">
+            <h2 class="section-title">MÓDULO 1: HEADCOUNT</h2>
+            <div class="aviso-bloqueado">Los campos sombreados se llenan automáticamente al ingresar el Usuario Beta. Solo puedes editar los campos marcados con borde blanco y las listas desplegables.</div>
+            <!-- FOTO -->
+            <div class="foto-box">
+                <h3>Fotografía del Empleado</h3>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;">
+                    <div id="previewFoto" style="width:200px;height:200px;border:3px solid #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;">
+                        <span style="color:#9ca3af;font-size:3rem;">👤</span>
+                    </div>
+                    <input type="file" id="fotoEmpleado" name="fotoEmpleado" accept="image/*" style="display:none;" onchange="cargarFoto(event)">
+                    <button type="button" onclick="document.getElementById('fotoEmpleado').click()" class="btn-primary">Seleccionar Foto</button>
+                    <p style="color:#6b7280;font-size:.875rem;">Formatos: JPG, PNG • Máx: 2MB</p>
+                </div>
+            </div>
+            <!-- DATOS GENERALES -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>AP <span id="badge-AP" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <select id="ap" name="ap"><option value="">Seleccionar...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Prenominista <span id="badge-PRENOMINISTA" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <select id="prenominista" name="prenominista"><option value="">Seleccionar...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Reclutador <span id="badge-RECLUTADOR" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <select id="reclutador" name="reclutador"><option value="">Seleccionar...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Fuente de Reclutamiento <span id="badge-FUENTE_RECLUTAMIENTO" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <select id="fuenteReclutamiento" name="fuenteReclutamiento"><option value="">Seleccionar...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Estatus <span id="badge-ESTATUS" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <select id="estatus" name="estatus"><option value="">Seleccionar...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Periodicidad de Pago <span id="badge-PERIODICIDAD_PAGO" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <select id="periodicidadPago" name="periodicidadPago" onchange="poblarTabuladores('')"><option value="">Seleccionar...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Usuario Beta <small style="color:#4d6b00;font-weight:600;">(ingresa y presiona Enter)</small></label>
+                    <input type="text" id="usuarioBeta" name="usuarioBeta" placeholder="Usuario Beta" class="campo-editable" onblur="autoLlenarUsuarioBeta()" onkeydown="if(event.key==='Enter'){event.preventDefault();autoLlenarUsuarioBeta();}">
+                </div>
+                <div class="form-group"><label>Apellido Paterno</label><input type="text" id="apellidoPaterno" name="apellidoPaterno" placeholder="Apellido paterno" readonly></div>
+                <div class="form-group"><label>Apellido Materno</label><input type="text" id="apellidoMaterno" name="apellidoMaterno" placeholder="Apellido materno" readonly></div>
+                <div class="form-group"><label>Nombre(s)</label><input type="text" id="nombres" name="nombres" placeholder="Nombre(s)" readonly></div>
+            </div>
+            <!-- DATOS DE CONTRATACIÓN -->
+            <h3 class="subsection-title">Datos de Contratación</h3>
+            <div class="form-grid">
+                <div class="form-group"><label>Puesto</label><input type="text" id="puesto" name="puesto" placeholder="Puesto" readonly></div>
+                <div class="form-group"><label>Fecha Real de Ingreso</label><input type="date" id="fechaRealIngreso" name="fechaRealIngreso" readonly></div>
+                <div class="form-group"><label for="folioVacante">Folio Vacante <span style="color:#ef4444;font-weight:700;">*</span></label><input type="text" id="folioVacante" name="folioVacante" placeholder="Folio de la vacante" autocomplete="off" class="campo-editable" required oninput="this.style.borderColor=''"></div>
+                <div class="form-group">
+                    <label>Tabulador <span style="color:#ef4444;font-weight:700;">*</span> <span id="badge-TABULADORES" class="catalog-badge catalog-loading">cargando...</span> <small style="color:#4d6b00;font-weight:600;">(según puesto y periodicidad)</small></label>
+                    <div class="tab-combo" id="tabCombo">
+                        <input type="text" id="tabuladorBuscar" placeholder="Buscar tabulador (estado, zona, esquema...)" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="tabLista">
+                        <span class="tab-combo-arrow">▾</span>
+                        <div id="tabLista" class="tab-combo-lista" role="listbox" style="display:none"></div>
+                    </div>
+                    <select id="tabulador" name="tabulador" style="display:none" tabindex="-1" aria-hidden="true" onchange="seleccionarTabulador()"><option value="">Selecciona el Usuario Beta primero...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Esquema de Contratación <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label>
+                    <input type="text" id="esquemaContratacion" name="esquemaContratacion" placeholder="Se llena automático desde tabulador" readonly class="campo-tabulador">
+                </div>
+                <div class="form-group"><label>Pago Diario <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="number" step="0.01" min="0" id="pagoDiario" name="pagoDiario" placeholder="Automático" readonly class="campo-tabulador"></div>
+                <div class="form-group"><label>Renta <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="number" step="0.01" min="0" id="rentaPago" name="rentaPago" placeholder="Automático" readonly class="campo-tabulador"></div>
+                <div class="form-group"><label>Complemento <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="number" step="0.01" min="0" id="complemento" name="complemento" placeholder="Automático" readonly class="campo-tabulador"></div>
+                <div class="form-group"><label>Bono <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="number" step="0.01" min="0" id="bono" name="bono" placeholder="Automático" readonly class="campo-tabulador"></div>
+                <div class="form-group"><label>Sueldo Mensual Total</label><input type="number" step="0.01" id="sueldoMensualTotal" name="sueldoMensualTotal" placeholder="Automático" readonly class="campo-tabulador"></div>
+                <div class="form-group"><label>Sueldo Mensual IMSS</label><input type="number" step="0.01" min="0" id="sueldoMensualIMSS" name="sueldoMensualIMSS" placeholder="Captura manual" class="campo-editable"></div>
+                <div class="form-group"><label>Departamento</label><input type="text" id="departamento" name="departamento" placeholder="Departamento" readonly></div>
+                <div class="form-group">
+                    <label>Estatus de Contrato <span id="badge-ESTATUS_CONTRATO" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <select id="estatusContrato" name="estatusContrato"><option value="">Seleccionar...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Jefe Inmediato <span id="badge-JEFE INMEDIATO" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <select id="jefeInmediato" name="jefeInmediato"><option value="">Seleccionar...</option></select>
+                </div>
+            </div>
+            <!-- TIENDA -->
+            <h3 class="subsection-title">Datos de Tienda / Proyecto</h3>
+            <div class="form-grid">
+                <div class="form-group id-tienda-group">
+                    <label>ID Tienda <small style="color:#4d6b00;font-weight:600;">(auto-rellena campos)</small></label>
+                    <input type="text" id="idTienda" name="idTienda" placeholder="Se llena automático al ingresar Usuario Beta" readonly>
+                    <span id="idTiendaStatus" class="id-tienda-status"></span>
+                </div>
+                <div class="form-group"><label>Cliente</label><input type="text" id="cliente" name="cliente" placeholder="Cliente" readonly></div>
+                <div class="form-group"><label>Formato</label><input type="text" id="formato" name="formato" placeholder="Formato" readonly></div>
+                <div class="form-group"><label>Proyecto</label><input type="text" id="proyecto" name="proyecto" placeholder="Proyecto" readonly></div>
+                <div class="form-group"><label>Sucursal</label><input type="text" id="sucursal" name="sucursal" placeholder="Sucursal" readonly></div>
+                <div class="form-group"><label>Determinante</label><input type="text" id="determinante" name="determinante" placeholder="Determinante" readonly></div>
+                <div class="form-group"><label>Entidad Federativa</label><input type="text" id="entidadFederativa" name="entidadFederativa" placeholder="Estado" readonly></div>
+                <div class="form-group"><label>Municipio</label><input type="text" id="municipio" name="municipio" placeholder="Municipio" readonly></div>
+            </div>
+            <!-- NÓMINA -->
+            <h3 class="subsection-title">Datos de Pago — Cuenta de Nómina</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Banco Nómina <span id="badge-BANCO" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <div class="banco-search-wrapper">
+                        <input type="text" id="bancoNominaSearch" name="bancoNomina" placeholder="🔍 Buscar banco..." autocomplete="off" class="campo-editable" oninput="filtrarBanco('nomina')" onfocus="mostrarDropdownBanco('nomina')" onblur="ocultarDropdownBanco('nomina')">
+                        <div class="banco-dropdown" id="bancoNominaDropdown"></div>
+                    </div>
+                </div>
+                <div class="form-group"><label>Clave Banco <small style="color:#4d6b00;">(auto)</small></label><input type="text" id="claveBanco" name="claveBanco" placeholder="Automático" readonly></div>
+                <div class="form-group"><label>No. Cuenta o CLABE Nómina</label><input type="text" id="noCuentaNomina" name="noCuentaNomina" placeholder="Número de cuenta o CLABE" class="campo-editable"></div>
+                <div class="form-group"><label>Link Estado de Cuenta Nómina</label><input type="url" id="linkEstadoCuentaNomina" name="linkEstadoCuentaNomina" placeholder="URL" class="campo-editable"></div>
+            </div>
+            <!-- RENTA -->
+            <h3 class="subsection-title">Datos de Pago — Cuenta de Renta</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Banco Renta</label>
+                    <div class="banco-search-wrapper">
+                        <input type="text" id="bancoRentaSearch" name="bancoRenta" placeholder="🔍 Buscar banco..." autocomplete="off" class="campo-editable" oninput="filtrarBanco('renta')" onfocus="mostrarDropdownBanco('renta')" onblur="ocultarDropdownBanco('renta')">
+                        <div class="banco-dropdown" id="bancoRentaDropdown"></div>
+                    </div>
+                </div>
+                <div class="form-group"><label>Clave Banco 2 <small style="color:#4d6b00;">(auto)</small></label><input type="text" id="claveBanco2" name="claveBanco2" placeholder="Automático" readonly></div>
+                <div class="form-group"><label>No. Cuenta o CLABE Renta</label><input type="text" id="noCuentaBancariaRenta" name="noCuentaBancariaRenta" placeholder="Número de cuenta o CLABE" class="campo-editable"></div>
+                <div class="form-group"><label>Link Estado de Cuenta Renta</label><input type="url" id="linkEstadoCuentaRenta" name="linkEstadoCuentaRenta" placeholder="URL" class="campo-editable"></div>
+            </div>
+            <!-- ESQUEMA -->
+            <h3 class="subsection-title">Actualización de Esquema</h3>
+            <div class="form-grid">
+                <div class="form-group"><label>Fecha Cambio de Esquema</label><input type="date" id="fechaCambioEsquema" name="fechaCambioEsquema" class="campo-editable"></div>
+                <div class="form-group"><label>Fecha Firma Nuevo Contrato</label><input type="date" id="fechaFirmaNuevoContrato" name="fechaFirmaNuevoContrato" class="campo-editable"></div>
+            </div>
+            <!-- DATOS PERSONALES -->
+            <h3 class="subsection-title">Datos Personales</h3>
+            <div class="form-grid">
+                <div class="form-group"><label>Fecha de Nacimiento</label><input type="date" id="fechaNacimiento" name="fechaNacimiento" readonly></div>
+                <div class="form-group"><label>Lugar de Nacimiento</label><input type="text" id="lugarNacimiento" name="lugarNacimiento" placeholder="Ciudad, Estado" readonly></div>
+                <div class="form-group">
+                    <label>Sexo <span id="badge-SEXO" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <select id="sexo" name="sexo"><option value="">Seleccionar...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Estado Civil</label>
+                    <select id="estadoCivil" name="estadoCivil">
+                        <option value="">Seleccionar...</option>
+                        <option value="SOLTERO">Soltero/a</option>
+                        <option value="CASADO">Casado/a</option>
+                        <option value="UNION_LIBRE">Unión Libre</option>
+                        <option value="DIVORCIADO">Divorciado/a</option>
+                        <option value="VIUDO">Viudo/a</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>IDMEX</label><input type="text" id="idmex" name="idmex" placeholder="Identificación Oficial" class="campo-editable"></div>
+                <div class="form-group"><label>RFC</label><input type="text" id="rfc" name="rfc" placeholder="RFC" maxlength="13" readonly></div>
+                <div class="form-group"><label>CURP</label><input type="text" id="curp" name="curp" placeholder="CURP" maxlength="18" readonly></div>
+                <div class="form-group">
+                    <label for="nss">NSS <span id="nssReqLabel" style="display:none;color:#ef4444;font-weight:700;"> * (obligatorio para BMEXS/BMEXM)</span></label>
+                    <input type="text" id="nss" name="nss" placeholder="NSS" maxlength="11" class="campo-editable nss-opcional">
+                    <span id="errorNss" style="display:none;color:#ef4444;font-size:.8rem;margin-top:.25rem;">⚠️ El NSS es obligatorio para usuarios BMEXS o BMEXM</span>
+                </div>
+                <div class="form-group"><label>🔗 Link No. IMSS</label><input type="url" id="linkNoImss" name="linkNoImss" placeholder="https://..." class="campo-editable"></div>
+                <div class="form-group"><label>No. Crédito INFONAVIT</label><input type="text" id="noCreditoInfonavit" name="noCreditoInfonavit" placeholder="Número" class="campo-editable"></div>
+                <div class="form-group"><label>Link Constancia Fiscal</label><input type="url" id="linkDescargaConstanciaFiscal" name="linkDescargaConstanciaFiscal" placeholder="URL" class="campo-editable"></div>
+                <div class="form-group"><label>No. de Licencia</label><input type="text" id="noLicencia" name="noLicencia" placeholder="Número de licencia" readonly></div>
+                <div class="form-group">
+                    <label>Escolaridad <span id="badge-ESCOLARIDAD" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <select id="escolaridad" name="escolaridad"><option value="">Seleccionar...</option></select>
+                </div>
+                <div class="form-group"><label>Nacionalidad</label><input type="text" id="nacionalidad" name="nacionalidad" placeholder="Nacionalidad" readonly></div>
+            </div>
+            <h4 style="font-size:1rem;font-weight:600;color:#4a5568;margin-top:1.5rem;margin-bottom:1rem;">Dirección</h4>
+            <div class="form-grid">
+                <div class="form-group"><label>Calle</label><input type="text" id="calle" name="calle" placeholder="Calle" readonly></div>
+                <div class="form-group"><label>No. Exterior</label><input type="text" id="noExt" name="noExt" placeholder="Número" readonly></div>
+                <div class="form-group"><label>No. Interior</label><input type="text" id="noInt" name="noInt" placeholder="Número/Depto" readonly></div>
+                <div class="form-group"><label>Entidad Federativa</label><input type="text" id="entidadFederativaDireccion" name="entidadFederativaDireccion" placeholder="Estado" readonly></div>
+                <div class="form-group"><label>Alcaldía/Municipio</label><input type="text" id="alcaldiaMunicipio" name="alcaldiaMunicipio" placeholder="Alcaldía/Municipio" readonly></div>
+                <div class="form-group"><label>Colonia</label><input type="text" id="colonia" name="colonia" placeholder="Colonia" readonly></div>
+                <div class="form-group"><label>C.P.</label><input type="text" id="cp" name="cp" placeholder="Código Postal" maxlength="5" readonly></div>
+            </div>
+            <h4 style="font-size:1rem;font-weight:600;color:#4a5568;margin-top:1.5rem;margin-bottom:1rem;">Contacto</h4>
+            <div class="form-grid">
+                <div class="form-group"><label>Correo Electrónico</label><input type="email" id="correoElectronico" name="correoElectronico" placeholder="correo@ejemplo.com" readonly></div>
+                <div class="form-group">
+                    <label>Teléfono Celular</label>
+                    <input type="tel" id="telefonoCelular" name="telefonoCelular" placeholder="10 dígitos" class="campo-editable" maxlength="10" oninput="soloNumerosTel(this);validarTelefonosDiferentes()">
+                    <span id="errorTelCelular" style="display:none;color:#ef4444;font-size:.8rem;margin-top:.25rem;">⚠️ Los teléfonos no pueden ser iguales</span>
+                    <span id="errorTelCelularLen" style="display:none;color:#ef4444;font-size:.8rem;margin-top:.25rem;">⚠️ Debe tener exactamente 10 dígitos</span>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono de Recados <span style="color:#ef4444;font-weight:700;">*</span></label>
+                    <input type="tel" id="telefonoRecados" name="telefonoRecados" placeholder="10 dígitos" class="campo-editable" maxlength="10" oninput="soloNumerosTel(this);validarTelefonosDiferentes()" required>
+                    <span id="errorTelRecados" style="display:none;color:#ef4444;font-size:.8rem;margin-top:.25rem;">⚠️ Los teléfonos no pueden ser iguales</span>
+                    <span id="errorTelRecadosLen" style="display:none;color:#ef4444;font-size:.8rem;margin-top:.25rem;">⚠️ Debe tener exactamente 10 dígitos</span>
+                </div>
+            </div>
+            <!-- UNIDAD -->
+            <h3 class="subsection-title">Datos de la Unidad</h3>
+            <div class="form-grid">
+                <div class="form-group"><label>Marca</label><input type="text" id="marca" name="marca" placeholder="Marca" readonly></div>
+                <div class="form-group"><label>Submarca</label><input type="text" id="submarca" name="submarca" placeholder="Submarca" readonly></div>
+                <div class="form-group"><label>Año Vehículo</label><input type="text" id="anoVehiculoUnidad" name="anoVehiculoUnidad" placeholder="Año" class="campo-editable"></div>
+                <div class="form-group"><label>Placa</label><input type="text" id="placa" name="placa" placeholder="Placas" readonly></div>
+                <div class="form-group"><label># Tarjeta Circulación</label><input type="text" id="tarjetaCirculacion" name="tarjetaCirculacion" placeholder="Número" readonly></div>
+                <div class="form-group"><label>Tipo</label><input type="text" id="tipo" name="tipo" placeholder="Tipo" readonly></div>
+                <div class="form-group"><label>Color</label><input type="text" id="color" name="color" placeholder="Color" readonly></div>
+                <div class="form-group"><label>Esquema Unidades</label><input type="text" id="esquemaUnidades" name="esquemaUnidades" placeholder="Esquema" readonly></div>
+                <div class="form-group"><label>Propietario</label><input type="text" id="propietario" name="propietario" placeholder="Propietario" readonly></div>
+                <div class="form-group"><label>Facturado Por</label><input type="text" id="facturadoPor" name="facturadoPor" placeholder="Facturado por" readonly></div>
+                <div class="form-group"><label>Aseguradora</label><input type="text" id="aseguradora" name="aseguradora" placeholder="Nombre" readonly></div>
+                <div class="form-group"><label>No. de Póliza</label><input type="text" id="noPoliza" name="noPoliza" placeholder="Número" readonly></div>
+                <div class="form-group"><label>Vigencia Póliza</label><input type="date" id="vigenciaPoliza" name="vigenciaPoliza" class="campo-editable"></div>
+                <div class="form-group"><label>Fecha Verificación</label><input type="date" id="fechaVerificacion" name="fechaVerificacion" class="campo-editable"></div>
+                <div class="form-group"><label>Motor</label><input type="text" id="motor" name="motor" placeholder="Número" class="campo-editable"></div>
+                <div class="form-group"><label>Cilindros</label><input type="text" id="cilindros" name="cilindros" placeholder="Cantidad" class="campo-editable"></div>
+                <div class="form-group"><label>Número Factura</label><input type="text" id="numeroFactura" name="numeroFactura" placeholder="Número" class="campo-editable"></div>
+                <div class="form-group"><label>Fecha Factura</label><input type="date" id="fecha" name="fecha" class="campo-editable"></div>
+                <div class="form-group"><label>Expedida Por</label><input type="text" id="expedidaPor" name="expedidaPor" placeholder="Expedida por" class="campo-editable"></div>
+                <div class="form-group">
+                    <label>Gasolina por TOKA <span id="badge-GASOLINA_TOKA" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <select id="gasolinaPorToka" name="gasolinaPorToka"><option value="">Seleccionar...</option></select>
+                </div>
+            </div>
+            <h3 class="subsection-title">Información Adicional</h3>
+            <div class="form-grid">
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label>Observaciones</label>
+                    <textarea id="observaciones" name="observaciones" placeholder="Escribe cualquier observación relevante..."></textarea>
+                </div>
+            </div>
+            <div class="button-container">
+                <button type="button" class="btn-success" onclick="guardarModulo('headcount')">💾 Guardar y Generar Ficha</button>
+            </div>
+        </section>
+        </form>
+    </div>
+
+    <!-- ===== TAB 2: VACACIONES ===== -->
+    <div class="tab-content" id="tab-1">
+        <form id="formVacaciones"><section class="section">
+            <h2 class="section-title">MÓDULO 2: CONTROL DE VACACIONES</h2>
+            <div class="search-box">
+                <h3 class="search-title">🔍 Búsqueda de Empleado</h3>
+                <div class="search-type-row">
+                    <button type="button" class="search-type-btn active" onclick="setTipoBusqueda('vac','curp',this)">Por CURP</button>
+                    <button type="button" class="search-type-btn" onclick="setTipoBusqueda('vac','usuario',this)">Por Usuario Beta</button>
+                    <button type="button" class="search-type-btn" onclick="setTipoBusqueda('vac','nombre',this)">Por Nombre</button>
+                </div>
+                <div class="search-row">
+                    <div class="form-group"><label id="labelBusquedaVac">CURP del Empleado</label><input type="text" id="searchTermVac" placeholder="Ingresa el CURP" style="text-transform:uppercase;"></div>
+                    <button type="button" class="btn-primary" onclick="buscarEmpleado('vacaciones')">Buscar</button>
+                </div>
+                <div id="resultVac"></div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label>Nombre Completo</label><input type="text" id="vacNombres" name="nombres" placeholder="Nombre completo" readonly></div>
+                <div class="form-group"><label>AP <span id="badge-AP-vac" class="catalog-badge catalog-loading">cargando...</span></label><select id="vacAp" name="ap"><option value="">Seleccionar...</option></select></div>
+                <div class="form-group"><label>Usuario Beta</label><input type="text" id="vacusuarioBeta" name="usuarioBeta" placeholder="Usuario Beta" readonly></div>
+                <div class="form-group"><label>CURP</label><input type="text" id="vacCurp" name="curp" placeholder="CURP" readonly></div>
+                <div class="form-group"><label>NSS</label><input type="text" id="vacNss" name="nss" placeholder="NSS" maxlength="11" readonly></div>
+                <div class="form-group"><label>Quien Autoriza</label><input type="text" id="vacApp" name="app" placeholder="Nombre Jefe Directo" class="campo-editable"></div>
+                <div class="form-group"><label>Años de Antigüedad</label><input type="number" id="vacAnios" name="anios" placeholder="Años" class="campo-editable"></div>
+                <div class="form-group"><label>Meses</label><input type="number" id="vacMeses" name="meses" placeholder="Meses" class="campo-editable"></div>
+                <div class="form-group"><label>Días</label><input type="number" id="vacDias" name="dias" placeholder="Días" class="campo-editable"></div>
+                <div class="form-group"><label>Fecha Inicio Vacaciones</label><input type="date" id="vacFechaInicio" name="fechaInicio" onchange="calcularDiasVacaciones()" class="campo-editable"></div>
+                <div class="form-group"><label>Fecha Término</label><input type="date" id="vacFechaTermino" name="fechaTermino" onchange="calcularDiasVacaciones()" class="campo-editable"></div>
+                <div class="form-group"><label>Fecha Reincorporación</label><input type="date" id="vacReincorporacion" name="reincorporacion" class="campo-editable"></div>
+                <div class="form-group"><label>Días Disfrutados <small style="color:#4d6b00;">(auto)</small></label><input type="number" id="vacDiasDisfrutados" name="diasDisfrutados" placeholder="Automático" readonly style="background:#f1f7de;font-weight:600;color:#166534;"></div>
+                <div class="form-group"><label>Días Pendientes</label><input type="number" id="vacDiasPendientes" name="diasPendientes" placeholder="Días" class="campo-editable"></div>
+                <div class="form-group"><label>🔗 Link de Autorización</label><input type="url" id="vacLinkAutorizacion" name="linkAutorizacion" placeholder="https://..." class="campo-editable"></div>
+            </div>
+            <div class="button-container"><button type="button" class="btn-blue" onclick="guardarModulo('vacaciones')">💾 Guardar y Generar Ficha</button></div>
+        </section></form>
+    </div>
+
+    <!-- ===== TAB 3: BAJAS ===== -->
+    <div class="tab-content" id="tab-2">
+        <form id="formBajas"><section class="section">
+            <h2 class="section-title">MÓDULO 3: INFORMACIÓN DE BAJA</h2>
+            <div class="search-box">
+                <h3 class="search-title">🔍 Búsqueda de Empleado</h3>
+                <div class="search-type-row">
+                    <button type="button" class="search-type-btn active" onclick="setTipoBusqueda('baja','curp',this)">Por CURP</button>
+                    <button type="button" class="search-type-btn" onclick="setTipoBusqueda('baja','usuario',this)">Por Usuario Beta</button>
+                    <button type="button" class="search-type-btn" onclick="setTipoBusqueda('baja','nombre',this)">Por Nombre</button>
+                </div>
+                <div class="search-row">
+                    <div class="form-group"><label id="labelBusquedaBaja">CURP del Empleado</label><input type="text" id="searchTermBaja" placeholder="Ingresa el CURP" style="text-transform:uppercase;"></div>
+                    <button type="button" class="btn-primary" onclick="buscarEmpleado('bajas')">Buscar</button>
+                </div>
+                <div id="resultBaja"></div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label>Nombre Completo</label><input type="text" id="bajaNombres" name="nombres" placeholder="Nombre completo" readonly></div>
+                <div class="form-group"><label>AP <span id="badge-AP-baja" class="catalog-badge catalog-loading">cargando...</span></label><select id="bajaAp" name="ap"><option value="">Seleccionar...</option></select></div>
+                <div class="form-group"><label>Usuario Beta</label><input type="text" id="bajausuarioBeta" name="usuarioBeta" placeholder="Usuario Beta" readonly></div>
+                <div class="form-group"><label>CURP</label><input type="text" id="bajaCurp" name="curp" placeholder="CURP" readonly></div>
+                <div class="form-group"><label>NSS</label><input type="text" id="bajaNss" name="nss" placeholder="NSS" maxlength="11" readonly></div>
+                <div class="form-group"><label>Quien Autoriza</label><input type="text" id="bajaApp" name="app" placeholder="Nombre Jefe Directo" class="campo-editable"></div>
+                <div class="form-group"><label>Fecha de Baja</label><input type="date" id="bajaFecha" name="fechaBaja" class="campo-editable"></div>
+                <div class="form-group"><label>Motivo de Baja</label><select id="bajaMotivo" name="motivoBaja"><option value="">Seleccionar...</option><option value="RENUNCIA">Renuncia Voluntaria</option><option value="DESPIDO">Despido</option><option value="TERMINO_CONTRATO">Término de Contrato</option><option value="ABANDONO">Abandono de Empleo</option><option value="OTRO">Otro</option></select></div>
+                <div class="form-group"><label>Renuncia Firmada</label><select id="bajaRenuncia" name="renunciaFirmada"><option value="">Seleccionar...</option><option value="SI">Sí</option><option value="NO">No</option><option value="PENDIENTE">Pendiente</option></select></div>
+                <div class="form-group"><label>Finiquito</label><select id="bajaFiniquito" name="finiquito"><option value="">Seleccionar...</option><option value="FIRMADO">Firmado</option><option value="PENDIENTE">Pendiente</option></select></div>
+            </div>
+            <div class="form-group" style="margin-top:1rem;"><label>Detalle Real de la Baja</label><textarea id="bajaDetalle" name="detalleBaja" placeholder="Describe el detalle de la baja..."></textarea></div>
+            <div class="form-group" style="margin-top:1rem;"><label>🔗 Link de Firma de Baja</label><input type="url" id="bajaLinkFirma" name="linkFirmaBaja" placeholder="https://..." class="campo-editable"></div>
+            <div class="button-container"><button type="button" class="btn-orange" onclick="guardarModulo('bajas')">💾 Guardar y Generar Ficha</button></div>
+        </section></form>
+    </div>
+
+    <!-- ===== TAB 4: INCAPACIDADES ===== -->
+    <div class="tab-content" id="tab-3">
+        <form id="formIncapacidades"><section class="section">
+            <h2 class="section-title">MÓDULO 4: INCAPACIDADES</h2>
+            <div class="search-box">
+                <h3 class="search-title">🔍 Búsqueda de Empleado</h3>
+                <div class="search-type-row">
+                    <button type="button" class="search-type-btn active" onclick="setTipoBusqueda('incap','curp',this)">Por CURP</button>
+                    <button type="button" class="search-type-btn" onclick="setTipoBusqueda('incap','usuario',this)">Por Usuario Beta</button>
+                    <button type="button" class="search-type-btn" onclick="setTipoBusqueda('incap','nombre',this)">Por Nombre</button>
+                </div>
+                <div class="search-row">
+                    <div class="form-group"><label id="labelBusquedaIncap">CURP del Empleado</label><input type="text" id="searchTermIncap" placeholder="Ingresa el CURP" style="text-transform:uppercase;"></div>
+                    <button type="button" class="btn-primary" onclick="buscarEmpleado('incapacidades')">Buscar</button>
+                </div>
+                <div id="resultIncap"></div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label>Nombre Completo</label><input type="text" id="incapNombres" name="nombres" placeholder="Nombre completo" readonly></div>
+                <div class="form-group"><label>AP <span id="badge-AP-incap" class="catalog-badge catalog-loading">cargando...</span></label><select id="incapAp" name="ap"><option value="">Seleccionar...</option></select></div>
+                <div class="form-group"><label>Usuario Beta</label><input type="text" id="incapusuarioBeta" name="usuarioBeta" placeholder="Usuario Beta" readonly></div>
+                <div class="form-group"><label>CURP</label><input type="text" id="incapCurp" name="curp" placeholder="CURP" readonly></div>
+                <div class="form-group"><label>NSS</label><input type="text" id="incapNss" name="nss" placeholder="NSS" maxlength="11" readonly></div>
+                <div class="form-group"><label>Jefe Directo</label><input type="text" id="incapApp" name="app" placeholder="Nombre Jefe Directo" class="campo-editable"></div>
+                <div class="form-group"><label>Folio</label><input type="text" id="incapFolio" name="folio" placeholder="Número de folio" class="campo-editable"></div>
+                <div class="form-group"><label>Inicio Incapacidad</label><input type="date" id="incapInicio" name="inicioIncapacidad" onchange="calcularDiasIncapacidad()" class="campo-editable"></div>
+                <div class="form-group"><label>Fin Incapacidad</label><input type="date" id="incapFin" name="finIncapacidad" onchange="calcularDiasIncapacidad()" class="campo-editable"></div>
+                <div class="form-group"><label>Total Días <small style="color:#4d6b00;">(auto)</small></label><input type="number" id="incapTotalDias" name="totalDias" placeholder="Automático" readonly style="background:#fff1f2;font-weight:600;color:#991b1b;"></div>
+                <div class="form-group"><label>Tipo de Incapacidad</label><select id="incapTipo" name="tipoIncapacidad"><option value="">Seleccionar...</option><option value="ENFERMEDAD_GENERAL">Enfermedad General</option><option value="RIESGO_TRABAJO">Riesgo de Trabajo</option><option value="MATERNIDAD">Maternidad</option></select></div>
+            </div>
+            <div class="form-group" style="margin-top:1rem;"><label>Comentarios / Observaciones</label><textarea id="incapComentarios" name="comentarios" placeholder="Agrega comentarios adicionales..."></textarea></div>
+            <div class="form-group" style="margin-top:1rem;"><label>🔗 Link de Incapacidad</label><input type="url" id="incapLinkDoc" name="linkIncapacidad" placeholder="https://..." class="campo-editable"></div>
+            <div class="button-container"><button type="button" class="btn-red" onclick="guardarModulo('incapacidades')">💾 Guardar y Generar Ficha</button></div>
+        </section></form>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="fichaModal">
+    <div class="modal-content">
+        <button class="close-modal" onclick="cerrarFicha()">×</button>
+        <div class="ficha" id="fichaContent"></div>
+        <div style="padding:1rem 2rem 2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+            <button class="btn-primary" onclick="imprimirFicha()">Imprimir</button>
+            <button class="btn-secondary" onclick="cerrarFicha()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<div class="loading" id="loading"><div class="spinner"></div></div>
+
+<script>
+// ============================================================
+// CONFIGURACIÓN
+// ============================================================
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby59fu8MNYkfEEOMl1njJl7cquT00NtkW49pcMwYAiODSePizh0839D7eWSul0SaY9n/exec';
+const LOGO_BET = `<span style="font-size:1.4rem;font-weight:900;letter-spacing:-1px;color:#1a1a1a;">B<span style="color:#8bc34a;">ET</span></span>`;
+
+// ============================================================
+// ESTADO GLOBAL
+// ============================================================
+let datosFormulario = {};
+let moduloActual = '';
+let datosEmpleadosLocal = JSON.parse(localStorage.getItem('empleadosBETA') || '{}');
+let fotoBase64 = '';
+let cacheCatalogos = {};
+const tipoBusqueda = { vac: 'curp', baja: 'curp', incap: 'curp' };
+const USUARIOS_NSS_OBLIGATORIO = ['BMEXS', 'BMEXM'];
+
+// ============================================================
+// FOTO
+// ============================================================
+function cargarFoto(event) {
+    const file = event.target.files[0]; if(!file) return;
+    if(file.size>2*1024*1024){alert('⚠️ Máximo 2MB');return;}
+    if(!file.type.startsWith('image/')){alert('⚠️ Imagen inválida');return;}
+    const reader = new FileReader();
+    reader.onload = e => { fotoBase64=e.target.result; document.getElementById('previewFoto').innerHTML=`<img src="${fotoBase64}" style="width:100%;height:100%;object-fit:cover;">`; };
+    reader.readAsDataURL(file);
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function cambiarTab(i) {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    document.querySelectorAll('.tab')[i].classList.add('active');
+    document.getElementById(`tab-${i}`).classList.add('active');
+}
+
+// ============================================================
+// ✅ NUEVA FUNCIÓN: LIMPIAR FORMULARIO
+// Borra todos los campos del módulo indicado para cargar nuevo registro
+// ============================================================
+function limpiarFormulario(modulo) {
+    if (modulo === 'headcount') {
+        // Resetear foto
+        fotoBase64 = '';
+        document.getElementById('previewFoto').innerHTML = '<span style="color:#9ca3af;font-size:3rem;">👤</span>';
+        document.getElementById('fotoEmpleado').value = '';
+
+        // Limpiar todos los inputs y textareas del form (excepto selects de catálogo)
+        const form = document.getElementById('formHeadcount');
+        form.querySelectorAll('input').forEach(el => {
+            if (el.type === 'file') return;
+            el.value = '';
+        });
+        form.querySelectorAll('textarea').forEach(el => { el.value = ''; });
+
+        // Resetear selects a primera opción (sin borrar las opciones cargadas del catálogo)
+        form.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
+        resetTabulador();
+
+        // Limpiar campos de bancos
+        document.getElementById('bancoNominaSearch').value = '';
+        document.getElementById('claveBanco').value = '';
+        document.getElementById('bancoRentaSearch').value = '';
+        document.getElementById('claveBanco2').value = '';
+
+        // Resetear estado tienda
+        const st = document.getElementById('idTiendaStatus');
+        if (st) { st.textContent = ''; st.className = 'id-tienda-status'; }
+
+        // Resetear NSS a estado opcional
+        const nssEl = document.getElementById('nss');
+        nssEl.required = false;
+        nssEl.classList.remove('nss-requerido');
+        nssEl.classList.add('nss-opcional');
+        document.getElementById('nssReqLabel').style.display = 'none';
+        document.getElementById('errorNss').style.display = 'none';
+
+        // Ocultar errores de teléfono
+        document.getElementById('errorTelCelular').style.display = 'none';
+        document.getElementById('errorTelRecados').style.display = 'none';
+
+        // Limpiar cache de usuario beta para permitir reuso
+        window._cUB = {};
+
+        // Scroll al inicio del formulario
+        document.getElementById('tab-0').scrollTop = 0;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } else {
+        // Para vacaciones, bajas e incapacidades: limpiar inputs y selects
+        const mapaForms = {
+            vacaciones:    'formVacaciones',
+            bajas:         'formBajas',
+            incapacidades: 'formIncapacidades',
+        };
+        const formId = mapaForms[modulo];
+        if (!formId) return;
+        const form = document.getElementById(formId);
+
+        form.querySelectorAll('input').forEach(el => { el.value = ''; });
+        form.querySelectorAll('textarea').forEach(el => { el.value = ''; });
+        form.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
+
+        // Limpiar resultado de búsqueda
+        const mapaResult = { vacaciones: 'resultVac', bajas: 'resultBaja', incapacidades: 'resultIncap' };
+        const mapaSearch = { vacaciones: 'searchTermVac', bajas: 'searchTermBaja', incapacidades: 'searchTermIncap' };
+        const rDiv = document.getElementById(mapaResult[modulo]);
+        if (rDiv) rDiv.innerHTML = '';
+        const sEl = document.getElementById(mapaSearch[modulo]);
+        if (sEl) sEl.value = '';
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    mostrarToast('🧹 Formulario limpio — listo para nuevo registro');
+}
+
+// ============================================================
+// BÚSQUEDA
+// ============================================================
+function setTipoBusqueda(prefix, tipo, btn) {
+    tipoBusqueda[prefix]=tipo;
+    btn.closest('.search-box').querySelectorAll('.search-type-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const lm={curp:'CURP del Empleado',usuario:'Usuario Beta',nombre:'Nombre o Apellido'};
+    const pm={curp:'Ingresa el CURP',usuario:'Ingresa el Usuario Beta',nombre:'Ingresa nombre o apellido'};
+    const lEl=document.getElementById(`labelBusqueda${cap(prefix)}`);
+    const iEl=document.getElementById(`searchTerm${cap(prefix)}`);
+    if(lEl)lEl.textContent=lm[tipo];
+    if(iEl){iEl.placeholder=pm[tipo];iEl.style.textTransform=tipo==='curp'?'uppercase':'none';iEl.value='';}
+    const rEl=document.getElementById(`result${cap(prefix)}`);
+    if(rEl)rEl.innerHTML='';
+}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+async function buscarEmpleado(modulo) {
+    const cfg={vacaciones:{prefix:'vac',resultId:'resultVac'},bajas:{prefix:'baja',resultId:'resultBaja'},incapacidades:{prefix:'incap',resultId:'resultIncap'}};
+    const{prefix,resultId}=cfg[modulo];
+    const tipo=tipoBusqueda[prefix];
+    const termino=document.getElementById(`searchTerm${cap(prefix)}`).value.trim().toUpperCase();
+    const rDiv=document.getElementById(resultId);
+    if(!termino){rDiv.innerHTML='<div class="alert alert-error">⚠️ Por favor ingresa un término</div>';return;}
+    if(tipo==='nombre'){await buscarPorNombre(prefix,termino,rDiv);return;}
+    rDiv.innerHTML='<div class="alert alert-warning">🔍 Buscando...</div>';
+    try{
+        const res=await fetch(`${SCRIPT_URL}?action=getUsuarioBeta&usuario=${encodeURIComponent(termino)}`);
+        const r=await res.json();
+        if(r.status==='success'){
+            const d=r.data; aplicarResultadoAlFormulario(prefix,d);
+            mostrarResultadoUnico(rDiv,prefix,cnc(d['APELLIDO PATERNO']||'',d['APELLIDO MATERNO']||'',d['NOMBRE(S)']||d['NOMBRES']||''),d['USUARIO BETA']||'',d['CURP']||termino,nssDeUB(d),'USUARIOS_BETA');
+        }else{rDiv.innerHTML=`<div class="alert alert-error">❌ <strong>${termino}</strong> no encontrado.</div>`;}
+    }catch(e){rDiv.innerHTML='<div class="alert alert-error">❌ Error de conexión</div>';}
+}
+
+async function buscarPorNombre(prefix,termino,rDiv){
+    const locales=Object.values(datosEmpleadosLocal).filter(e=>cnc(e.apellidoPaterno,e.apellidoMaterno,e.nombres).includes(termino));
+    rDiv.innerHTML='<div class="alert alert-warning">🔍 Buscando por nombre...</div>';
+    let sheets=[];
+    try{const res=await fetch(`${SCRIPT_URL}?action=buscarPorNombre&nombre=${encodeURIComponent(termino)}`);const r=await res.json();if(r.status==='success'&&Array.isArray(r.data))sheets=r.data;}catch(e){}
+    const mapa={};
+    locales.forEach(e=>{const k=e.curp||e.usuarioBeta||cnc(e.apellidoPaterno,e.apellidoMaterno,e.nombres);mapa[k]={nombre:cnc(e.apellidoPaterno,e.apellidoMaterno,e.nombres),usuario:e.usuarioBeta||'',curp:e.curp||'',nss:e.nss||'',raw:e,fuente:'localStorage'};});
+    sheets.forEach(d=>{const n=cnc(d['APELLIDO PATERNO']||'',d['APELLIDO MATERNO']||'',d['NOMBRE(S)']||d['NOMBRES']||'');const c=d['CURP']||'';const k=c||(d['USUARIO BETA']||n);mapa[k]={nombre:n,usuario:d['USUARIO BETA']||'',curp:c,nss:nssDeUB(d),raw:d,fuente:'USUARIOS_BETA'};});
+    const lista=Object.values(mapa);
+    if(!lista.length){rDiv.innerHTML=`<div class="alert alert-error">❌ Sin resultados para "<strong>${termino}</strong>"</div>`;return;}
+    if(lista.length===1){aplicarResultadoAlFormulario(prefix,lista[0].raw);mostrarResultadoUnico(rDiv,prefix,lista[0].nombre,lista[0].usuario,lista[0].curp,lista[0].nss,lista[0].fuente);return;}
+    let html=`<div style="margin-top:.75rem;"><p style="font-size:.875rem;color:#4a5568;margin-bottom:.5rem;">Se encontraron <strong>${lista.length}</strong> coincidencias:</p><div class="search-results-list">`;
+    lista.forEach((e,i)=>html+=`<div class="search-results-list-item" onclick="seleccionarEmpleadoDeLista('${prefix}',${i})"><span class="sri-name">${e.nombre||'Sin nombre'}</span><span class="sri-details">Usuario: ${e.usuario||'N/A'} | CURP: ${e.curp||'N/A'} | NSS: ${e.nss||'N/A'}</span></div>`);
+    html+='</div></div>'; rDiv.innerHTML=html; window._listaRes=lista;
+}
+function seleccionarEmpleadoDeLista(prefix,idx){const e=(window._listaRes||[])[idx];if(!e)return;aplicarResultadoAlFormulario(prefix,e.raw);mostrarResultadoUnico(document.getElementById(`result${cap(prefix)}`),prefix,e.nombre,e.usuario,e.curp,e.nss,e.fuente);}
+function aplicarResultadoAlFormulario(prefix,d){
+    const n=cnc(d['APELLIDO PATERNO']||d.apellidoPaterno||'',d['APELLIDO MATERNO']||d.apellidoMaterno||'',d['NOMBRE(S)']||d['NOMBRES']||d.nombres||'');
+    sv(`${prefix}Nombres`,n);sv(`${prefix}usuarioBeta`,d['USUARIO BETA']||d.usuarioBeta||'');sv(`${prefix}Curp`,d['CURP']||d.curp||'');sv(`${prefix}Nss`,nssDeUB(d));
+}
+function mostrarResultadoUnico(rDiv,prefix,nombre,usuario,curp,nss,fuente){
+    rDiv.innerHTML=`<div class="alert alert-success"><strong>✅ Empleado encontrado</strong> <small style="opacity:.7">(${fuente})</small><br><strong>Nombre:</strong> ${nombre||'—'}<br><strong>Usuario Beta:</strong> ${usuario||'—'}<br><strong>CURP:</strong> ${curp||'—'}${nss?`<br><strong>NSS:</strong> ${nss}`:''}</div>`;
+    sv(`${prefix}Nombres`,nombre);sv(`${prefix}usuarioBeta`,usuario);sv(`${prefix}Curp`,curp);sv(`${prefix}Nss`,nss);
+}
+function cnc(a,b,c){return[a,b,c].filter(Boolean).join(' ').trim().toUpperCase();}
+function sv(id,val){const el=document.getElementById(id);if(el&&val)el.value=val;}
+
+// ============================================================
+// NSS CONDICIONAL
+// ============================================================
+// Toma el NSS de la fila de USUARIOS_BETA (columna "NSS"). Tolera encabezados con espacios/mayúsculas
+// y variantes ("NÚMERO DE SEGURO SOCIAL"); también acepta registros locales (d.nss).
+function nssDeUB(d){
+    if(!d)return '';
+    const alias=['NSS','NUMERODESEGUROSOCIAL','NOSEGUROSOCIAL','NUMSEGUROSOCIAL','SEGUROSOCIAL'];
+    const limpio=k=>k.toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+    let v='';
+    for(const k of Object.keys(d)){
+        if(alias.includes(limpio(k))&&d[k]!==undefined&&d[k]!==null&&d[k].toString().trim()!==''){v=d[k];break;}
+    }
+    if(v==='')v=d.nss||'';
+    v=v.toString().trim();
+    const dig=v.replace(/[\s-]/g,'');
+    // El NSS tiene 11 dígitos; si Sheets lo convirtió a número y perdió el cero inicial, se restituye
+    if(/^\d{10}$/.test(dig))return '0'+dig;
+    if(/^\d{11}$/.test(dig))return dig;
+    return v;
+}
+// Si USUARIOS_BETA no entrega el NSS, avisa por qué (columna ausente o vacía) para poder corregirlo
+function diagnosticarNssUB(d){
+    if(nssDeUB(d))return;
+    const cols=Object.keys(d).filter(k=>/NSS|SEGUROSOCIAL/.test(ubClave(k)));
+    if(cols.length)mostrarToast('⚠️ La columna "'+cols[0].trim()+'" de USUARIOS_BETA viene vacía para este usuario. Captura el NSS a mano.',true);
+    else mostrarToast('⚠️ El script no devolvió ninguna columna NSS (recibió '+Object.keys(d).length+' columnas). Revisa el encabezado en USUARIOS_BETA y vuelve a desplegar el script.',true);
+}
+function actualizarNssObligatorio(usuarioBeta) {
+    const ub = (usuarioBeta||'').toUpperCase().trim();
+    const esObligatorio = USUARIOS_NSS_OBLIGATORIO.some(u => ub.startsWith(u));
+    const nssEl = document.getElementById('nss');
+    const label = document.getElementById('nssReqLabel');
+    const error = document.getElementById('errorNss');
+    if (esObligatorio) {
+        nssEl.required = true; nssEl.classList.remove('nss-opcional'); nssEl.classList.add('nss-requerido');
+        if(label) label.style.display='inline';
+    } else {
+        nssEl.required = false; nssEl.classList.remove('nss-requerido'); nssEl.classList.add('nss-opcional');
+        if(label) label.style.display='none';
+        if(error) error.style.display='none';
+    }
+}
+
+// ============================================================
+// TIENDA
+// ============================================================
+async function buscarTienda() {
+    const id=document.getElementById('idTienda').value.trim(); if(!id)return;
+    const st=document.getElementById('idTiendaStatus'); st.textContent='🔍 Buscando...';st.className='id-tienda-status';
+    try{const res=await fetch(`${SCRIPT_URL}?action=getTienda&formatoSucursal=${encodeURIComponent(id)}`);const r=await res.json();if(r.status==='success'){aplicarDatosTienda(r.data);mostrarToast('✅ Tienda cargada');}else{st.textContent='❌ No encontrada';st.className='id-tienda-status id-tienda-error';}}
+    catch(e){st.textContent='❌ Error de conexión';st.className='id-tienda-status id-tienda-error';}
+}
+function aplicarDatosTienda(d){
+    const m={'ID TIENDA':'idTienda','CLIENTE':'cliente','FORMATO':'formato','PROYECTO':'proyecto','SUCURSAL':'sucursal','DETERMINANTE':'determinante','ENTIDAD FEDERATIVA':'entidadFederativa','MUNICIPIO':'municipio'};
+    Object.keys(m).forEach(c=>{if(d[c]&&d[c].toString().trim()){const el=document.getElementById(m[c]);if(el)el.value=d[c];}});
+    const s=document.getElementById('idTiendaStatus');if(s){s.textContent='✅ Tienda encontrada';s.className='id-tienda-status id-tienda-ok';}
+}
+
+// ============================================================
+// DÍAS
+// ============================================================
+function calcularDias(a,b,c){const i=document.getElementById(a).value,f=document.getElementById(b).value,t=document.getElementById(c);if(i&&f){const d=Math.ceil((new Date(f)-new Date(i))/86400000)+1;t.value=d>0?d:0;}}
+function calcularDiasVacaciones(){calcularDias('vacFechaInicio','vacFechaTermino','vacDiasDisfrutados');}
+function calcularDiasIncapacidad(){calcularDias('incapInicio','incapFin','incapTotalDias');}
+
+// ============================================================
+// GUARDAR — ✅ Llama limpiarFormulario() al final
+// ============================================================
+function guardarModulo(modulo) {
+    moduloActual = modulo;
+    const form = document.getElementById(`form${cap(modulo)}`);
+    const fd = new FormData(form);
+    datosFormulario = { modulo };
+    fd.forEach((v,k) => { if(k !== 'fotoEmpleado') datosFormulario[k] = v; });
+    if(modulo === 'headcount' && fotoBase64) datosFormulario.foto = fotoBase64;
+    if(modulo === 'headcount'){
+        datosFormulario.idTienda = document.getElementById('idTienda').value;
+        datosFormulario.bancoNomina = document.getElementById('bancoNominaSearch').value;
+        datosFormulario.bancoRenta = document.getElementById('bancoRentaSearch').value;
+        datosFormulario.esquemaContratacion = document.getElementById('esquemaContratacion').value;
+        datosFormulario.prenominista = document.getElementById('prenominista').value;
+    }
+
+    // Validaciones
+    if(modulo === 'headcount' && (!datosFormulario.nombres || !datosFormulario.curp)){
+        mostrarToast('⚠️ Por favor completa al menos Nombre y CURP', true); return;
+    }
+    if(modulo === 'headcount'){
+        const ub = (document.getElementById('usuarioBeta').value || '').toUpperCase().trim();
+        const nssVal = (document.getElementById('nss').value || '').trim();
+        const esObl = USUARIOS_NSS_OBLIGATORIO.some(u => ub.startsWith(u));
+        if(esObl && !nssVal){
+            mostrarToast('⚠️ El NSS es obligatorio para usuarios BMEXS / BMEXM', true);
+            document.getElementById('nss').focus();
+            document.getElementById('errorNss').style.display = 'block';
+            return;
+        }
+        document.getElementById('errorNss').style.display = 'none';
+    }
+    if(modulo === 'headcount'){
+        const folioEl = document.getElementById('folioVacante');
+        folioEl.value = folioEl.value.trim();
+        datosFormulario.folioVacante = folioEl.value;
+        if(!folioEl.value){
+            folioEl.style.borderColor = '#ef4444';
+            mostrarToast('⚠️ El Folio Vacante es obligatorio', true);
+            folioEl.focus();
+            return;
+        }
+        const selTab = document.getElementById('tabulador');
+        if(!selTab.value){
+            const selTabBuscar = document.getElementById('tabuladorBuscar');
+            selTabBuscar.style.borderColor = '#ef4444';
+            mostrarToast('⚠️ Selecciona el Tabulador (llena Pago Diario, Renta, Complemento y Bono)', true);
+            selTabBuscar.focus();
+            return;
+        }
+        selTab.style.borderColor = '';
+        const camposPago = [['pagoDiario','Pago Diario'],['rentaPago','Renta'],['complemento','Complemento'],['bono','Bono']];
+        for(const [id,nombre] of camposPago){
+            const el = document.getElementById(id);
+            const v = (el.value || '').toString().trim();
+            if(v === '' || isNaN(parseFloat(v)) || parseFloat(v) < 0){
+                el.style.borderColor = '#ef4444';
+                mostrarToast('⚠️ ' + nombre + ' es obligatorio (si no aplica, captura 0)', true);
+                el.focus();
+                return;
+            }
+            el.style.borderColor = '';
+        }
+    }
+    if(modulo === 'headcount'){
+        const tc = document.getElementById('telefonoCelular').value.trim();
+        const tr = document.getElementById('telefonoRecados').value.trim();
+        if(!tr){ mostrarToast('⚠️ El Teléfono de Recados es obligatorio', true); return; }
+        if(tr.length !== 10){ mostrarToast('⚠️ El Teléfono de Recados debe tener 10 dígitos', true); document.getElementById('telefonoRecados').focus(); return; }
+        if(tc && tc.length !== 10){ mostrarToast('⚠️ El Teléfono Celular debe tener 10 dígitos', true); document.getElementById('telefonoCelular').focus(); return; }
+        if(tc && tr && tc === tr){ mostrarToast('⚠️ Los teléfonos no pueden ser iguales', true); return; }
+    }
+
+    // Guardar en local
+    if(datosFormulario.curp){
+        datosEmpleadosLocal[datosFormulario.curp] = {...datosEmpleadosLocal[datosFormulario.curp], ...datosFormulario};
+        localStorage.setItem('empleadosBETA', JSON.stringify(datosEmpleadosLocal));
+    }
+
+    // Generar ficha y mostrar modal
+    const gen = { headcount: generarFichaHeadcount, vacaciones: generarFichaVacaciones, bajas: generarFichaBajas, incapacidades: generarFichaIncapacidades };
+    gen[modulo]();
+    document.getElementById('fichaModal').classList.add('show');
+    mostrarToast('✅ Ficha generada');
+
+    // Enviar a Sheets
+    enviarASheets();
+}
+
+// ============================================================
+// VALIDACIÓN TELÉFONOS
+// ============================================================
+// Fuerza solo dígitos en campos de teléfono
+function soloNumerosTel(el){
+    el.value = el.value.replace(/\D/g,'').slice(0,10);
+}
+
+function validarTelefonosDiferentes(){
+    const tc=document.getElementById('telefonoCelular'),tr=document.getElementById('telefonoRecados');
+    const ec=document.getElementById('errorTelCelular'),er=document.getElementById('errorTelRecados');
+    const ecLen=document.getElementById('errorTelCelularLen'),erLen=document.getElementById('errorTelRecadosLen');
+    const ig=tc.value.trim()!==''&&tr.value.trim()!==''&&tc.value.trim()===tr.value.trim();
+    tc.style.borderColor=ig?'#ef4444':(tc.value.length>0&&tc.value.length<10?'#f59e0b':'');
+    tr.style.borderColor=ig?'#ef4444':(tr.value.length>0&&tr.value.length<10?'#f59e0b':'');
+    ec.style.display=ig?'block':'none';er.style.display=ig?'block':'none';
+    if(ecLen)ecLen.style.display=(tc.value.length>0&&tc.value.length<10&&!ig)?'block':'none';
+    if(erLen)erLen.style.display=(tr.value.length>0&&tr.value.length<10&&!ig)?'block':'none';
+}
+
+// ============================================================
+// CATÁLOGOS
+// ============================================================
+async function cargarListasDesplegables() {
+    for(const campo of['AP','RECLUTADOR','FUENTE_RECLUTAMIENTO','ESTATUS','JEFE INMEDIATO','SEXO','ESTATUS_CONTRATO','PERIODICIDAD_PAGO','GASOLINA_TOKA','ESCOLARIDAD']){
+        await cargarCampo(campo);
+    }
+    await cargarPrenominista();
+    cargarCatalogoTabuladores();
+}
+
+async function cargarCampo(campo) {
+    const mi={'AP':'ap','RECLUTADOR':'reclutador','FUENTE_RECLUTAMIENTO':'fuenteReclutamiento','ESTATUS':'estatus','JEFE INMEDIATO':'jefeInmediato','SEXO':'sexo','ESTATUS_CONTRATO':'estatusContrato','PERIODICIDAD_PAGO':'periodicidadPago','GASOLINA_TOKA':'gasolinaPorToka','ESCOLARIDAD':'escolaridad'};
+    const eid=mi[campo]; const badge=document.getElementById(`badge-${campo}`);
+    if(cacheCatalogos[campo]){llenarSelect(eid,cacheCatalogos[campo]);if(campo==='AP')sincAP(cacheCatalogos[campo]);if(badge){badge.textContent=cacheCatalogos[campo].length+' opciones';badge.className='catalog-badge catalog-ok';}return;}
+    try{
+        const res=await fetch(`${SCRIPT_URL}?action=getDatos&campo=${encodeURIComponent(campo)}`);
+        const r=await res.json();
+        if(r.status==='success'&&r.data.length>0){cacheCatalogos[campo]=r.data;llenarSelect(eid,r.data);if(campo==='AP')sincAP(r.data);if(badge){badge.textContent=r.data.length+' opciones';badge.className='catalog-badge catalog-ok';}}
+        else{if(badge){badge.textContent='sin datos';badge.className='catalog-badge catalog-fail';}if(campo==='AP')bAP('sin datos','catalog-fail');}
+    }catch{if(badge){badge.textContent='error';badge.className='catalog-badge catalog-fail';}if(campo==='AP')bAP('error','catalog-fail');}
+}
+
+async function cargarPrenominista() {
+    const badge = document.getElementById('badge-PRENOMINISTA');
+    try {
+        const res = await fetch(`${SCRIPT_URL}?action=getDatos&campo=PRENOMINISTA`);
+        const r   = await res.json();
+        if (r.status==='success' && r.data.length>0) {
+            llenarSelect('prenominista', r.data);
+            if(badge){badge.textContent=r.data.length+' opciones';badge.className='catalog-badge catalog-ok';}
+        } else {
+            if(badge){badge.textContent='sin datos';badge.className='catalog-badge catalog-fail';}
+        }
+    } catch {
+        if(badge){badge.textContent='error';badge.className='catalog-badge catalog-fail';}
+    }
+}
+
+function sincAP(data){['vacAp','bajaAp','incapAp'].forEach(id=>llenarSelect(id,data));bAP(data.length+' opciones','catalog-ok');}
+function bAP(t,c){['badge-AP-vac','badge-AP-baja','badge-AP-incap'].forEach(id=>{const b=document.getElementById(id);if(b){b.textContent=t;b.className='catalog-badge '+c;}});}
+function llenarSelect(id,opciones){
+    const sel=document.getElementById(id);if(!sel)return;
+    const pend=window._pSV&&window._pSV[id];
+    const val=pend!==undefined?pend:sel.value;
+    sel.innerHTML='<option value="">Seleccionar...</option>';
+    opciones.forEach(op=>{const o=document.createElement('option');o.value=op;o.textContent=op;if(op===val)o.selected=true;sel.appendChild(o);});
+    if(pend!==undefined)delete window._pSV[id];
+    if(id==='periodicidadPago'&&pend!==undefined&&typeof poblarTabuladores==='function')setTimeout(()=>poblarTabuladores(''),0);
+}
+
+// ============================================================
+// AUTO-LLENADO USUARIO BETA
+// ============================================================
+async function autoLlenarUsuarioBeta() {
+    const ub=document.getElementById('usuarioBeta').value.trim(); if(!ub)return;
+    actualizarNssObligatorio(ub);
+    // Si cambió el Usuario Beta, se limpia el NSS del anterior (el nuevo se trae de la hoja)
+    if(window._ubNssPrev!==ub){const nEl=document.getElementById('nss');if(nEl)nEl.value='';['bancoNominaSearch','claveBanco','noCuentaNomina','bancoRentaSearch','claveBanco2','noCuentaBancariaRenta'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window._ubNssPrev=ub;if(typeof resetTabulador==='function'){resetTabulador();limpiarCamposTabulador();}}
+    if(!window._cUB)window._cUB={};
+    let d;
+    if(window._cUB[ub]){d=window._cUB[ub];aplicarDatosUB(d);}
+    else{
+        try{
+            const res=await fetch(`${SCRIPT_URL}?action=getUsuarioBeta&usuario=${encodeURIComponent(ub)}`);
+            const r=await res.json();
+            if(r.status==='success'){window._cUB[ub]=r.data;d=r.data;aplicarDatosUB(d);mostrarToast('✅ Usuario cargado ('+Object.keys(d).length+' campos)');}
+            else{mostrarToast('⚠️ Usuario Beta no encontrado',true);return;}
+        }catch(e){mostrarToast('❌ Error de conexión',true);return;}
+    }
+    diagnosticarNssUB(d);
+    const fs=d['FORMATO SUCURSAL']||d['FORMATO_SUCURSAL']||'';
+    if(fs.toString().trim())await buscarTiendaPorFormato(fs.toString().trim());
+    const pl=d['PLACA']||d['Placa']||'';
+    if(pl.toString().trim())await buscarUnidadPorPlaca(pl.toString().trim());
+    const it=(d['ID TABULADOR']||d['ID_TABULADOR']||d['TABULADOR']||'').toString().trim();
+    const okCat=await poblarTabuladores(it,true);
+    if(!okCat&&it)await buscarTabulador(it);
+}
+
+async function buscarTiendaPorFormato(fs){try{const res=await fetch(`${SCRIPT_URL}?action=getTienda&formatoSucursal=${encodeURIComponent(fs)}`);const r=await res.json();if(r.status==='success'&&r.data){aplicarDatosTienda(r.data);mostrarToast('🏪 Tienda: '+fs);}}catch(e){}}
+async function buscarUnidadPorPlaca(pl){try{const res=await fetch(`${SCRIPT_URL}?action=getUnidad&placa=${encodeURIComponent(pl)}`);const r=await res.json();if(r.status==='success'&&r.data){aplicarDatosUnidad(r.data);mostrarToast('🚗 Unidad: '+pl);}}catch(e){}}
+
+function aplicarDatosUnidad(d){
+    const m={'PLACA':'placa','MARCA':'marca','SUBMARCA':'submarca','AÑO VEHÍCULO':'anoVehiculoUnidad','AÑO VEHICULO':'anoVehiculoUnidad','TIPO':'tipo','COLOR':'color','ESQUEMA UNIDADES':'esquemaUnidades','PROPIETARIO':'propietario','FACTURADO POR':'facturadoPor','ASEGURADORA':'aseguradora','NO. DE PÓLIZA':'noPoliza','VIGENCIA PÓLIZA':'vigenciaPoliza','FECHA VERIFICACIÓN':'fechaVerificacion','MOTOR':'motor','CILINDROS':'cilindros','NÚMERO FACTURA':'numeroFactura','FECHA FACTURA':'fecha','EXPEDIDA POR':'expedidaPor','# TARJETA CIRCULACIÓN':'tarjetaCirculacion'};
+    const cf=new Set(['vigenciaPoliza','fechaVerificacion','fecha']);
+    function pf(v){if(!v)return'';const s=v.toString().trim();if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m){const[,d,mo,y]=m;return y+'-'+mo.padStart(2,'0')+'-'+d.padStart(2,'0');}const f=new Date(s);if(!isNaN(f))return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');return s;}
+    Object.keys(d).forEach(c=>{const id=m[c];if(!id)return;const v=d[c];if(v===undefined||v===null||v.toString().trim()==='')return;const el=document.getElementById(id);if(!el)return;el.value=cf.has(id)?pf(v):v;});
+}
+
+// ============================================================
+// TABULADOR
+// ============================================================
+async function buscarTabulador(id){
+    if(!id)return;
+    try{
+        const res=await fetch(`${SCRIPT_URL}?action=getTabulador&idTabulador=${encodeURIComponent(id)}`);
+        const r=await res.json();
+        if(r.status==='success'&&r.data){aplicarDatosTabulador(r.data);mostrarToast('Tabulador: '+(r.data['TABULADOR']||id));}
+        else mostrarToast('⚠️ Tabulador no encontrado: '+id,true);
+    }catch(e){}
+}
+
+// ============================================================
+// TABULADORES (hoja "TABULADORES" del Sheets) — lista desplegable según puesto
+// ============================================================
+let _tabCat=null, _tabFiltrados=[];
+function normTxt(t){return (t===undefined||t===null?'':t).toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\*/g,'').replace(/\s+/g,' ').trim().toUpperCase();}
+function tabCampo(row,aliases){
+    if(!row)return '';
+    const keys=Object.keys(row);
+    for(const a of aliases.map(normTxt)){
+        for(const k of keys){
+            if(normTxt(k)===a){const v=row[k];if(v!==undefined&&v!==null&&v.toString().trim()!=='')return v;}
+        }
+    }
+    return '';
+}
+function numTab(v){if(v===undefined||v===null||v==='')return '';const n=parseFloat(v.toString().replace(/[$,\s]/g,''));return isNaN(n)?'':n;}
+const TAB_ALIAS={
+    nombre:['TABULADOR','NOMBRE TABULADOR'],
+    id:['ID TABULADOR','ID_TABULADOR','ID'],
+    puesto:['PUESTO','PUESTOS'],
+    periodicidad:['PERIODICIDAD','PERIODICIDAD DE PAGO','PERIODICIDAD PAGO','PERIODICIDAD_PAGO','PERIOCIDAD','PERIOCIDAD DE PAGO'],
+    esquema:['ESQUEMA DE CONTRATACION','ESQUEMA'],
+    pagoDiario:['PAGO DIARIO'],
+    renta:['RENTA'],
+    complemento:['COMPLEMENTO'],
+    bono:['BONO'],
+    total:['SUELDO MENSUAL BRUTO','SUELDO MENSUAL TOTAL'],
+    gasolina:['GASOLINA POR TOKA']
+};
+async function cargarCatalogoTabuladores(){
+    if(_tabCat)return _tabCat;
+    const badge=document.getElementById('badge-TABULADORES');
+    try{
+        const res=await fetch(`${SCRIPT_URL}?action=getTabuladores`);
+        const r=await res.json();
+        if(r.status==='success'&&Array.isArray(r.data)&&r.data.length>0){
+            _tabCat=r.data;
+            if(badge){badge.textContent=r.data.length+' tabuladores';badge.className='catalog-badge catalog-ok';}
+            return _tabCat;
+        }
+        if(badge){badge.textContent='sin datos';badge.className='catalog-badge catalog-fail';}
+    }catch(e){
+        if(badge){badge.textContent='error';badge.className='catalog-badge catalog-fail';}
+    }
+    return null;
+}
+function resetTabulador(){
+    _tabFiltrados=[];
+    const s=document.getElementById('tabulador');
+    _tabManual='';
+    if(s){s.innerHTML='<option value="">Selecciona el Usuario Beta primero...</option>';s.style.borderColor='';}
+    const b=document.getElementById('tabuladorBuscar');if(b)b.style.borderColor='';
+    syncTabCombo();
+}
+function periodicidadActual(){
+    const el=document.getElementById('periodicidadPago');
+    let v=el?el.value:'';
+    if(!v&&window._pSV&&window._pSV['periodicidadPago'])v=window._pSV['periodicidadPago'];
+    return normTxt(v);
+}
+// Filtra por una columna (exacto; si no hay, "contiene"). Si la hoja no trae esa columna, no filtra.
+function filtrarTab(lista,alias,val){
+    if(!val)return lista;
+    if(!lista.some(r=>tabCampo(r,alias)!==''))return lista;
+    let f=lista.filter(r=>normTxt(tabCampo(r,alias))===val);
+    if(!f.length)f=lista.filter(r=>{const x=normTxt(tabCampo(r,alias));return x&&(x.includes(val)||val.includes(x));});
+    return f;
+}
+async function poblarTabuladores(preRef,forzar){
+    const sel=document.getElementById('tabulador');if(!sel)return false;
+    const puestoTxt=(document.getElementById('puesto').value||'').trim();
+    // Sin puesto (y sin llamada forzada desde el Usuario Beta) no se arma la lista
+    if(!puestoTxt&&!preRef&&!forzar)return false;
+    const cat=await cargarCatalogoTabuladores();if(!cat)return false;
+    const actual=sel.value;
+    const puesto=normTxt(puestoTxt);
+    const per=periodicidadActual();
+    let aviso='';
+    // 1) Filtro por PUESTO
+    let lista=filtrarTab(cat,TAB_ALIAS.puesto,puesto);
+    if(puesto&&!lista.length){lista=cat.slice();aviso='puesto';}
+    // 2) Filtro por PERIODICIDAD DE PAGO (afina el resultado)
+    if(per){
+        const conPer=filtrarTab(lista,TAB_ALIAS.periodicidad,per);
+        if(conPer.length)lista=conPer;
+        else if(lista.some(r=>tabCampo(r,TAB_ALIAS.periodicidad)!==''))aviso=aviso||'periodicidad';
+    }
+    // 3) Preselección si el registro del Usuario Beta ya trae su tabulador (ID o nombre)
+    let pre=null;
+    if(preRef)_tabManual='';
+    if(preRef){
+        const pr=normTxt(preRef);
+        pre=cat.find(r=>normTxt(tabCampo(r,TAB_ALIAS.id))===pr||normTxt(tabCampo(r,TAB_ALIAS.nombre))===pr)||null;
+        if(pre&&!lista.includes(pre))lista.push(pre);
+    }
+    _tabFiltrados=lista;
+    sel.innerHTML='<option value="">Seleccionar...</option>';
+    const vistos=new Set();
+    lista.forEach(r=>{
+        const nom=(tabCampo(r,TAB_ALIAS.nombre)||'').toString().trim();
+        if(!nom||vistos.has(nom))return;vistos.add(nom);
+        const t=numTab(tabCampo(r,TAB_ALIAS.total));
+        const o=document.createElement('option');o.value=nom;
+        o.textContent=nom+(t!==''?' — $'+t.toLocaleString('es-MX',{minimumFractionDigits:2}):'');
+        sel.appendChild(o);
+    });
+    if(pre){sel.value=(tabCampo(pre,TAB_ALIAS.nombre)||'').toString().trim();}
+    else if(actual&&!preRef&&_tabManual===actual&&tabRowPorNombre(actual)){asegurarOpcionTab(actual);sel.value=actual;}
+    else if(actual&&vistos.has(actual)){sel.value=actual;}
+    else if(!aviso&&vistos.size===1&&(puesto||per)){sel.selectedIndex=1;}
+    // Si el tabulador que estaba elegido ya no aplica con el nuevo filtro, se limpian sus valores
+    if(actual&&!sel.value)limpiarCamposTabulador();
+    if(aviso==='puesto')mostrarToast('⚠️ No hay tabuladores para el puesto "'+puestoTxt+'". Se muestran todos.',true);
+    if(aviso==='periodicidad')mostrarToast('⚠️ No hay tabuladores de periodicidad "'+(document.getElementById('periodicidadPago').value||per)+'" para este puesto. Se muestran los del puesto.',true);
+    if(sel.value)seleccionarTabulador();
+    syncTabCombo();
+    return true;
+}
+function limpiarCamposTabulador(){
+    ['esquemaContratacion','pagoDiario','rentaPago','complemento','bono','sueldoMensualTotal'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+function seleccionarTabulador(){
+    const sel=document.getElementById('tabulador');const nom=sel.value;
+    const row=tabRowPorNombre(nom);
+    if(!nom||!row){limpiarCamposTabulador();syncTabCombo();return;}
+    sel.style.borderColor='';
+    const b=document.getElementById('tabuladorBuscar');if(b)b.style.borderColor='';
+    aplicarFilaTabulador(row);
+    syncTabCombo();
+}
+
+// ------------------------------------------------------------
+// COMBO BUSCABLE DE TABULADOR
+// Busca en TODO el catálogo. Los que aplican al puesto/periodicidad salen primero
+// como "Sugeridos"; el resto aparece en "Otros tabuladores" para poder elegirlos.
+// El <select id="tabulador"> (oculto) sigue siendo la fuente del valor.
+// ------------------------------------------------------------
+let _tabManual='', _tabIdx=-1, _tabVisibles=[];
+const _tabHay=new WeakMap();
+const TAB_MAX_SUG=150, TAB_MAX_OTROS=60;
+function escTab(t){return (t===undefined||t===null?'':t).toString().replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function tabNombre(r){return (tabCampo(r,TAB_ALIAS.nombre)||'').toString().trim();}
+function tabRowPorNombre(nom){
+    if(!nom)return null;
+    return _tabFiltrados.find(r=>tabNombre(r)===nom)||(_tabCat||[]).find(r=>tabNombre(r)===nom)||null;
+}
+function tabTotalTxt(r){
+    const t=numTab(tabCampo(r,TAB_ALIAS.total));
+    return t!==''?'$'+t.toLocaleString('es-MX',{minimumFractionDigits:2}):'';
+}
+function tabHaystack(r){
+    let h=_tabHay.get(r);
+    if(h===undefined){
+        h=normTxt([tabNombre(r),tabCampo(r,TAB_ALIAS.puesto),tabCampo(r,TAB_ALIAS.periodicidad),tabCampo(r,TAB_ALIAS.esquema),tabCampo(r,TAB_ALIAS.id)].join(' '));
+        _tabHay.set(r,h);
+    }
+    return h;
+}
+function asegurarOpcionTab(nom){
+    const sel=document.getElementById('tabulador');
+    if(!sel||!nom)return;
+    if([...sel.options].some(o=>o.value===nom))return;
+    const t=tabTotalTxt(tabRowPorNombre(nom));
+    sel.add(new Option(nom+(t?' — '+t:''),nom));
+}
+function syncTabCombo(){
+    const sel=document.getElementById('tabulador'),inp=document.getElementById('tabuladorBuscar');
+    if(!sel||!inp)return;
+    inp.value=sel.value||'';
+    inp.title=sel.value||'';
+}
+function tabListaAbierta(){const l=document.getElementById('tabLista');return !!l&&l.style.display!=='none';}
+function abrirTabLista(filtro){
+    const l=document.getElementById('tabLista'),inp=document.getElementById('tabuladorBuscar');
+    if(!l)return;
+    renderTabLista(filtro||'');
+    l.style.display='block';
+    inp.setAttribute('aria-expanded','true');
+}
+function cerrarTabLista(){
+    const l=document.getElementById('tabLista'),inp=document.getElementById('tabuladorBuscar');
+    if(l)l.style.display='none';
+    if(inp)inp.setAttribute('aria-expanded','false');
+    _tabIdx=-1;
+}
+function renderTabLista(texto){
+    const l=document.getElementById('tabLista');if(!l)return;
+    if(!_tabCat){
+        l.innerHTML='<div class="tab-combo-vacio">Cargando catálogo de tabuladores...</div>';
+        _tabVisibles=[];return;
+    }
+    const words=normTxt(texto).split(' ').filter(Boolean);
+    const match=r=>{if(!words.length)return true;const h=tabHaystack(r);return words.every(w=>h.includes(w));};
+    const vistos=new Set(),sug=[],otros=[];
+    let totSug=0,totOtros=0;
+    _tabFiltrados.forEach(r=>{const n=tabNombre(r);if(!n||vistos.has(n))return;vistos.add(n);if(match(r)){totSug++;if(sug.length<TAB_MAX_SUG)sug.push(r);}});
+    _tabCat.forEach(r=>{const n=tabNombre(r);if(!n||vistos.has(n))return;vistos.add(n);if(match(r)){totOtros++;if(otros.length<TAB_MAX_OTROS)otros.push(r);}});
+    const actual=document.getElementById('tabulador').value;
+    _tabVisibles=[];
+    const item=r=>{
+        const n=tabNombre(r),i=_tabVisibles.length;_tabVisibles.push(n);
+        return '<div class="tab-combo-item'+(n===actual?' elegido':'')+'" role="option" data-i="'+i+'"><span>'+escTab(n)+'</span><span class="tc-total">'+escTab(tabTotalTxt(r))+'</span></div>';
+    };
+    let html='';
+    if(sug.length){
+        html+='<div class="tab-combo-grupo">Sugeridos para este puesto ('+totSug+')</div>'+sug.map(item).join('');
+    }
+    if(otros.length){
+        html+='<div class="tab-combo-grupo">'+(sug.length||_tabFiltrados.length?'Otros tabuladores':'Tabuladores')+' ('+totOtros+')</div>'+otros.map(item).join('');
+        if(totOtros>otros.length)html+='<div class="tab-combo-vacio">Mostrando '+otros.length+' de '+totOtros+'. Sigue escribiendo para afinar la búsqueda.</div>';
+    }
+    if(!sug.length&&!otros.length)html='<div class="tab-combo-vacio">Sin resultados para "'+escTab(texto)+'". Prueba con otras palabras (estado, zona, esquema...).</div>';
+    l.innerHTML=html;
+    _tabIdx=-1;
+}
+function elegirTabulador(nom){
+    const sel=document.getElementById('tabulador');
+    if(!sel||!nom)return;
+    asegurarOpcionTab(nom);
+    sel.value=nom;
+    // Si no es de los sugeridos, se recuerda como elección manual para que no se borre al refiltrar
+    _tabManual=_tabFiltrados.some(r=>tabNombre(r)===nom)?'':nom;
+    seleccionarTabulador();
+    cerrarTabLista();
+}
+function marcarTabActivo(idx){
+    const l=document.getElementById('tabLista');if(!l)return;
+    const items=l.querySelectorAll('.tab-combo-item');if(!items.length)return;
+    if(idx<0)idx=items.length-1;if(idx>=items.length)idx=0;
+    items.forEach(e=>e.classList.remove('activo'));
+    items[idx].classList.add('activo');
+    items[idx].scrollIntoView({block:'nearest'});
+    _tabIdx=idx;
+}
+(function initTabCombo(){
+    const start=()=>{
+        const inp=document.getElementById('tabuladorBuscar'),l=document.getElementById('tabLista');
+        if(!inp||!l)return;
+        inp.addEventListener('focus',()=>{inp.select();abrirTabLista('');});
+        inp.addEventListener('click',()=>{if(!tabListaAbierta())abrirTabLista('');});
+        inp.addEventListener('input',()=>{abrirTabLista(inp.value);});
+        inp.addEventListener('keydown',e=>{
+            if(e.key==='ArrowDown'){e.preventDefault();if(!tabListaAbierta())abrirTabLista(inp.value);else marcarTabActivo(_tabIdx+1);}
+            else if(e.key==='ArrowUp'){e.preventDefault();if(tabListaAbierta())marcarTabActivo(_tabIdx<=0?-1:_tabIdx-1);}
+            else if(e.key==='Enter'){
+                if(tabListaAbierta()){e.preventDefault();const n=_tabVisibles[_tabIdx>=0?_tabIdx:0];if(n)elegirTabulador(n);}
+            }
+            else if(e.key==='Escape'||e.key==='Tab'){cerrarTabLista();syncTabCombo();}
+        });
+        // mousedown (no click) para que el input no pierda el foco antes de elegir
+        l.addEventListener('mousedown',e=>{
+            const it=e.target.closest('.tab-combo-item');
+            e.preventDefault();
+            if(it)elegirTabulador(_tabVisibles[parseInt(it.dataset.i,10)]);
+        });
+        document.addEventListener('mousedown',e=>{
+            if(!e.target.closest('#tabCombo')&&tabListaAbierta()){cerrarTabLista();syncTabCombo();}
+        });
+    };
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+})();
+function aplicarFilaTabulador(d){
+    const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
+    const es=tabCampo(d,TAB_ALIAS.esquema);if(es!=='')set('esquemaContratacion',es);
+    [['pagoDiario','pagoDiario'],['rentaPago','renta'],['complemento','complemento'],['bono','bono']].forEach(([id,k])=>{
+        const n=numTab(tabCampo(d,TAB_ALIAS[k]));set(id,n===''?0:n);
+    });
+    const t=numTab(tabCampo(d,TAB_ALIAS.total));set('sueldoMensualTotal',t);
+    const ga=tabCampo(d,TAB_ALIAS.gasolina);
+    if(ga){const sel=document.getElementById('gasolinaPorToka');if(sel){let ok=false;for(let i=0;i<sel.options.length;i++){if(sel.options[i].value.toUpperCase()===ga.toString().toUpperCase()||sel.options[i].text.toUpperCase()===ga.toString().toUpperCase()){sel.selectedIndex=i;ok=true;break;}}if(!ok){if(!window._pSV)window._pSV={};window._pSV['gasolinaPorToka']=ga;}}}
+}
+// Respaldo: búsqueda directa por ID (acción getTabulador) si el catálogo completo no está disponible
+function aplicarDatosTabulador(d){
+    const nt=(tabCampo(d,TAB_ALIAS.nombre)||'').toString().trim();
+    const sel=document.getElementById('tabulador');
+    if(sel&&nt){if(![...sel.options].some(o=>o.value===nt))sel.add(new Option(nt,nt));sel.value=nt;}
+    aplicarFilaTabulador(d);
+    syncTabCombo();
+}
+
+function aplicarDatosUB(d){
+    const m={'USUARIO BETA':'usuarioBeta','NOMBRE(S)':'nombres','NOMBRES':'nombres','APELLIDO PATERNO':'apellidoPaterno','APELLIDO MATERNO':'apellidoMaterno','CURP':'curp','RFC':'rfc','NSS':'nss','IDMEX':'idmex','PUESTO':'puesto','DEPARTAMENTO':'departamento','FECHA REAL DE INGRESO':'fechaRealIngreso','SUCURSAL':'sucursal','FORMATO':'formato','CLIENTE':'cliente','PROYECTO':'proyecto','DETERMINANTE':'determinante','ENTIDAD FEDERATIVA':'entidadFederativa','MUNICIPIO':'municipio','FECHA DE NACIMIENTO':'fechaNacimiento','LUGAR DE NACIMIENTO':'lugarNacimiento','NACIONALIDAD':'nacionalidad','ESCOLARIDAD':'escolaridad','NO. DE LICENCIA':'noLicencia','NO. CRÉDITO INFONAVIT':'noCreditoInfonavit','CALLE':'calle','NO. EXTERIOR':'noExt','NO. INTERIOR':'noInt','COLONIA':'colonia','ALCALDÍA/MUNICIPIO':'alcaldiaMunicipio','ENTIDAD FEDERATIVA DIRECCIÓN':'entidadFederativaDireccion','C.P.':'cp','CORREO ELECTRÓNICO':'correoElectronico','TELÉFONO CELULAR':'telefonoCelular','TELÉFONO DE RECADOS':'telefonoRecados','PLACA':'placa','MARCA':'marca','SUBMARCA':'submarca','COLOR':'color','ESQUEMA UNIDADES':'esquemaUnidades','PROPIETARIO':'propietario','ASEGURADORA':'aseguradora','NO. DE PÓLIZA':'noPoliza','ID TIENDA':'idTienda','CLAVE BANCO':'claveBanco','SEXO':'sexo','ESTADO CIVIL':'estadoCivil','ESTATUS':'estatus','AP':'ap','RECLUTADOR':'reclutador','JEFE INMEDIATO':'jefeInmediato','FUENTE DE RECLUTAMIENTO':'fuenteReclutamiento','FUENTE_RECLUTAMIENTO':'fuenteReclutamiento'};
+    const cf=new Set(['fechaRealIngreso','fechaNacimiento']);
+    function pf(v){if(!v)return'';const s=v.toString().trim();if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;const mm=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(mm){const[,dd,mo,y]=mm;return y+'-'+mo.padStart(2,'0')+'-'+dd.padStart(2,'0');}const f=new Date(s);if(!isNaN(f))return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');return s;}
+    Object.keys(m).forEach(c=>{if(d[c]!==undefined&&d[c]!==null&&d[c]!==''){const el=document.getElementById(m[c]);if(!el)return;el.value=cf.has(m[c])?pf(d[c]):d[c];}});
+    const nssV=nssDeUB(d);
+    if(nssV){const nEl=document.getElementById('nss');if(nEl){nEl.value=nssV;const er=document.getElementById('errorNss');if(er)er.style.display='none';}}
+    const sc=['estatusContrato','periodicidadPago','gasolinaPorToka','ap','reclutador','jefeInmediato','estatus','sexo','estadoCivil','fuenteReclutamiento'];
+    if(!window._pSV)window._pSV={};
+    sc.forEach(id=>{const el=document.getElementById(id);if(!el)return;if(el.value)return;if(el.options.length<=1){const cols=Object.keys(m).filter(k=>m[k]===id);for(const c of cols){if(d[c]&&d[c]!==''){window._pSV[id]=d[c];break;}}}});
+    // Bancos y cuentas desde USUARIOS_BETA (BANCO NÓMINA, NO. CUENTA NÓMINA, BANCO RENTA, NO. CUENTA RENTA).
+    // La cuenta puede ser número de cuenta o CLABE: si no hay cuenta, se usa la columna CLABE.
+    const bn=ubCampo(d,['BANCO NOMINA']);
+    const cn=ubCampo(d,['NO. CUENTA NOMINA','NUMERO DE CUENTA NOMINA','CUENTA NOMINA'])||ubCampo(d,['CLABE NOMINA','CLABE INTERBANCARIA NOMINA']);
+    const br=ubCampo(d,['BANCO RENTA']);
+    const cr=ubCampo(d,['NO. CUENTA RENTA','NUMERO DE CUENTA RENTA','CUENTA RENTA'])||ubCampo(d,['CLABE RENTA','CLABE INTERBANCARIA RENTA']);
+    if(bn)sincBanco('nomina',bn);
+    if(br)sincBanco('renta',br);
+    if(cn){const e=document.getElementById('noCuentaNomina');if(e)e.value=cn;}
+    if(cr){const e=document.getElementById('noCuentaBancariaRenta');if(e)e.value=cr;}
+}
+
+// ============================================================
+// BANCOS
+// ============================================================
+let _bancos=[];
+async function cargarCatalogoBancos(){
+    const badge=document.getElementById('badge-BANCO');
+    try{const res=await fetch(`${SCRIPT_URL}?action=getCatalogoBancos`);const r=await res.json();if(r.status==='success'&&Array.isArray(r.data)&&r.data.length>0){_bancos=r.data;if(badge){badge.textContent=r.data.length+' bancos';badge.className='catalog-badge catalog-ok';}['nomina','renta'].forEach(t=>{const{searchId,claveId}=gbcfg(t);const v=document.getElementById(searchId).value.trim();if(v&&!document.getElementById(claveId).value)sincBanco(t,v);});}else{if(badge){badge.textContent='sin datos';badge.className='catalog-badge catalog-fail';}}}
+    catch(e){if(badge){badge.textContent='error';badge.className='catalog-badge catalog-fail';}}
+}
+function ubClave(k){return k.toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');}
+// Busca una columna de la fila de USUARIOS_BETA ignorando acentos, mayúsculas, puntos y espacios (según el orden de alias)
+function ubCampo(d,aliases){
+    if(!d)return '';
+    const keys=Object.keys(d);
+    for(const a of aliases.map(ubClave)){
+        for(const k of keys){
+            if(ubClave(k)===a){const v=d[k];if(v!==undefined&&v!==null&&v.toString().trim()!=='')return v.toString().trim();}
+        }
+    }
+    return '';
+}
+function gbcfg(t){return t==='nomina'?{searchId:'bancoNominaSearch',dropdownId:'bancoNominaDropdown',claveId:'claveBanco'}:{searchId:'bancoRentaSearch',dropdownId:'bancoRentaDropdown',claveId:'claveBanco2'};}
+function filtrarBanco(t){const{searchId,dropdownId,claveId}=gbcfg(t);const q=document.getElementById(searchId).value.trim().toLowerCase();const dd=document.getElementById(dropdownId);document.getElementById(claveId).value='';const f=q?_bancos.filter(b=>b.nombre.toLowerCase().includes(q)||b.clave.toLowerCase().includes(q)):_bancos;rDB(dd,f,t);dd.classList.add('open');}
+function rDB(dd,lista,t){if(!lista.length){dd.innerHTML='<div class="banco-dropdown-empty">Sin resultados</div>';return;}dd.innerHTML=lista.map(b=>`<div class="banco-dropdown-item" onmousedown="selBanco('${t}','${b.nombre.replace(/'/g,"\\'")}','${b.clave}')"><span class="banco-nombre">${b.nombre}</span><span class="banco-clave">${b.clave}</span></div>`).join('');}
+function selBanco(t,n,c){const{searchId,dropdownId,claveId}=gbcfg(t);document.getElementById(searchId).value=n;document.getElementById(claveId).value=c;document.getElementById(dropdownId).classList.remove('open');mostrarToast(`✅ ${n} — Clave: ${c}`);}
+function mostrarDropdownBanco(t){const{searchId,dropdownId}=gbcfg(t);const dd=document.getElementById(dropdownId);const q=document.getElementById(searchId).value.trim().toLowerCase();const l=q?_bancos.filter(b=>b.nombre.toLowerCase().includes(q)||b.clave.toLowerCase().includes(q)):_bancos;rDB(dd,l,t);dd.classList.add('open');}
+function ocultarDropdownBanco(t){setTimeout(()=>document.getElementById(gbcfg(t).dropdownId).classList.remove('open'),200);}
+function sincBanco(t,n){const{searchId,claveId}=gbcfg(t);const q=ubClave(n);const b=_bancos.find(x=>ubClave(x.nombre)===q)||_bancos.find(x=>ubClave(x.nombre).includes(q)||q.includes(ubClave(x.nombre)));document.getElementById(searchId).value=n;if(b)document.getElementById(claveId).value=b.clave;}
+
+// ============================================================
+// ENVIAR A SHEETS
+// ============================================================
+async function enviarASheets(){
+    mostrarLoading(true);
+    const p={...datosFormulario};delete p.foto;
+    try{const pa=new URLSearchParams();pa.append('payload',JSON.stringify(p));await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:pa.toString()});mostrarToast('✅ Datos enviados a Sheets');}
+    catch(e){mostrarToast('❌ Error al enviar',true);}
+    finally{mostrarLoading(false);}
+}
+
+// ============================================================
+// HELPER barra logo para fichas
+// ============================================================
+function logoBar(color, titulo) {
+    const colores = {
+        green:  { bg:'#111111', barBg:'#ffffff', border:'#93d502' },
+        blue:   { bg:'#1e40af', barBg:'#eff6ff', border:'#1e40af' },
+        orange: { bg:'#111111', barBg:'#ffffff', border:'#93d502' },
+        red:    { bg:'#111111', barBg:'#ffffff', border:'#93d502' },
+        yellow: { bg:'#111111', barBg:'#ffffff', border:'#93d502' },
+    };
+    const c = colores[color] || colores.green;
+    const _bl = "data:image/jpeg;base64,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";
+    return `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:.4rem 3.75rem .4rem 1rem;background:${c.barBg};border-bottom:3px solid ${c.border};margin:-2rem -2rem .5rem -2rem;">
+            <img src="${_bl}" style="height:44px;width:auto;object-fit:contain;" alt="BET">
+            <span style="font-size:.85rem;font-weight:700;color:${c.bg};text-transform:uppercase;letter-spacing:.05em;">${titulo}</span>
+            <span style="font-size:.7rem;color:#9ca3af;white-space:nowrap;">${new Date().toLocaleDateString('es-MX')}</span>
+        </div>`;
+}
+
+// ============================================================
+// FICHAS
+// ============================================================
+function generarFichaHeadcount(){
+    const nombre=cnc(datosFormulario.apellidoPaterno||'',datosFormulario.apellidoMaterno||'',datosFormulario.nombres||'');
+    const foto=datosFormulario.foto||'';
+    // Color dinámico: si fuente es JOINS → azul, si no → verde
+    const fuente=(datosFormulario.fuenteReclutamiento||'').toUpperCase().trim();
+    const esJoin = fuente.includes('JOIN');
+    const colorFicha = esJoin ? 'blue' : 'green';
+    const colorHex   = esJoin ? '#1e40af' : '#111111';
+    const colorBgSec = esJoin ? '#1e40af' : '#111111';
+    document.getElementById('fichaContent').innerHTML=`
+        <div style="padding:0;margin:0;">
+            ${logoBar(colorFicha,'Ficha de Inscripción a Capacitación')}
+            <div style="font-size:.7rem;padding:.4rem .5rem .6rem;line-height:1.3;text-align:justify;">Por medio de la presente, solicitamos incluir al siguiente colaborador de nuevo ingreso en los planes y programas de capacitación correspondientes a las funciones inherentes a su puesto.</div>
+            <div style="display:flex;">
+                <div style="width:140px;height:160px;border:2px solid #000;border-right:1px solid #000;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#f5f5f5;flex-shrink:0;">${foto?`<img src="${foto}" style="width:100%;height:100%;object-fit:cover;">`:'<span style="font-size:3.5rem;color:#999;">👤</span>'}</div>
+                <div style="flex:1;border:2px solid #000;border-left:none;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1rem;gap:.25rem;">
+                    <img src="data:image/jpeg;base64,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" style="height:52px;width:auto;object-fit:contain;" alt="BET">
+                    <span style="font-size:.7rem;color:#6b7280;font-weight:500;letter-spacing:.08em;">RECURSOS HUMANOS</span>
+                    ${esJoin?'<span style="font-size:.78rem;color:#1e40af;font-weight:700;letter-spacing:.08em;margin-top:.15rem;">INGRESO POR JOIN US</span>':''}
+                </div>
+            </div>
+            <div style="background:${colorBgSec};border-bottom:2px solid #93d502;letter-spacing:.05em;color:white;padding:.3rem .5rem;font-weight:700;font-size:.82rem;">DATOS DE CONTRATACIÓN</div>
+            <table style="width:100%;border-collapse:collapse;font-size:.73rem;">
+                ${tr2('NOMBRE COMPLETO',nombre||'NA')}
+                ${tr2('USUARIO BETA',datosFormulario.usuarioBeta||'NA')}
+                ${tr2('CURP',datosFormulario.curp||'NA')}
+                ${tr2('RFC',datosFormulario.rfc||'NA')}
+                ${tr2('NSS',datosFormulario.nss||'NA')}
+                ${tr2('TELÉFONO',datosFormulario.telefonoCelular||'NA')}
+                ${tr2('CORREO',datosFormulario.correoElectronico||'NA')}
+                ${tr2('PUESTO',datosFormulario.puesto||'NA')}
+                ${tr2('TABULADOR',datosFormulario.tabulador||'NA')}
+                ${tr2('ESQUEMA',datosFormulario.esquemaContratacion||'NA')}
+                ${tr2('PERIODICIDAD',datosFormulario.periodicidadPago||'NA')}
+                ${tr2('FECHA INGRESO',datosFormulario.fechaRealIngreso||'NA')}
+                ${tr2('FOLIO VACANTE',datosFormulario.folioVacante||'NA')}
+                ${tr2('FUENTE RECLUTAMIENTO',datosFormulario.fuenteReclutamiento||'NA')}
+                ${tr2('ID TIENDA',datosFormulario.idTienda||'NA')}
+                ${tr2('CLIENTE',datosFormulario.cliente||'NA')}
+                ${tr2('FORMATO',datosFormulario.formato||'NA')}
+                ${tr2('PROYECTO',datosFormulario.proyecto||'NA')}
+                ${tr2('SUCURSAL',datosFormulario.sucursal||'NA')}
+                ${tr2('CIUDAD/ESTADO',datosFormulario.entidadFederativa||'NA')}
+                ${tr2('ESTATUS CONTRATO',datosFormulario.estatusContrato||'NA')}
+            </table>
+            <div style="display:grid;grid-template-columns:1fr 1fr;">
+                <table style="width:100%;border-collapse:collapse;font-size:.73rem;">
+                    ${tr2('MARCA',datosFormulario.marca||'NA')}
+                    ${tr2('SUBMARCA',datosFormulario.submarca||'NA')}
+                    ${tr2('PLACA',datosFormulario.placa||'NA')}
+                </table>
+                <div>
+                    <div style="background:${colorBgSec};border-bottom:2px solid #93d502;letter-spacing:.05em;color:white;padding:.3rem .5rem;font-weight:700;font-size:.82rem;">DATOS GENERALES</div>
+                    <table style="width:100%;border-collapse:collapse;font-size:.73rem;">
+                        ${tr2('RECLUTADOR',datosFormulario.reclutador||'NA')}
+                        ${tr2('FUENTE',datosFormulario.fuenteReclutamiento||'NA')}
+                        ${tr2('AP',datosFormulario.ap||'NA')}
+                        ${tr2('PRENOMINISTA',datosFormulario.prenominista||'NA')}
+                        ${tr2('GERENCIA',datosFormulario.jefeInmediato||'NA')}
+                    </table>
+                </div>
+            </div>
+        </div>`;
+}
+
+function generarFichaVacaciones(){
+    document.getElementById('fichaContent').innerHTML=`
+        ${logoBar('orange','Solicitud de Vacaciones')}
+        <div style="background:#111111;border-bottom:3px solid #93d502;letter-spacing:.05em;color:white;padding:.6rem 1rem;margin:.5rem 0 .5rem;font-weight:600;font-size:1rem;">DATOS DEL EMPLEADO</div>
+        <table class="ficha-table">
+            <tr><td>NOMBRE COMPLETO</td><td>${datosFormulario.nombres||'N/A'}</td></tr>
+            <tr><td>USUARIO BETA</td><td>${datosFormulario.usuarioBeta||'N/A'}</td></tr>
+            <tr><td>CURP</td><td>${datosFormulario.curp||'N/A'}</td></tr>
+            <tr><td>NSS</td><td>${datosFormulario.nss||'N/A'}</td></tr>
+            <tr><td>ANTIGÜEDAD</td><td>${datosFormulario.anios||'0'} años, ${datosFormulario.meses||'0'} meses, ${datosFormulario.dias||'0'} días</td></tr>
+        </table>
+        <div style="background:#111111;border-bottom:3px solid #93d502;letter-spacing:.05em;color:white;padding:.6rem 1rem;margin:.5rem 0 .5rem;font-weight:600;font-size:1rem;">PERIODO DE VACACIONES</div>
+        <table class="ficha-table">
+            <tr><td>FECHA INICIO</td><td>${datosFormulario.fechaInicio||'N/A'}</td></tr>
+            <tr><td>FECHA TÉRMINO</td><td>${datosFormulario.fechaTermino||'N/A'}</td></tr>
+            <tr><td>REINCORPORACIÓN</td><td>${datosFormulario.reincorporacion||'N/A'}</td></tr>
+            <tr><td>DÍAS DISFRUTADOS</td><td><strong>${datosFormulario.diasDisfrutados||'0'} días</strong></td></tr>
+            <tr><td>DÍAS PENDIENTES</td><td>${datosFormulario.diasPendientes||'0'} días</td></tr>
+        </table>
+        <div style="margin-top:3rem;padding-top:2rem;border-top:2px solid #e5e7eb;display:flex;justify-content:space-between;gap:2rem;">
+            <div style="text-align:center;flex:1;"><div style="border-top:2px solid #000;padding-top:.5rem;margin-top:3rem;"><strong>Firma del Empleado</strong></div></div>
+            <div style="text-align:center;flex:1;"><div style="border-top:2px solid #000;padding-top:.5rem;margin-top:3rem;"><strong>Autorización RH</strong></div></div>
+        </div>`;
+}
+
+function generarFichaBajas(){
+    document.getElementById('fichaContent').innerHTML=`
+        ${logoBar('red','Formato de Baja de Empleado')}
+        <div style="background:#111111;border-bottom:3px solid #93d502;letter-spacing:.05em;color:white;padding:.6rem 1rem;margin:.5rem 0 .5rem;font-weight:600;font-size:1rem;">DATOS DEL EMPLEADO</div>
+        <table class="ficha-table">
+            <tr><td>NOMBRE COMPLETO</td><td>${datosFormulario.nombres||'N/A'}</td></tr>
+            <tr><td>USUARIO BETA</td><td>${datosFormulario.usuarioBeta||'N/A'}</td></tr>
+            <tr><td>CURP</td><td>${datosFormulario.curp||'N/A'}</td></tr>
+            <tr><td>NSS</td><td>${datosFormulario.nss||'N/A'}</td></tr>
+            <tr><td>FECHA DE BAJA</td><td>${datosFormulario.fechaBaja||'N/A'}</td></tr>
+        </table>
+        <div style="background:#111111;border-bottom:3px solid #93d502;letter-spacing:.05em;color:white;padding:.6rem 1rem;margin:.5rem 0 .5rem;font-weight:600;font-size:1rem;">INFORMACIÓN DE LA BAJA</div>
+        <table class="ficha-table">
+            <tr><td>MOTIVO</td><td>${datosFormulario.motivoBaja||'N/A'}</td></tr>
+            <tr><td>RENUNCIA FIRMADA</td><td>${datosFormulario.renunciaFirmada||'N/A'}</td></tr>
+            <tr><td>FINIQUITO</td><td>${datosFormulario.finiquito||'N/A'}</td></tr>
+        </table>
+        ${datosFormulario.detalleBaja?`<div style="background:#111111;border-bottom:3px solid #93d502;letter-spacing:.05em;color:white;padding:.6rem 1rem;margin:.5rem 0 .5rem;font-weight:600;">DETALLE</div><div style="padding:1rem;background:#f7faee;border:1px solid #d9e6b0;border-radius:8px;white-space:pre-wrap;">${datosFormulario.detalleBaja}</div>`:''}
+        <div style="margin-top:3rem;padding-top:2rem;border-top:2px solid #e5e7eb;display:flex;justify-content:space-between;gap:2rem;">
+            <div style="text-align:center;flex:1;"><div style="border-top:2px solid #000;padding-top:.5rem;margin-top:3rem;"><strong>Firma del Empleado</strong></div></div>
+            <div style="text-align:center;flex:1;"><div style="border-top:2px solid #000;padding-top:.5rem;margin-top:3rem;"><strong>Recursos Humanos</strong></div></div>
+        </div>`;
+}
+
+function generarFichaIncapacidades(){
+    document.getElementById('fichaContent').innerHTML=`
+        ${logoBar('yellow','Registro de Incapacidad')}
+        <div style="background:#111111;border-bottom:3px solid #93d502;letter-spacing:.05em;color:white;padding:.6rem 1rem;margin:.5rem 0 .5rem;font-weight:600;font-size:1rem;">DATOS DEL EMPLEADO</div>
+        <table class="ficha-table">
+            <tr><td>NOMBRE COMPLETO</td><td>${datosFormulario.nombres||'N/A'}</td></tr>
+            <tr><td>USUARIO BETA</td><td>${datosFormulario.usuarioBeta||'N/A'}</td></tr>
+            <tr><td>CURP</td><td>${datosFormulario.curp||'N/A'}</td></tr>
+            <tr><td>NSS</td><td>${datosFormulario.nss||'N/A'}</td></tr>
+            <tr><td>FOLIO</td><td>${datosFormulario.folio||'N/A'}</td></tr>
+        </table>
+        <div style="background:#111111;border-bottom:3px solid #93d502;letter-spacing:.05em;color:white;padding:.6rem 1rem;margin:.5rem 0 .5rem;font-weight:600;font-size:1rem;">PERIODO DE INCAPACIDAD</div>
+        <table class="ficha-table">
+            <tr><td>TIPO</td><td>${datosFormulario.tipoIncapacidad||'N/A'}</td></tr>
+            <tr><td>INICIO</td><td>${datosFormulario.inicioIncapacidad||'N/A'}</td></tr>
+            <tr><td>FIN</td><td>${datosFormulario.finIncapacidad||'N/A'}</td></tr>
+            <tr><td>TOTAL DÍAS</td><td><strong>${datosFormulario.totalDias||'0'} días</strong></td></tr>
+        </table>
+        ${datosFormulario.comentarios?`<div style="background:#111111;border-bottom:3px solid #93d502;letter-spacing:.05em;color:white;padding:.6rem 1rem;margin:.5rem 0 .5rem;font-weight:600;">OBSERVACIONES</div><div style="padding:1rem;background:#f7faee;border:1px solid #d9e6b0;border-radius:8px;white-space:pre-wrap;">${datosFormulario.comentarios}</div>`:''}
+        <div style="margin-top:3rem;text-align:center;"><div style="border-top:2px solid #000;padding-top:.5rem;margin:3rem auto 0;max-width:300px;"><strong>Recursos Humanos</strong></div></div>`;
+}
+
+function tr2(label, val){return `<tr><td style="background:#f1f7de;padding:.3rem .5rem;border:1px solid #bfc4b0;font-weight:700;width:35%;">${label}</td><td style="padding:.3rem .5rem;border:1px solid #bfc4b0;">${val}</td></tr>`;}
+
+// ============================================================
+// UTILIDADES
+// ============================================================
+
+// ✅ cerrarFicha — limpia el formulario del módulo activo al cerrar
+function cerrarFicha(){
+    document.getElementById('fichaModal').classList.remove('show');
+    if(moduloActual) limpiarFormulario(moduloActual);
+}
+
+function imprimirFicha(){window.print();}
+function mostrarToast(msg,esError=false){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(esError?' error':'');setTimeout(()=>t.classList.remove('show'),3500);}
+function mostrarLoading(show){document.getElementById('loading').classList.toggle('show',show);}
+
+// ============================================================
+// INICIALIZACIÓN
+// ============================================================
+document.addEventListener('DOMContentLoaded',()=>{
+    cargarListasDesplegables();
+    cargarCatalogoBancos();
+    ['Vac','Baja','Incap'].forEach(p=>{
+        const inp=document.getElementById(`searchTerm${p}`);
+        const mm={Vac:'vacaciones',Baja:'bajas',Incap:'incapacidades'};
+        if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();buscarEmpleado(mm[p]);}});
+    });
+});
+
+setInterval(()=>{
+    ['headcount','vacaciones','bajas','incapacidades'].forEach(t=>{
+        const f=document.getElementById(`form${cap(t)}`);if(!f)return;
+        const d={};new FormData(f).forEach((v,k)=>{if(v&&k!=='fotoEmpleado')d[k]=v;});
+        if(Object.keys(d).length>0)localStorage.setItem(`draft_${t}`,JSON.stringify(d));
+    });
+},30000);
+</script>
+</body>
+</html>
