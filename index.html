@@ -717,12 +717,8 @@ function nssDeUB(d){
         if(alias.includes(limpio(k))&&d[k]!==undefined&&d[k]!==null&&d[k].toString().trim()!==''){v=d[k];break;}
     }
     if(v==='')v=d.nss||'';
-    v=v.toString().trim();
-    const dig=v.replace(/[\s-]/g,'');
-    // El NSS tiene 11 dígitos; si Sheets lo convirtió a número y perdió el cero inicial, se restituye
-    if(/^\d{10}$/.test(dig))return '0'+dig;
-    if(/^\d{11}$/.test(dig))return dig;
-    return v;
+    // Se refleja EXACTAMENTE lo que exista en la columna NSS de USUARIOS_BETA (sin agregar ni quitar dígitos)
+    return v.toString().trim();
 }
 // Si USUARIOS_BETA no entrega el NSS, avisa por qué (columna ausente o vacía) para poder corregirlo
 function diagnosticarNssUB(d){
