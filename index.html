@@ -188,12 +188,8 @@
                     <select id="fuenteReclutamiento" name="fuenteReclutamiento"><option value="">Seleccionar...</option></select>
                 </div>
                 <div class="form-group">
-                    <label>Estatus <span id="badge-ESTATUS" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <label>Tipo de Movimiento <span id="badge-ESTATUS" class="catalog-badge catalog-loading">cargando...</span></label>
                     <select id="estatus" name="estatus"><option value="">Seleccionar...</option></select>
-                </div>
-                <div class="form-group">
-                    <label>Periodicidad de Pago <span id="badge-PERIODICIDAD_PAGO" class="catalog-badge catalog-loading">cargando...</span></label>
-                    <select id="periodicidadPago" name="periodicidadPago" onchange="poblarTabuladores('')"><option value="">Seleccionar...</option></select>
                 </div>
                 <div class="form-group">
                     <label>Usuario Beta <small style="color:#4d6b00;font-weight:600;">(ingresa y presiona Enter)</small></label>
@@ -206,28 +202,40 @@
             <!-- DATOS DE CONTRATACIÓN -->
             <h3 class="subsection-title">Datos de Contratación</h3>
             <div class="form-grid">
-                <div class="form-group"><label>Puesto</label><input type="text" id="puesto" name="puesto" placeholder="Puesto" readonly></div>
-                <div class="form-group"><label>Fecha Real de Ingreso</label><input type="date" id="fechaRealIngreso" name="fechaRealIngreso" readonly></div>
-                <div class="form-group"><label for="folioVacante">Folio Vacante <span style="color:#ef4444;font-weight:700;">*</span></label><input type="text" id="folioVacante" name="folioVacante" placeholder="Folio de la vacante" autocomplete="off" class="campo-editable" required oninput="this.style.borderColor=''"></div>
                 <div class="form-group">
-                    <label>Tabulador <span style="color:#ef4444;font-weight:700;">*</span> <span id="badge-TABULADORES" class="catalog-badge catalog-loading">cargando...</span> <small style="color:#4d6b00;font-weight:600;">(según puesto y periodicidad)</small></label>
-                    <div class="tab-combo" id="tabCombo">
-                        <input type="text" id="tabuladorBuscar" placeholder="Buscar tabulador (estado, zona, esquema...)" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="tabLista">
-                        <span class="tab-combo-arrow">▾</span>
-                        <div id="tabLista" class="tab-combo-lista" role="listbox" style="display:none"></div>
-                    </div>
-                    <select id="tabulador" name="tabulador" style="display:none" tabindex="-1" aria-hidden="true" onchange="seleccionarTabulador()"><option value="">Selecciona el Usuario Beta primero...</option></select>
+                    <label>ID Tabulador <small style="color:#4d6b00;font-weight:600;">(ingresa y presiona Enter)</small></label>
+                    <input type="text" id="idTabulador" name="idTabulador" placeholder="ID del tabulador" autocomplete="off" class="campo-editable" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarPorIdTabulador();}" onblur="buscarPorIdTabulador()" oninput="this.style.borderColor=''">
+                </div>
+                <div class="form-group">
+                    <label>Puesto Tabulador <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label>
+                    <input type="text" id="puestoTabulador" name="puestoTabulador" placeholder="Se llena automático desde tabulador" readonly class="campo-tabulador">
                 </div>
                 <div class="form-group">
                     <label>Esquema de Contratación <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label>
                     <input type="text" id="esquemaContratacion" name="esquemaContratacion" placeholder="Se llena automático desde tabulador" readonly class="campo-tabulador">
                 </div>
-                <div class="form-group"><label>Pago Diario <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="number" step="0.01" min="0" id="pagoDiario" name="pagoDiario" placeholder="Automático" readonly class="campo-tabulador"></div>
-                <div class="form-group"><label>Renta <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="number" step="0.01" min="0" id="rentaPago" name="rentaPago" placeholder="Automático" readonly class="campo-tabulador"></div>
-                <div class="form-group"><label>Complemento <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="number" step="0.01" min="0" id="complemento" name="complemento" placeholder="Automático" readonly class="campo-tabulador"></div>
-                <div class="form-group"><label>Bono <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="number" step="0.01" min="0" id="bono" name="bono" placeholder="Automático" readonly class="campo-tabulador"></div>
-                <div class="form-group"><label>Sueldo Mensual Total</label><input type="number" step="0.01" id="sueldoMensualTotal" name="sueldoMensualTotal" placeholder="Automático" readonly class="campo-tabulador"></div>
-                <div class="form-group"><label>Sueldo Mensual IMSS</label><input type="number" step="0.01" min="0" id="sueldoMensualIMSS" name="sueldoMensualIMSS" placeholder="Captura manual" class="campo-editable"></div>
+                <div class="form-group">
+                    <label>Periodicidad de Pago <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label>
+                    <input type="text" id="periodicidadPago" name="periodicidadPago" placeholder="Se llena automático desde tabulador" readonly class="campo-tabulador">
+                </div>
+                <div class="form-group"><label>Sueldo Mensual IMSS <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="text" id="sueldoMensualIMSS" name="sueldoMensualIMSS" placeholder="Automático" readonly class="campo-tabulador"></div>
+                <div class="form-group"><label>Pago Diario <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="text" id="pagoDiario" name="pagoDiario" placeholder="Automático" readonly class="campo-tabulador"></div>
+                <div class="form-group"><label>Renta <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="text" id="rentaPago" name="rentaPago" placeholder="Automático" readonly class="campo-tabulador"></div>
+                <div class="form-group"><label>Complemento <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="text" id="complemento" name="complemento" placeholder="Automático" readonly class="campo-tabulador"></div>
+                <div class="form-group"><label>Bono <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="text" id="bono" name="bono" placeholder="Automático" readonly class="campo-tabulador"></div>
+                <div class="form-group"><label>Sueldo Mensual Bruto <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="text" id="sueldoMensualTotal" name="sueldoMensualTotal" placeholder="Automático" readonly class="campo-tabulador"></div>
+                <div class="form-group"><label>Pago Diario Total <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="text" id="pagoDiarioTotal" name="pagoDiarioTotal" placeholder="Automático" readonly class="campo-tabulador"></div>
+                <div class="form-group"><label>Gasolina por TOKA <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="text" id="gasolinaPorToka" name="gasolinaPorToka" placeholder="Automático" readonly class="campo-tabulador"></div>
+                <div class="form-group">
+                    <label>Tabulador <span style="color:#ef4444;font-weight:700;">*</span> <span id="badge-TABULADORES" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <div class="tab-combo" id="tabCombo">
+                        <input type="text" id="tabuladorBuscar" placeholder="Se llena con el ID Tabulador" autocomplete="off" readonly class="campo-tabulador">
+                    </div>
+                    <select id="tabulador" name="tabulador" style="display:none" tabindex="-1" aria-hidden="true" onchange="seleccionarTabulador()"><option value="">Selecciona el Usuario Beta primero...</option></select>
+                </div>
+                <div class="form-group"><label>Puesto</label><input type="text" id="puesto" name="puesto" placeholder="Puesto" readonly></div>
+                <div class="form-group"><label>Fecha Real de Ingreso</label><input type="date" id="fechaRealIngreso" name="fechaRealIngreso" readonly></div>
+                <div class="form-group"><label for="folioVacante">Folio Vacante</label><input type="text" id="folioVacante" name="folioVacante" placeholder="Folio de la vacante" autocomplete="off" class="campo-editable" oninput="this.style.borderColor=''"></div>
                 <div class="form-group"><label>Departamento</label><input type="text" id="departamento" name="departamento" placeholder="Departamento" readonly></div>
                 <div class="form-group">
                     <label>Estatus de Contrato <span id="badge-ESTATUS_CONTRATO" class="catalog-badge catalog-loading">cargando...</span></label>
@@ -265,7 +273,8 @@
                     </div>
                 </div>
                 <div class="form-group"><label>Clave Banco <small style="color:#4d6b00;">(auto)</small></label><input type="text" id="claveBanco" name="claveBanco" placeholder="Automático" readonly></div>
-                <div class="form-group"><label>No. Cuenta o CLABE Nómina</label><input type="text" id="noCuentaNomina" name="noCuentaNomina" placeholder="Número de cuenta o CLABE" class="campo-editable"></div>
+                <div class="form-group"><label>Cuenta Bancaria Nómina</label><input type="text" id="noCuentaNomina" name="noCuentaNomina" placeholder="Número de cuenta" inputmode="numeric" class="campo-editable"></div>
+                <div class="form-group"><label>CLABE Interbancaria Nómina</label><input type="text" id="clabeNomina" name="clabeInterbancariaNomina" placeholder="CLABE de 18 dígitos" inputmode="numeric" maxlength="18" class="campo-editable"></div>
                 <div class="form-group"><label>Link Estado de Cuenta Nómina</label><input type="url" id="linkEstadoCuentaNomina" name="linkEstadoCuentaNomina" placeholder="URL" class="campo-editable"></div>
             </div>
             <!-- RENTA -->
@@ -279,7 +288,8 @@
                     </div>
                 </div>
                 <div class="form-group"><label>Clave Banco 2 <small style="color:#4d6b00;">(auto)</small></label><input type="text" id="claveBanco2" name="claveBanco2" placeholder="Automático" readonly></div>
-                <div class="form-group"><label>No. Cuenta o CLABE Renta</label><input type="text" id="noCuentaBancariaRenta" name="noCuentaBancariaRenta" placeholder="Número de cuenta o CLABE" class="campo-editable"></div>
+                <div class="form-group"><label>Cuenta Bancaria Renta</label><input type="text" id="noCuentaBancariaRenta" name="noCuentaBancariaRenta" placeholder="Número de cuenta" inputmode="numeric" class="campo-editable"></div>
+                <div class="form-group"><label>CLABE Interbancaria Renta</label><input type="text" id="clabeRenta" name="clabeInterbancariaRenta" placeholder="CLABE de 18 dígitos" inputmode="numeric" maxlength="18" class="campo-editable"></div>
                 <div class="form-group"><label>Link Estado de Cuenta Renta</label><input type="url" id="linkEstadoCuentaRenta" name="linkEstadoCuentaRenta" placeholder="URL" class="campo-editable"></div>
             </div>
             <!-- ESQUEMA -->
@@ -313,8 +323,9 @@
                 <div class="form-group"><label>CURP</label><input type="text" id="curp" name="curp" placeholder="CURP" maxlength="18" readonly></div>
                 <div class="form-group">
                     <label for="nss">NSS <span id="nssReqLabel" style="display:none;color:#ef4444;font-weight:700;"> * (obligatorio para BMEXS/BMEXM)</span></label>
-                    <input type="text" id="nss" name="nss" placeholder="NSS" maxlength="11" class="campo-editable nss-opcional">
+                    <input type="text" id="nss" name="nss" placeholder="NSS" inputmode="numeric" autocomplete="off" oninput="this.value=this.value.replace(/\D/g,'')" class="campo-editable nss-opcional">
                     <span id="errorNss" style="display:none;color:#ef4444;font-size:.8rem;margin-top:.25rem;">⚠️ El NSS es obligatorio para usuarios BMEXS o BMEXM</span>
+                    <span id="nssDiag" style="display:none;color:#b45309;font-size:.72rem;margin-top:.25rem;line-height:1.3;word-break:break-word;"></span>
                 </div>
                 <div class="form-group"><label>🔗 Link No. IMSS</label><input type="url" id="linkNoImss" name="linkNoImss" placeholder="https://..." class="campo-editable"></div>
                 <div class="form-group"><label>No. Crédito INFONAVIT</label><input type="text" id="noCreditoInfonavit" name="noCreditoInfonavit" placeholder="Número" class="campo-editable"></div>
@@ -374,10 +385,6 @@
                 <div class="form-group"><label>Número Factura</label><input type="text" id="numeroFactura" name="numeroFactura" placeholder="Número" class="campo-editable"></div>
                 <div class="form-group"><label>Fecha Factura</label><input type="date" id="fecha" name="fecha" class="campo-editable"></div>
                 <div class="form-group"><label>Expedida Por</label><input type="text" id="expedidaPor" name="expedidaPor" placeholder="Expedida por" class="campo-editable"></div>
-                <div class="form-group">
-                    <label>Gasolina por TOKA <span id="badge-GASOLINA_TOKA" class="catalog-badge catalog-loading">cargando...</span></label>
-                    <select id="gasolinaPorToka" name="gasolinaPorToka"><option value="">Seleccionar...</option></select>
-                </div>
             </div>
             <h3 class="subsection-title">Información Adicional</h3>
             <div class="form-grid">
@@ -415,7 +422,7 @@
                 <div class="form-group"><label>AP <span id="badge-AP-vac" class="catalog-badge catalog-loading">cargando...</span></label><select id="vacAp" name="ap"><option value="">Seleccionar...</option></select></div>
                 <div class="form-group"><label>Usuario Beta</label><input type="text" id="vacusuarioBeta" name="usuarioBeta" placeholder="Usuario Beta" readonly></div>
                 <div class="form-group"><label>CURP</label><input type="text" id="vacCurp" name="curp" placeholder="CURP" readonly></div>
-                <div class="form-group"><label>NSS</label><input type="text" id="vacNss" name="nss" placeholder="NSS" maxlength="11" readonly></div>
+                <div class="form-group"><label>NSS</label><input type="text" id="vacNss" name="nss" placeholder="NSS" readonly></div>
                 <div class="form-group"><label>Quien Autoriza</label><input type="text" id="vacApp" name="app" placeholder="Nombre Jefe Directo" class="campo-editable"></div>
                 <div class="form-group"><label>Años de Antigüedad</label><input type="number" id="vacAnios" name="anios" placeholder="Años" class="campo-editable"></div>
                 <div class="form-group"><label>Meses</label><input type="number" id="vacMeses" name="meses" placeholder="Meses" class="campo-editable"></div>
@@ -453,7 +460,7 @@
                 <div class="form-group"><label>AP <span id="badge-AP-baja" class="catalog-badge catalog-loading">cargando...</span></label><select id="bajaAp" name="ap"><option value="">Seleccionar...</option></select></div>
                 <div class="form-group"><label>Usuario Beta</label><input type="text" id="bajausuarioBeta" name="usuarioBeta" placeholder="Usuario Beta" readonly></div>
                 <div class="form-group"><label>CURP</label><input type="text" id="bajaCurp" name="curp" placeholder="CURP" readonly></div>
-                <div class="form-group"><label>NSS</label><input type="text" id="bajaNss" name="nss" placeholder="NSS" maxlength="11" readonly></div>
+                <div class="form-group"><label>NSS</label><input type="text" id="bajaNss" name="nss" placeholder="NSS" readonly></div>
                 <div class="form-group"><label>Quien Autoriza</label><input type="text" id="bajaApp" name="app" placeholder="Nombre Jefe Directo" class="campo-editable"></div>
                 <div class="form-group"><label>Fecha de Baja</label><input type="date" id="bajaFecha" name="fechaBaja" class="campo-editable"></div>
                 <div class="form-group"><label>Motivo de Baja</label><select id="bajaMotivo" name="motivoBaja"><option value="">Seleccionar...</option><option value="RENUNCIA">Renuncia Voluntaria</option><option value="DESPIDO">Despido</option><option value="TERMINO_CONTRATO">Término de Contrato</option><option value="ABANDONO">Abandono de Empleo</option><option value="OTRO">Otro</option></select></div>
@@ -488,7 +495,7 @@
                 <div class="form-group"><label>AP <span id="badge-AP-incap" class="catalog-badge catalog-loading">cargando...</span></label><select id="incapAp" name="ap"><option value="">Seleccionar...</option></select></div>
                 <div class="form-group"><label>Usuario Beta</label><input type="text" id="incapusuarioBeta" name="usuarioBeta" placeholder="Usuario Beta" readonly></div>
                 <div class="form-group"><label>CURP</label><input type="text" id="incapCurp" name="curp" placeholder="CURP" readonly></div>
-                <div class="form-group"><label>NSS</label><input type="text" id="incapNss" name="nss" placeholder="NSS" maxlength="11" readonly></div>
+                <div class="form-group"><label>NSS</label><input type="text" id="incapNss" name="nss" placeholder="NSS" readonly></div>
                 <div class="form-group"><label>Jefe Directo</label><input type="text" id="incapApp" name="app" placeholder="Nombre Jefe Directo" class="campo-editable"></div>
                 <div class="form-group"><label>Folio</label><input type="text" id="incapFolio" name="folio" placeholder="Número de folio" class="campo-editable"></div>
                 <div class="form-group"><label>Inicio Incapacidad</label><input type="date" id="incapInicio" name="inicioIncapacidad" onchange="calcularDiasIncapacidad()" class="campo-editable"></div>
@@ -522,7 +529,7 @@
 // ============================================================
 // CONFIGURACIÓN
 // ============================================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHn2mJDTyEx53QSau1_nQMWmr3vnTH8UFzvXslixzyBlys3ZCJBfqCl92EKJB9sttb/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybV-Q6ILkVRNEdzg9IfFNaD08aS_hONf-tUWSU2I5i_3DRG0cCXumTVq6HKeaDS820/exec';
 const LOGO_BET = `<span style="font-size:1.4rem;font-weight:900;letter-spacing:-1px;color:#1a1a1a;">B<span style="color:#8bc34a;">ET</span></span>`;
 
 // ============================================================
@@ -722,10 +729,35 @@ function nssDeUB(d){
 }
 // Si USUARIOS_BETA no entrega el NSS, avisa por qué (columna ausente o vacía) para poder corregirlo
 function diagnosticarNssUB(d){
-    if(nssDeUB(d))return;
+    const el=document.getElementById('nssDiag');
+    if(nssDeUB(d)){if(el)el.style.display='none';return;}
     const cols=Object.keys(d).filter(k=>/NSS|SEGUROSOCIAL/.test(ubClave(k)));
-    if(cols.length)mostrarToast('⚠️ La columna "'+cols[0].trim()+'" de USUARIOS_BETA viene vacía para este usuario. Captura el NSS a mano.',true);
-    else mostrarToast('⚠️ El script no devolvió ninguna columna NSS (recibió '+Object.keys(d).length+' columnas). Revisa el encabezado en USUARIOS_BETA y vuelve a desplegar el script.',true);
+    let msg;
+    if(cols.length)msg='⚠️ USUARIOS_BETA devolvió la columna "'+cols[0].trim()+'" pero vacía para este usuario. Captura el NSS a mano.';
+    else msg='⚠️ El script NO devolvió ninguna columna NSS de USUARIOS_BETA (llegaron '+Object.keys(d).length+' columnas: '+Object.keys(d).join(' | ')+').';
+    const ub=(d['USUARIO BETA']||document.getElementById('usuarioBeta').value||'').toString().trim();
+    const mostrar=(t)=>{if(el){el.style.color='#b45309';el.textContent=t;el.style.display='block';}mostrarToast(msg,true);};
+    if(!ub||!el){mostrar(msg);return;}
+    // Respaldo: lee la celda NSS directamente de USUARIOS_BETA con la acción de diagnóstico del script
+    fetch(`${SCRIPT_URL}?action=diagUsuario&usuario=${encodeURIComponent(ub)}&_t=${Date.now()}`,{cache:'no-store'}).then(r=>r.json()).then(r=>{
+        if(r.status==='ok'){
+            let nss='',fila='';
+            for(const c of (r.coincidencias||[])){for(const n of (c.nss||[])){const v=(n.valorVisible||'').toString().trim();if(v){nss=v;fila=c.fila;break;}}if(nss)break;}
+            if(nss){
+                const nEl=document.getElementById('nss');
+                if(nEl&&!nEl.value.trim())nEl.value=nss;
+                const er=document.getElementById('errorNss');if(er)er.style.display='none';
+                d['NSS']=nss;if(window._cUB)window._cUB[ub]=d;
+                el.style.color='#166534';el.textContent='✅ NSS tomado de USUARIOS_BETA (fila '+fila+').';el.style.display='block';
+                mostrarToast('✅ NSS cargado desde USUARIOS_BETA');
+                return;
+            }
+            const co=(r.coincidencias||[]).map(c=>'fila '+c.fila+': '+((c.nss||[]).map(n=>'"'+n.columna+'"='+JSON.stringify(n.valorVisible)).join(', ')||'sin columna NSS')).join(' | ')||'ninguna fila coincide';
+            mostrar(msg+' — Diagnóstico: el script leyó la hoja "'+r.hojaLeida+'" del archivo "'+r.spreadsheet+'" ('+r.totalFilas+' filas). Coincidencias: '+co+'.');
+        }else if(/no reconocida/i.test(r.message||'')){
+            mostrar(msg+' — El web app publicado es una VERSIÓN VIEJA del Code.gs (no conoce diagUsuario). En Apps Script: Implementar → Administrar implementaciones → editar → Nueva versión → Implementar.');
+        }else mostrar(msg+' — '+(r.message||'sin detalle'));
+    }).catch(()=>mostrar(msg));
 }
 function actualizarNssObligatorio(usuarioBeta) {
     const ub = (usuarioBeta||'').toUpperCase().trim();
@@ -798,23 +830,28 @@ function guardarModulo(modulo) {
             return;
         }
         document.getElementById('errorNss').style.display = 'none';
+        const clabesCheck = [['clabeNomina','Nómina'],['clabeRenta','Renta']];
+        for(const [cid, lbl] of clabesCheck){
+            const clabeEl = document.getElementById(cid);
+            if(!clabeEl) continue;
+            clabeEl.value = clabeEl.value.replace(/\D/g,'');
+            if(clabeEl.value && clabeEl.value.length !== 18){
+                mostrarToast('⚠️ La CLABE Interbancaria ' + lbl + ' debe tener 18 dígitos', true);
+                clabeEl.focus();
+                return;
+            }
+        }
     }
     if(modulo === 'headcount'){
         const folioEl = document.getElementById('folioVacante');
         folioEl.value = folioEl.value.trim();
         datosFormulario.folioVacante = folioEl.value;
-        if(!folioEl.value){
-            folioEl.style.borderColor = '#ef4444';
-            mostrarToast('⚠️ El Folio Vacante es obligatorio', true);
-            folioEl.focus();
-            return;
-        }
         const selTab = document.getElementById('tabulador');
         if(!selTab.value){
             const selTabBuscar = document.getElementById('tabuladorBuscar');
             selTabBuscar.style.borderColor = '#ef4444';
-            mostrarToast('⚠️ Selecciona el Tabulador (llena Pago Diario, Renta, Complemento y Bono)', true);
-            selTabBuscar.focus();
+            mostrarToast('⚠️ Ingresa el ID Tabulador (llena Pago Diario, Renta, Complemento y Bono)', true);
+            document.getElementById('idTabulador').focus();
             return;
         }
         selTab.style.borderColor = '';
@@ -822,9 +859,9 @@ function guardarModulo(modulo) {
         for(const [id,nombre] of camposPago){
             const el = document.getElementById(id);
             const v = (el.value || '').toString().trim();
-            if(v === '' || isNaN(parseFloat(v)) || parseFloat(v) < 0){
+            if(v === '' || (v.toUpperCase() !== 'NO APLICA' && (isNaN(parseFloat(v)) || parseFloat(v) < 0))){
                 el.style.borderColor = '#ef4444';
-                mostrarToast('⚠️ ' + nombre + ' es obligatorio (si no aplica, captura 0)', true);
+                mostrarToast('⚠️ ' + nombre + ' no tiene valor: vuelve a elegir el tabulador', true);
                 el.focus();
                 return;
             }
@@ -880,7 +917,7 @@ function validarTelefonosDiferentes(){
 // CATÁLOGOS
 // ============================================================
 async function cargarListasDesplegables() {
-    for(const campo of['AP','RECLUTADOR','FUENTE_RECLUTAMIENTO','ESTATUS','JEFE INMEDIATO','SEXO','ESTATUS_CONTRATO','PERIODICIDAD_PAGO','GASOLINA_TOKA','ESCOLARIDAD']){
+    for(const campo of['AP','RECLUTADOR','FUENTE_RECLUTAMIENTO','ESTATUS','JEFE INMEDIATO','SEXO','ESTATUS_CONTRATO','ESCOLARIDAD']){
         await cargarCampo(campo);
     }
     await cargarPrenominista();
@@ -888,7 +925,7 @@ async function cargarListasDesplegables() {
 }
 
 async function cargarCampo(campo) {
-    const mi={'AP':'ap','RECLUTADOR':'reclutador','FUENTE_RECLUTAMIENTO':'fuenteReclutamiento','ESTATUS':'estatus','JEFE INMEDIATO':'jefeInmediato','SEXO':'sexo','ESTATUS_CONTRATO':'estatusContrato','PERIODICIDAD_PAGO':'periodicidadPago','GASOLINA_TOKA':'gasolinaPorToka','ESCOLARIDAD':'escolaridad'};
+    const mi={'AP':'ap','RECLUTADOR':'reclutador','FUENTE_RECLUTAMIENTO':'fuenteReclutamiento','ESTATUS':'estatus','JEFE INMEDIATO':'jefeInmediato','SEXO':'sexo','ESTATUS_CONTRATO':'estatusContrato','GASOLINA_TOKA':'gasolinaPorToka','ESCOLARIDAD':'escolaridad'};
     const eid=mi[campo]; const badge=document.getElementById(`badge-${campo}`);
     if(cacheCatalogos[campo]){llenarSelect(eid,cacheCatalogos[campo]);if(campo==='AP')sincAP(cacheCatalogos[campo]);if(badge){badge.textContent=cacheCatalogos[campo].length+' opciones';badge.className='catalog-badge catalog-ok';}return;}
     try{
@@ -934,15 +971,15 @@ async function autoLlenarUsuarioBeta() {
     const ub=document.getElementById('usuarioBeta').value.trim(); if(!ub)return;
     actualizarNssObligatorio(ub);
     // Si cambió el Usuario Beta, se limpia el NSS del anterior (el nuevo se trae de la hoja)
-    if(window._ubNssPrev!==ub){const nEl=document.getElementById('nss');if(nEl)nEl.value='';['bancoNominaSearch','claveBanco','noCuentaNomina','bancoRentaSearch','claveBanco2','noCuentaBancariaRenta'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window._ubNssPrev=ub;if(typeof resetTabulador==='function'){resetTabulador();limpiarCamposTabulador();}}
+    if(window._ubNssPrev!==ub){const nEl=document.getElementById('nss');if(nEl)nEl.value='';['bancoNominaSearch','claveBanco','noCuentaNomina','clabeNomina','bancoRentaSearch','claveBanco2','noCuentaBancariaRenta','clabeRenta'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window._ubNssPrev=ub;if(typeof resetTabulador==='function'){resetTabulador();limpiarCamposTabulador();}}
     if(!window._cUB)window._cUB={};
     let d;
-    if(window._cUB[ub]){d=window._cUB[ub];aplicarDatosUB(d);}
+    if(window._cUB[ub]&&nssDeUB(window._cUB[ub])){d=window._cUB[ub];aplicarDatosUB(d);}
     else{
         try{
-            const res=await fetch(`${SCRIPT_URL}?action=getUsuarioBeta&usuario=${encodeURIComponent(ub)}`);
+            const res=await fetch(`${SCRIPT_URL}?action=getUsuarioBeta&usuario=${encodeURIComponent(ub)}&_t=${Date.now()}`,{cache:'no-store'});
             const r=await res.json();
-            if(r.status==='success'){window._cUB[ub]=r.data;d=r.data;aplicarDatosUB(d);mostrarToast('✅ Usuario cargado ('+Object.keys(d).length+' campos)');}
+            if(r.status==='success'){if(nssDeUB(r.data))window._cUB[ub]=r.data;d=r.data;aplicarDatosUB(d);mostrarToast('✅ Usuario cargado ('+Object.keys(d).length+' campos)');}
             else{mostrarToast('⚠️ Usuario Beta no encontrado',true);return;}
         }catch(e){mostrarToast('❌ Error de conexión',true);return;}
     }
@@ -994,6 +1031,7 @@ function tabCampo(row,aliases){
     }
     return '';
 }
+const NA_TAB='NO APLICA';
 function numTab(v){if(v===undefined||v===null||v==='')return '';const n=parseFloat(v.toString().replace(/[$,\s]/g,''));return isNaN(n)?'':n;}
 const TAB_ALIAS={
     nombre:['TABULADOR','NOMBRE TABULADOR'],
@@ -1006,6 +1044,8 @@ const TAB_ALIAS={
     complemento:['COMPLEMENTO'],
     bono:['BONO'],
     total:['SUELDO MENSUAL BRUTO','SUELDO MENSUAL TOTAL'],
+    imss:['SUELDO IMSS','SUELDO MENSUAL IMSS'],
+    pagoDiarioTotal:['PAGO DIARIO TOTAL'],
     gasolina:['GASOLINA POR TOKA']
 };
 async function cargarCatalogoTabuladores(){
@@ -1027,18 +1067,15 @@ async function cargarCatalogoTabuladores(){
 }
 function resetTabulador(){
     _tabFiltrados=[];
+    limpiarCamposTabulador();
     const s=document.getElementById('tabulador');
     _tabManual='';
     if(s){s.innerHTML='<option value="">Selecciona el Usuario Beta primero...</option>';s.style.borderColor='';}
     const b=document.getElementById('tabuladorBuscar');if(b)b.style.borderColor='';
+    ['idTabulador','puestoTabulador'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.style.borderColor='';delete el.dataset.ultimo;}});
     syncTabCombo();
 }
-function periodicidadActual(){
-    const el=document.getElementById('periodicidadPago');
-    let v=el?el.value:'';
-    if(!v&&window._pSV&&window._pSV['periodicidadPago'])v=window._pSV['periodicidadPago'];
-    return normTxt(v);
-}
+function periodicidadActual(){return '';}
 // Filtra por una columna (exacto; si no hay, "contiene"). Si la hoja no trae esa columna, no filtra.
 function filtrarTab(lista,alias,val){
     if(!val)return lista;
@@ -1098,7 +1135,7 @@ async function poblarTabuladores(preRef,forzar){
     return true;
 }
 function limpiarCamposTabulador(){
-    ['esquemaContratacion','pagoDiario','rentaPago','complemento','bono','sueldoMensualTotal'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['idTabulador','puestoTabulador','periodicidadPago','esquemaContratacion','pagoDiario','rentaPago','complemento','bono','pagoDiarioTotal','sueldoMensualTotal','sueldoMensualIMSS','gasolinaPorToka'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
 function seleccionarTabulador(){
     const sel=document.getElementById('tabulador');const nom=sel.value;
@@ -1240,15 +1277,52 @@ function marcarTabActivo(idx){
     };
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
+// Busca el tabulador por ID en la hoja TABULADORES y llena todos los campos
+async function buscarPorIdTabulador(){
+    const inp=document.getElementById('idTabulador');if(!inp)return;
+    const id=inp.value.trim();
+    if(!id)return;
+    const sel=document.getElementById('tabulador');
+    // Evita buscar dos veces (Enter + blur) el mismo ID
+    if(inp.dataset.ultimo===id&&sel&&sel.value)return;
+    inp.dataset.ultimo=id;
+    let row=null;
+    const cat=await cargarCatalogoTabuladores();
+    if(cat){const n=normTxt(id);row=cat.find(r=>normTxt(tabCampo(r,TAB_ALIAS.id))===n)||null;}
+    if(row){
+        const nom=tabNombre(row);
+        if(nom){elegirTabulador(nom);}
+        else{aplicarFilaTabulador(row);syncTabCombo();}
+        mostrarToast('✅ Tabulador: '+(nom||id));
+        return;
+    }
+    // Respaldo: búsqueda directa por ID en el script
+    try{
+        const res=await fetch(`${SCRIPT_URL}?action=getTabulador&idTabulador=${encodeURIComponent(id)}`);
+        const r=await res.json();
+        if(r.status==='success'&&r.data){aplicarDatosTabulador(r.data);mostrarToast('✅ Tabulador: '+(r.data['TABULADOR']||id));return;}
+    }catch(e){}
+    delete inp.dataset.ultimo;
+    inp.style.borderColor='#ef4444';
+    mostrarToast('⚠️ No se encontró el ID Tabulador: '+id,true);
+}
 function aplicarFilaTabulador(d){
     const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
-    const es=tabCampo(d,TAB_ALIAS.esquema);if(es!=='')set('esquemaContratacion',es);
+    const idT=tabCampo(d,TAB_ALIAS.id);if(idT!==''){set('idTabulador',idT.toString().trim());const ie=document.getElementById('idTabulador');if(ie){ie.dataset.ultimo=idT.toString().trim();ie.style.borderColor='';}}
+    set('puestoTabulador',(tabCampo(d,TAB_ALIAS.puesto)||'').toString().trim()||NA_TAB);
+    const es=tabCampo(d,TAB_ALIAS.esquema);set('esquemaContratacion',es.toString().trim()===''?NA_TAB:es.toString().trim());
     [['pagoDiario','pagoDiario'],['rentaPago','renta'],['complemento','complemento'],['bono','bono']].forEach(([id,k])=>{
-        const n=numTab(tabCampo(d,TAB_ALIAS[k]));set(id,n===''?0:n);
+        const n=numTab(tabCampo(d,TAB_ALIAS[k]));set(id,n===''?NA_TAB:n);
     });
-    const t=numTab(tabCampo(d,TAB_ALIAS.total));set('sueldoMensualTotal',t);
+    const pe=tabCampo(d,TAB_ALIAS.periodicidad);set('periodicidadPago',pe.toString().trim()===''?NA_TAB:pe.toString().trim());
+    const t=numTab(tabCampo(d,TAB_ALIAS.total));set('sueldoMensualTotal',t===''?NA_TAB:t);
+    const im=numTab(tabCampo(d,TAB_ALIAS.imss));set('sueldoMensualIMSS',im===''?NA_TAB:im);
+    // Pago Diario Total: columna PAGO DIARIO TOTAL del tabulador; si no existe, Sueldo Mensual Total / 30
+    let pdt=numTab(tabCampo(d,TAB_ALIAS.pagoDiarioTotal));
+    if(pdt===''&&t!=='')pdt=Math.round(t/30*100)/100;
+    set('pagoDiarioTotal',pdt===''?NA_TAB:pdt);
     const ga=tabCampo(d,TAB_ALIAS.gasolina);
-    if(ga){const sel=document.getElementById('gasolinaPorToka');if(sel){let ok=false;for(let i=0;i<sel.options.length;i++){if(sel.options[i].value.toUpperCase()===ga.toString().toUpperCase()||sel.options[i].text.toUpperCase()===ga.toString().toUpperCase()){sel.selectedIndex=i;ok=true;break;}}if(!ok){if(!window._pSV)window._pSV={};window._pSV['gasolinaPorToka']=ga;}}}
+    set('gasolinaPorToka',(ga===undefined||ga===null||ga.toString().trim()==='')?NA_TAB:ga.toString().trim());
 }
 // Respaldo: búsqueda directa por ID (acción getTabulador) si el catálogo completo no está disponible
 function aplicarDatosTabulador(d){
@@ -1266,19 +1340,26 @@ function aplicarDatosUB(d){
     Object.keys(m).forEach(c=>{if(d[c]!==undefined&&d[c]!==null&&d[c]!==''){const el=document.getElementById(m[c]);if(!el)return;el.value=cf.has(m[c])?pf(d[c]):d[c];}});
     const nssV=nssDeUB(d);
     if(nssV){const nEl=document.getElementById('nss');if(nEl){nEl.value=nssV;const er=document.getElementById('errorNss');if(er)er.style.display='none';}}
-    const sc=['estatusContrato','periodicidadPago','gasolinaPorToka','ap','reclutador','jefeInmediato','estatus','sexo','estadoCivil','fuenteReclutamiento'];
+    const sc=['estatusContrato','ap','reclutador','jefeInmediato','estatus','sexo','estadoCivil','fuenteReclutamiento'];
     if(!window._pSV)window._pSV={};
     sc.forEach(id=>{const el=document.getElementById(id);if(!el)return;if(el.value)return;if(el.options.length<=1){const cols=Object.keys(m).filter(k=>m[k]===id);for(const c of cols){if(d[c]&&d[c]!==''){window._pSV[id]=d[c];break;}}}});
     // Bancos y cuentas desde USUARIOS_BETA (BANCO NÓMINA, NO. CUENTA NÓMINA, BANCO RENTA, NO. CUENTA RENTA).
     // La cuenta puede ser número de cuenta o CLABE: si no hay cuenta, se usa la columna CLABE.
     const bn=ubCampo(d,['BANCO NOMINA']);
-    const cn=ubCampo(d,['NO. CUENTA NOMINA','NUMERO DE CUENTA NOMINA','CUENTA NOMINA'])||ubCampo(d,['CLABE NOMINA','CLABE INTERBANCARIA NOMINA']);
+    let cn=ubCampo(d,['NO. CUENTA NOMINA','NUMERO DE CUENTA NOMINA','CUENTA NOMINA','CUENTA BANCARIA NOMINA']);
+    let cl=ubCampo(d,['CLABE NOMINA','CLABE INTERBANCARIA NOMINA']);
+    // Si la hoja trae una CLABE (18 dígitos) capturada en la columna de cuenta, se pasa al campo CLABE
+    if(!cl&&cn){cl=cn;}cn='';
     const br=ubCampo(d,['BANCO RENTA']);
-    const cr=ubCampo(d,['NO. CUENTA RENTA','NUMERO DE CUENTA RENTA','CUENTA RENTA'])||ubCampo(d,['CLABE RENTA','CLABE INTERBANCARIA RENTA']);
+    let cr=ubCampo(d,['NO. CUENTA RENTA','NUMERO DE CUENTA RENTA','CUENTA RENTA','CUENTA BANCARIA RENTA']);
+    let clr=ubCampo(d,['CLABE RENTA','CLABE INTERBANCARIA RENTA']);
+    if(!clr&&cr){clr=cr;}cr='';
     if(bn)sincBanco('nomina',bn);
     if(br)sincBanco('renta',br);
     if(cn){const e=document.getElementById('noCuentaNomina');if(e)e.value=cn;}
+    if(cl){const e=document.getElementById('clabeNomina');if(e)e.value=cl;}
     if(cr){const e=document.getElementById('noCuentaBancariaRenta');if(e)e.value=cr;}
+    if(clr){const e=document.getElementById('clabeRenta');if(e)e.value=clr;}
 }
 
 // ============================================================
