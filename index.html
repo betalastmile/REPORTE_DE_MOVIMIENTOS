@@ -1170,11 +1170,18 @@ function llenarSelect(id,opciones){
 // ============================================================
 // AUTO-LLENADO USUARIO BETA
 // ============================================================
+let _ubEnCurso=null;
 async function autoLlenarUsuarioBeta() {
     const _ub=document.getElementById('usuarioBeta').value.trim(); if(!_ub)return;
+    // Enter + blur disparaban la búsqueda dos veces: si ya hay una en curso para el mismo usuario, se reutiliza
+    if(_ubEnCurso&&_ubEnCurso.ub===_ub)return _ubEnCurso.p;
     mostrarLoading(true,'Cargando usuario, espera...');
-    try{ await _autoLlenarUsuarioBetaInner(); }
-    finally{ mostrarLoading(false); }
+    const p=(async()=>{
+        try{ await _autoLlenarUsuarioBetaInner(); }
+        finally{ mostrarLoading(false); if(_ubEnCurso&&_ubEnCurso.p===p)_ubEnCurso=null; }
+    })();
+    _ubEnCurso={ub:_ub,p:p};
+    return p;
 }
 async function _autoLlenarUsuarioBetaInner() {
     const ub=document.getElementById('usuarioBeta').value.trim(); if(!ub)return;
@@ -1193,17 +1200,32 @@ async function _autoLlenarUsuarioBetaInner() {
         }catch(e){mostrarToast('❌ Error de conexión',true);return;}
     }
     diagnosticarNssUB(d);
-    const fs=d['FORMATO SUCURSAL']||d['FORMATO_SUCURSAL']||'';
-    if(fs.toString().trim())await buscarTiendaPorFormato(fs.toString().trim());
-    const pl=d['PLACA']||d['Placa']||'';
-    if(pl.toString().trim())await buscarUnidadPorPlaca(pl.toString().trim());
+    const fs=(d['FORMATO SUCURSAL']||d['FORMATO_SUCURSAL']||'').toString().trim();
+    const pl=(d['PLACA']||d['Placa']||'').toString().trim();
     const it=(d['ID TABULADOR']||d['ID_TABULADOR']||d['TABULADOR']||'').toString().trim();
-    const okCat=await poblarTabuladores(it,true);
-    if(!okCat&&it)await buscarTabulador(it);
+    // Las 3 consultas son independientes entre sí: se lanzan al mismo tiempo
+    await Promise.all([
+        fs?buscarTiendaPorFormato(fs):null,
+        pl?buscarUnidadPorPlaca(pl):null,
+        (async()=>{const okCat=await poblarTabuladores(it,true);if(!okCat&&it)await buscarTabulador(it);})()
+    ]);
 }
 
-async function buscarTiendaPorFormato(fs){try{const res=await fetch(`${SCRIPT_URL}?action=getTienda&formatoSucursal=${encodeURIComponent(fs)}`);const r=await res.json();if(r.status==='success'&&r.data){aplicarDatosTienda(r.data);mostrarToast('🏪 Tienda: '+fs);}}catch(e){}}
-async function buscarUnidadPorPlaca(pl){try{const res=await fetch(`${SCRIPT_URL}?action=getUnidad&placa=${encodeURIComponent(pl)}`);const r=await res.json();if(r.status==='success'&&r.data){aplicarDatosUnidad(r.data);mostrarToast('🚗 Unidad: '+pl);}}catch(e){}}
+window._cTienda=window._cTienda||{};window._cUnidad=window._cUnidad||{};
+async function buscarTiendaPorFormato(fs){
+    try{
+        if(window._cTienda[fs]){aplicarDatosTienda(window._cTienda[fs]);mostrarToast('🏪 Tienda: '+fs);return;}
+        const res=await fetch(`${SCRIPT_URL}?action=getTienda&formatoSucursal=${encodeURIComponent(fs)}`);const r=await res.json();
+        if(r.status==='success'&&r.data){window._cTienda[fs]=r.data;aplicarDatosTienda(r.data);mostrarToast('🏪 Tienda: '+fs);}
+    }catch(e){}
+}
+async function buscarUnidadPorPlaca(pl){
+    try{
+        if(window._cUnidad[pl]){aplicarDatosUnidad(window._cUnidad[pl]);mostrarToast('🚗 Unidad: '+pl);return;}
+        const res=await fetch(`${SCRIPT_URL}?action=getUnidad&placa=${encodeURIComponent(pl)}`);const r=await res.json();
+        if(r.status==='success'&&r.data){window._cUnidad[pl]=r.data;aplicarDatosUnidad(r.data);mostrarToast('🚗 Unidad: '+pl);}
+    }catch(e){}
+}
 
 function aplicarDatosUnidad(d){
     const m={'PLACA':'placa','MARCA':'marca','SUBMARCA':'submarca','AÑO VEHÍCULO':'anoVehiculoUnidad','AÑO VEHICULO':'anoVehiculoUnidad','TIPO':'tipo','COLOR':'color','ESQUEMA UNIDADES':'esquemaUnidades','PROPIETARIO':'propietario','FACTURADO POR':'facturadoPor','ASEGURADORA':'aseguradora','NO. DE PÓLIZA':'noPoliza','VIGENCIA PÓLIZA':'vigenciaPoliza','FECHA VERIFICACIÓN':'fechaVerificacion','MOTOR':'motor','CILINDROS':'cilindros','NÚMERO FACTURA':'numeroFactura','FECHA FACTURA':'fecha','EXPEDIDA POR':'expedidaPor','# TARJETA CIRCULACIÓN':'tarjetaCirculacion'};
@@ -1257,8 +1279,13 @@ const TAB_ALIAS={
     pagoDiarioTotal:['PAGO DIARIO TOTAL'],
     gasolina:['GASOLINA POR TOKA']
 };
-async function cargarCatalogoTabuladores(){
-    if(_tabCat)return _tabCat;
+let _tabCatP=null;
+function cargarCatalogoTabuladores(){
+    if(_tabCat)return Promise.resolve(_tabCat);
+    if(!_tabCatP)_tabCatP=_cargarCatalogoTabuladores().finally(()=>{_tabCatP=null;});
+    return _tabCatP;
+}
+async function _cargarCatalogoTabuladores(){
     const badge=document.getElementById('badge-TABULADORES');
     try{
         const res=await fetch(`${SCRIPT_URL}?action=getTabuladores`);
