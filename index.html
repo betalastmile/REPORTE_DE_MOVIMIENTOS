@@ -222,6 +222,47 @@
         @keyframes brilloBarra{ from{ background-position:0 0; } to{ background-position:200% 0; } }
         @keyframes sacudir{ 0%,100%{ transform:translateX(0); } 20%,60%{ transform:translateX(-8px); } 40%,80%{ transform:translateX(8px); } }
         @media (prefers-reduced-motion:reduce){ .fl-logo,.login-box,.login-box::before,.login-logo img{ animation:none !important; } .fl-logo{ opacity:.12; } }
+
+        /* ===== TUTORIAL ===== */
+        .tut-open{padding:.35rem .8rem;font-size:.7rem;font-weight:700;background:var(--lime);color:#111;border:1px solid var(--lime);border-radius:999px;cursor:pointer;}
+        .tut-open:hover{filter:brightness(1.08);}
+        #tutModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:100000;align-items:center;justify-content:center;padding:1rem;}
+        #tutModal.show{display:flex;}
+        .tut-box{background:#fff;color:#151515;border-radius:14px;max-width:760px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.5);border-top:5px solid var(--lime);}
+        html[data-theme="dark"] .tut-box{background:#171a13;color:#e8ebe0;}
+        .tut-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.9rem 1.2rem;background:linear-gradient(100deg,#111 0%,#4d6b00 100%);color:#fff;}
+        .tut-head h3{font-size:1rem;letter-spacing:.06em;text-transform:uppercase;}
+        .tut-x{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:999px;width:2rem;height:2rem;font-size:1rem;cursor:pointer;line-height:1;}
+        .tut-x:hover{background:rgba(255,255,255,.32);}
+        .tut-mods{display:flex;gap:.4rem;padding:.7rem 1.2rem 0;flex-wrap:wrap;}
+        .tut-mod{padding:.35rem .85rem;border:1px solid var(--line);border-radius:999px;background:transparent;color:inherit;font-size:.78rem;font-weight:600;cursor:pointer;}
+        .tut-mod.active{background:var(--lime);color:#111;border-color:var(--lime);}
+        .tut-dots{display:flex;gap:.3rem;padding:.8rem 1.2rem 0;}
+        .tut-dot{flex:1;height:5px;border-radius:3px;background:var(--line);cursor:pointer;}
+        .tut-dot.on{background:var(--lime);}
+        .tut-body{padding:1rem 1.4rem;overflow-y:auto;flex:1;min-height:280px;}
+        .tut-num{display:inline-flex;align-items:center;justify-content:center;flex:0 0 2rem;width:2rem;height:2rem;border-radius:50%;background:var(--lime);color:#111;font-weight:800;margin-right:.6rem;}
+        .tut-title{display:flex;align-items:center;font-size:1.15rem;font-weight:700;margin-bottom:.7rem;}
+        .tut-body p{line-height:1.55;margin-bottom:.6rem;font-size:.95rem;}
+        .tut-body ul{margin:.3rem 0 .7rem 1.2rem;line-height:1.6;font-size:.93rem;}
+        .tut-tip{background:var(--lime-soft);border-left:4px solid var(--lime);border-radius:8px;padding:.55rem .8rem;font-size:.86rem;margin:.6rem 0;}
+        .tut-warn{background:#fdecea;border-left:4px solid #e53935;color:#7a1b17;border-radius:8px;padding:.55rem .8rem;font-size:.86rem;margin:.6rem 0;}
+        .tut-ill{border:1px dashed var(--line);border-radius:10px;padding:.8rem;margin:.7rem 0;display:flex;flex-direction:column;align-items:center;gap:.5rem;background:rgba(147,213,2,.06);}
+        .tut-foto{width:130px;height:130px;border:3px solid #d1d5db;border-radius:8px;background:#f9fafb;display:flex;align-items:center;justify-content:center;font-size:3rem;overflow:hidden;}
+        .tut-foto.ok{border-color:var(--lime);}
+        .tut-foto svg{width:100%;height:100%;display:block;}
+        .tut-fake-btn{background:var(--lime);color:#111;font-weight:700;border-radius:8px;padding:.45rem 1rem;font-size:.85rem;box-shadow:0 0 0 3px rgba(147,213,2,.35);}
+        .tut-arrow{font-size:1.3rem;}
+        .tut-fake-in{border:2px solid var(--lime);border-radius:8px;padding:.4rem .7rem;font-size:.85rem;background:#fff;color:#151515;min-width:220px;}
+        .tut-fake-ro{border:1px solid #d1d5db;border-radius:8px;padding:.4rem .7rem;font-size:.85rem;background:#eceee6;color:#6b7280;min-width:220px;}
+        html[data-theme="dark"] .tut-fake-ro{background:#12150e;border-color:#2c3125;color:#9aa08e;}
+        .tut-row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;justify-content:center;}
+        .tut-foot{display:flex;justify-content:space-between;align-items:center;gap:.6rem;padding:.8rem 1.2rem;border-top:1px solid var(--line);}
+        .tut-foot button{padding:.5rem 1.2rem;border-radius:8px;border:1px solid var(--line);background:transparent;color:inherit;font-weight:700;cursor:pointer;font-size:.88rem;}
+        .tut-foot button.pri{background:var(--lime);color:#111;border-color:var(--lime);}
+        .tut-foot button:disabled{opacity:.4;cursor:not-allowed;}
+        .tut-count{font-size:.8rem;color:var(--mut);}
+        @media(max-width:600px){.tut-body{padding:.8rem;}.tut-title{font-size:1rem;}.tut-fake-in,.tut-fake-ro{min-width:0;width:100%;}}
     </style>
 </head>
 <body>
@@ -266,7 +307,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
             <h1>Sistema de Gestión de Empleados</h1>
             <p>Beta Last Mile &nbsp;|&nbsp; Gestión integral de personal</p>
         </div>
-        <div class="user-chip" id="userChip" style="display:none;"><button type="button" class="theme-btn" onclick="toggleTema()">🌙 Oscuro</button><span id="userNombre"></span><button type="button" onclick="cerrarSesion()">Cerrar sesión</button></div>
+        <div class="user-chip" id="userChip" style="display:none;"><button type="button" class="tut-open" onclick="abrirTutorial()">📖 Tutorial</button><button type="button" class="theme-btn" onclick="toggleTema()">🌙 Oscuro</button><span id="userNombre"></span><button type="button" onclick="cerrarSesion()">Cerrar sesión</button></div>
     </div>
     <div class="tabs">
         <button class="tab active" onclick="cambiarTab(0)">Headcount</button>
@@ -684,6 +725,20 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
 </div>
 
 <div id="toast" class="toast"></div>
+
+<div id="tutModal" role="dialog" aria-modal="true" aria-label="Tutorial de uso">
+    <div class="tut-box">
+        <div class="tut-head"><h3>📖 Tutorial de uso</h3><button type="button" class="tut-x" onclick="cerrarTutorial()" aria-label="Cerrar">✕</button></div>
+        <div class="tut-mods" id="tutMods"></div>
+        <div class="tut-dots" id="tutDots"></div>
+        <div class="tut-body" id="tutBody"></div>
+        <div class="tut-foot">
+            <button type="button" id="tutPrev" onclick="tutMover(-1)">← Anterior</button>
+            <span class="tut-count" id="tutCount"></span>
+            <button type="button" class="pri" id="tutNext" onclick="tutMover(1)">Siguiente →</button>
+        </div>
+    </div>
+</div>
 <div class="loading" id="loading"><div class="spinner"></div><div class="loading-msg" id="loadingMsg">Cargando, espera...</div><div class="loading-sub">No cierres ni toques la pantalla</div></div>
 
 <script>
@@ -1935,6 +1990,87 @@ function cerrarSesion(){
     sessionStorage.removeItem('sesionBET');
     location.reload();
 }
+
+
+// ============================================================
+// TUTORIAL DE USO
+// ============================================================
+const _TUT_FOTO_OK = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' fill='%23dfeeb0'/><circle cx='50' cy='38' r='17' fill='%236b7a3a'/><path d='M14 100c0-22 16-36 36-36s36 14 36 36z' fill='%236b7a3a'/></svg>";
+const TUT = {
+  headcount:{nombre:'Headcount (alta)', pasos:[
+    {t:'Inicia sesión',h:`<p>Escribe tu <b>usuario</b> y <b>contraseña</b> y presiona <b>Entrar</b>. La página se recarga sola y ya puedes trabajar.</p>
+      <div class="tut-tip">💡 Si dice "Usuario o contraseña incorrectos", revisa mayúsculas y espacios. Con <b>Cerrar sesión</b> (arriba a la derecha) sales de tu cuenta.</div>`},
+    {t:'Llena los datos generales',h:`<p>En el módulo <b>Headcount</b>, elige en las listas desplegables:</p>
+      <ul><li><b>AP</b></li><li><b>Prenominista</b></li><li><b>Reclutador</b></li><li><b>Fuente de Reclutamiento</b></li><li><b>Tipo de Movimiento</b></li></ul>
+      <div class="tut-tip">💡 Junto a cada nombre aparece una etiqueta ("cargando…" → número de opciones). Espera a que termine de cargar antes de elegir.</div>`},
+    {t:'Ingresa el Usuario Beta',h:`<p>Escribe el <b>Usuario Beta</b> y presiona <b>Enter</b>. Aparece "Cargando usuario, espera…" y el sistema llena solo nombre, CURP, tienda, unidad y más.</p>
+      <div class="tut-ill"><div class="tut-fake-in">BMEXS12345 ⏎</div><div class="tut-arrow">⬇</div><div class="tut-fake-ro">Apellidos, nombre, CURP… (se llenan solos)</div></div>
+      <div class="tut-tip">💡 Los campos <b>sombreados</b> son automáticos y no se editan. Solo captura los de borde blanco y las listas desplegables.</div>
+      <div class="tut-warn">⚠️ Si sale "Usuario Beta no encontrado", revisa que esté bien escrito. Si cambias el Usuario Beta, se limpian los datos del anterior.</div>`},
+    {t:'Coloca la foto',h:`<p>En el recuadro <b>Fotografía del Empleado</b> (arriba del formulario):</p>
+      <ul><li>Presiona <b>Seleccionar Foto</b>.</li><li>Elige una imagen <b>JPG o PNG</b> de máximo <b>2 MB</b>.</li><li>Verás la vista previa dentro del cuadro. Si te equivocas, vuelve a presionar el botón y elige otra.</li></ul>
+      <div class="tut-ill"><div class="tut-row"><div class="tut-foto">👤</div><div class="tut-arrow">➜</div><div class="tut-foto ok">__FOTO__</div></div><div class="tut-fake-btn">Seleccionar Foto</div></div>
+      <div class="tut-tip">💡 Usa una foto de frente, con buena luz y sin lentes oscuros.</div>
+      <div class="tut-warn">⚠️ En <b>Vacaciones, Bajas e Incapacidades</b> la foto es <b>obligatoria</b>: si falta, el recuadro se pone rojo y no deja guardar.</div>`},
+    {t:'Elige el Tabulador',h:`<p>En <b>Datos de Contratación</b> tienes dos opciones:</p>
+      <ul><li>Escribe el <b>ID Tabulador</b> y presiona <b>Enter</b>, o</li><li>Abre la lista <b>Tabulador</b> y busca escribiendo (puesto, zona, esquema…). Los <b>Sugeridos</b> para el puesto salen primero.</li></ul>
+      <p>Al elegirlo se llenan solos <b>Pago Diario, Renta, Complemento y Bono</b>.</p>
+      <div class="tut-warn">⚠️ Sin tabulador no se puede guardar. Si algún monto queda vacío, vuelve a elegir el tabulador.</div>`},
+    {t:'Folio de vacante, tienda y unidad',h:`<p>Captura el <b>Folio Vacante</b>. Los datos de <b>Tienda / Proyecto</b> y de la <b>Unidad</b> (placa, marca, póliza…) se llenan solos con el Usuario Beta; solo revísalos.</p>
+      <div class="tut-tip">💡 Si algo viene mal en esos campos, corrígelo en la hoja de origen, no aquí.</div>`},
+    {t:'Datos de pago',h:`<p>En <b>Cuenta de Nómina</b> y <b>Cuenta de Renta</b>:</p>
+      <ul><li>Busca el <b>banco</b> escribiendo su nombre y elígelo de la lista.</li><li>Captura número de cuenta y <b>CLABE</b>.</li></ul>
+      <div class="tut-warn">⚠️ La CLABE debe tener exactamente <b>18 dígitos</b> (solo números).</div>`},
+    {t:'Datos personales y contacto',h:`<p>Completa los campos editables:</p>
+      <ul><li><b>NSS</b> (solo números). Es <b>obligatorio</b> si el usuario empieza con <b>BMEXS</b> o <b>BMEXM</b>.</li><li><b>Teléfono de Recados</b>: obligatorio, 10 dígitos.</li><li><b>Teléfono Celular</b>: opcional, 10 dígitos.</li><li><b>Nombre Contacto</b>: obligatorio.</li></ul>
+      <div class="tut-warn">⚠️ Los dos teléfonos <b>no pueden ser iguales</b>.</div>`},
+    {t:'Guarda y genera la ficha',h:`<p>Escribe <b>Observaciones</b> si hace falta y presiona <b>💾 Guardar y Generar Ficha</b>.</p>
+      <ul><li>Se muestra la ficha lista para imprimir.</li><li>Los datos se envían a Google Sheets automáticamente.</li></ul>
+      <div class="tut-tip">💡 Si sale un aviso rojo (⚠️), léelo: te dice exactamente qué campo falta o está mal.</div>
+      <p><b>¡Listo!</b> Puedes repetir el proceso con el siguiente empleado.</p>`}
+  ]},
+  otros:{nombre:'Vacaciones / Bajas / Incapacidades', pasos:[
+    {t:'Elige el módulo',h:`<p>Usa las pestañas de arriba: <b>Vacaciones</b>, <b>Bajas</b> o <b>Incapacidades</b>. Todos funcionan igual.</p>`},
+    {t:'Busca al empleado',h:`<p>En <b>🔍 Búsqueda de Empleado</b> elige cómo buscar y presiona <b>Buscar</b> (o Enter):</p>
+      <ul><li><b>Por CURP</b></li><li><b>Por Usuario Beta</b></li><li><b>Por Nombre</b> (nombre o apellido; si hay varios, elige de la lista)</li></ul>
+      <div class="tut-ill"><div class="tut-row"><div class="tut-fake-in">CURP ⏎</div><div class="tut-fake-btn">Buscar</div></div><div class="tut-arrow">⬇</div><div class="tut-fake-ro">✅ Empleado encontrado</div></div>`},
+    {t:'Coloca la foto (obligatoria)',h:`<p>Presiona <b>Seleccionar Foto</b> y elige una imagen JPG o PNG de máximo 2 MB.</p>
+      <div class="tut-ill"><div class="tut-row"><div class="tut-foto">👤</div><div class="tut-arrow">➜</div><div class="tut-foto ok">__FOTO__</div></div></div>
+      <div class="tut-warn">⚠️ Sin foto no se puede guardar.</div>`},
+    {t:'Llena el formulario',h:`<p>Los datos del empleado ya vienen cargados. Completa solo lo que corresponde al movimiento (fechas, motivo, días, etc.) y presiona el botón de guardar para generar la <b>ficha</b>.</p>`}
+  ]}
+};
+let _tutMod='headcount', _tutPaso=0;
+function abrirTutorial(){ _tutMod='headcount'; _tutPaso=0; tutRender(); document.getElementById('tutModal').classList.add('show'); }
+function cerrarTutorial(){ document.getElementById('tutModal').classList.remove('show'); try{localStorage.setItem('tutBETvisto','1');}catch(_){} }
+function tutMod(m){ _tutMod=m; _tutPaso=0; tutRender(); }
+function tutIr(i){ _tutPaso=i; tutRender(); }
+function tutMover(d){
+    const n=TUT[_tutMod].pasos.length, i=_tutPaso+d;
+    if(i>=n){ cerrarTutorial(); return; }
+    if(i<0) return;
+    _tutPaso=i; tutRender();
+}
+function tutRender(){
+    const m=TUT[_tutMod], n=m.pasos.length, p=m.pasos[_tutPaso];
+    document.getElementById('tutMods').innerHTML=Object.keys(TUT).map(k=>`<button type="button" class="tut-mod${k===_tutMod?' active':''}" onclick="tutMod('${k}')">${TUT[k].nombre}</button>`).join('');
+    document.getElementById('tutDots').innerHTML=m.pasos.map((_,i)=>`<div class="tut-dot${i<=_tutPaso?' on':''}" onclick="tutIr(${i})" title="Paso ${i+1}"></div>`).join('');
+    document.getElementById('tutBody').innerHTML=`<div class="tut-title"><span class="tut-num">${_tutPaso+1}</span>${p.t}</div>`+p.h.split('__FOTO__').join(`<img src="${_TUT_FOTO_OK}" alt="" style="width:100%;height:100%;object-fit:cover;">`);
+    document.getElementById('tutBody').scrollTop=0;
+    document.getElementById('tutCount').textContent='Paso '+(_tutPaso+1)+' de '+n;
+    document.getElementById('tutPrev').disabled=_tutPaso===0;
+    document.getElementById('tutNext').textContent=_tutPaso===n-1?'✔ Entendido':'Siguiente →';
+}
+document.addEventListener('keydown',e=>{
+    const el=document.getElementById('tutModal'); if(!el||!el.classList.contains('show'))return;
+    if(e.key==='Escape')cerrarTutorial();
+    else if(e.key==='ArrowRight')tutMover(1);
+    else if(e.key==='ArrowLeft')tutMover(-1);
+});
+// La primera vez que alguien entra con sesión, se muestra solo
+document.addEventListener('DOMContentLoaded',()=>{
+    try{ if(window.getSesionBET&&window.getSesionBET()&&!localStorage.getItem('tutBETvisto'))setTimeout(abrirTutorial,600); }catch(_){}
+});
 
 // ============================================================
 // MODO CLARO / OSCURO
