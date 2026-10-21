@@ -587,14 +587,14 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 <div id="resultVac"></div>
             </div>
             <div class="foto-box" style="padding:1.25rem;">
-                <h3>Fotografía del Empleado <span style="color:#ef4444;font-weight:700;">*</span></h3>
+                <h3>Fotografía del Empleado</h3>
                 <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem;">
                     <div id="previewFotoVac" style="width:160px;height:160px;border:3px solid #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;">
                         <span style="color:#9ca3af;font-size:3rem;">👤</span>
                     </div>
                     <input type="file" id="fotoVac" accept="image/*" style="display:none;" onchange="cargarFotoMod('vac',event)">
                     <button type="button" onclick="document.getElementById('fotoVac').click()" class="btn-primary">Seleccionar Foto</button>
-                    <p style="color:#6b7280;font-size:.875rem;">Obligatoria • Formatos: JPG, PNG • Máx: 2MB</p>
+                    <p style="color:#6b7280;font-size:.875rem;">Opcional • Formatos: JPG, PNG • Máx: 2MB</p>
                 </div>
             </div>
             <div class="form-grid">
@@ -636,14 +636,14 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 <div id="resultBaja"></div>
             </div>
             <div class="foto-box" style="padding:1.25rem;">
-                <h3>Fotografía del Empleado <span style="color:#ef4444;font-weight:700;">*</span></h3>
+                <h3>Fotografía del Empleado</h3>
                 <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem;">
                     <div id="previewFotoBaja" style="width:160px;height:160px;border:3px solid #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;">
                         <span style="color:#9ca3af;font-size:3rem;">👤</span>
                     </div>
                     <input type="file" id="fotoBaja" accept="image/*" style="display:none;" onchange="cargarFotoMod('baja',event)">
                     <button type="button" onclick="document.getElementById('fotoBaja').click()" class="btn-primary">Seleccionar Foto</button>
-                    <p style="color:#6b7280;font-size:.875rem;">Obligatoria • Formatos: JPG, PNG • Máx: 2MB</p>
+                    <p style="color:#6b7280;font-size:.875rem;">Opcional • Formatos: JPG, PNG • Máx: 2MB</p>
                 </div>
             </div>
             <div class="form-grid">
@@ -656,7 +656,8 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 <div class="form-group"><label>Fecha de Baja</label><input type="date" id="bajaFecha" name="fechaBaja" class="campo-editable"></div>
                 <div class="form-group"><label>Motivo de Baja <span id="badge-MOTIVO DE BAJA" class="catalog-badge catalog-loading">cargando...</span></label><select id="bajaMotivo" name="motivoBaja"><option value="">Seleccionar...</option></select></div>
                 <div class="form-group"><label>Renuncia Firmada</label><select id="bajaRenuncia" name="renunciaFirmada"><option value="">Seleccionar...</option><option value="SI">Sí</option><option value="NO">No</option><option value="PENDIENTE">Pendiente</option></select></div>
-                <div class="form-group"><label>Finiquito</label><select id="bajaFiniquito" name="finiquito"><option value="">Seleccionar...</option><option value="FIRMADO">Firmado</option><option value="PENDIENTE">Pendiente</option></select></div>
+                <div class="form-group"><label>Finiquito</label><select id="bajaFiniquito" name="finiquito"><option value="">Seleccionar...</option><option value="FIRMADO">SI</option><option value="PENDIENTE">NO</option></select></div>
+                <div class="form-group"><label>¿Contratable? <span style="color:#ef4444;font-weight:700;">*</span></label><select id="bajaContratable" name="contratable"><option value="">Seleccionar...</option><option value="CONTRATABLE">Contratable</option><option value="NO CONTRATABLE">No contratable</option></select></div>
             </div>
             <div class="form-group" style="margin-top:1rem;"><label>Detalle Real de la Baja</label><textarea id="bajaDetalle" name="detalleBaja" placeholder="Describe el detalle de la baja..."></textarea></div>
             <div class="form-group" style="margin-top:1rem;"><label>🔗 Link de Firma de Baja</label><input type="url" id="bajaLinkFirma" name="linkFirmaBaja" placeholder="https://..." class="campo-editable"></div>
@@ -682,14 +683,14 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 <div id="resultIncap"></div>
             </div>
             <div class="foto-box" style="padding:1.25rem;">
-                <h3>Fotografía del Empleado <span style="color:#ef4444;font-weight:700;">*</span></h3>
+                <h3>Fotografía del Empleado</h3>
                 <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem;">
                     <div id="previewFotoIncap" style="width:160px;height:160px;border:3px solid #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;">
                         <span style="color:#9ca3af;font-size:3rem;">👤</span>
                     </div>
                     <input type="file" id="fotoIncap" accept="image/*" style="display:none;" onchange="cargarFotoMod('incap',event)">
                     <button type="button" onclick="document.getElementById('fotoIncap').click()" class="btn-primary">Seleccionar Foto</button>
-                    <p style="color:#6b7280;font-size:.875rem;">Obligatoria • Formatos: JPG, PNG • Máx: 2MB</p>
+                    <p style="color:#6b7280;font-size:.875rem;">Opcional • Formatos: JPG, PNG • Máx: 2MB</p>
                 </div>
             </div>
             <div class="form-grid">
@@ -1054,12 +1055,8 @@ function guardarModulo(modulo) {
     if(modulo === 'headcount' && fotoBase64) datosFormulario.foto = fotoBase64;
     const _pf = {vacaciones:'vac',bajas:'baja',incapacidades:'incap'}[modulo];
     if(_pf){
-        if(!fotosMod[_pf]){
-            const _pv = document.getElementById('previewFoto'+{vac:'Vac',baja:'Baja',incap:'Incap'}[_pf]);
-            if(_pv){ _pv.style.borderColor = '#ef4444'; _pv.scrollIntoView({behavior:'smooth',block:'center'}); }
-            mostrarToast('⚠️ La fotografía es obligatoria', true); return;
-        }
-        datosFormulario.foto = fotosMod[_pf];
+        // La foto es opcional en Vacaciones, Bajas e Incapacidades
+        if(fotosMod[_pf]) datosFormulario.foto = fotosMod[_pf];
     }
     if(modulo === 'headcount'){
         datosFormulario.idTienda = document.getElementById('idTienda').value;
@@ -1070,6 +1067,11 @@ function guardarModulo(modulo) {
     }
 
     // Validaciones
+    if(modulo === 'bajas' && !datosFormulario.contratable){
+        const _c = document.getElementById('bajaContratable');
+        if(_c){ _c.style.borderColor = '#ef4444'; _c.focus(); }
+        mostrarToast('⚠️ Indica si el empleado es CONTRATABLE o NO CONTRATABLE', true); return;
+    }
     if(modulo === 'headcount' && (!datosFormulario.nombres || !datosFormulario.curp)){
         mostrarToast('⚠️ Por favor completa al menos Nombre y CURP', true); return;
     }
@@ -1825,12 +1827,10 @@ function generarFichaBajas(){
             <tr><td>MOTIVO</td><td>${datosFormulario.motivoBaja||'N/A'}</td></tr>
             <tr><td>RENUNCIA FIRMADA</td><td>${datosFormulario.renunciaFirmada||'N/A'}</td></tr>
             <tr><td>FINIQUITO</td><td>${datosFormulario.finiquito||'N/A'}</td></tr>
+            <tr><td>CONTRATABLE</td><td><b>${datosFormulario.contratable||'N/A'}</b></td></tr>
         </table>
         ${datosFormulario.detalleBaja?`<div style="background:#111111;border-bottom:3px solid #93d502;letter-spacing:.05em;color:white;padding:.6rem 1rem;margin:.5rem 0 .5rem;font-weight:600;">DETALLE</div><div style="padding:1rem;background:#f7faee;border:1px solid #d9e6b0;border-radius:8px;white-space:pre-wrap;">${datosFormulario.detalleBaja}</div>`:''}
-        <div style="margin-top:3rem;padding-top:2rem;border-top:2px solid #e5e7eb;display:flex;justify-content:space-between;gap:2rem;">
-            <div style="text-align:center;flex:1;"><div style="border-top:2px solid #000;padding-top:.5rem;margin-top:3rem;"><strong>Firma del Empleado</strong></div></div>
-            <div style="text-align:center;flex:1;"><div style="border-top:2px solid #000;padding-top:.5rem;margin-top:3rem;"><strong>Recursos Humanos</strong></div></div>
-        </div>`;
+`;
 }
 
 function generarFichaIncapacidades(){
@@ -2011,7 +2011,7 @@ const TUT = {
       <ul><li>Presiona <b>Seleccionar Foto</b>.</li><li>Elige una imagen <b>JPG o PNG</b> de máximo <b>2 MB</b>.</li><li>Verás la vista previa dentro del cuadro. Si te equivocas, vuelve a presionar el botón y elige otra.</li></ul>
       <div class="tut-ill"><div class="tut-row"><div class="tut-foto">👤</div><div class="tut-arrow">➜</div><div class="tut-foto ok">__FOTO__</div></div><div class="tut-fake-btn">Seleccionar Foto</div></div>
       <div class="tut-tip">💡 Usa una foto de frente, con buena luz y sin lentes oscuros.</div>
-      <div class="tut-warn">⚠️ En <b>Vacaciones, Bajas e Incapacidades</b> la foto es <b>obligatoria</b>: si falta, el recuadro se pone rojo y no deja guardar.</div>`},
+      <div class="tut-tip">💡 La foto es <b>opcional</b> en todos los módulos. Si la pones, sale en la ficha; si no, la ficha se genera sin ella.</div>`},
     {t:'Elige el Tabulador',h:`<p>En <b>Datos de Contratación</b> tienes dos opciones:</p>
       <ul><li>Escribe el <b>ID Tabulador</b> y presiona <b>Enter</b>, o</li><li>Abre la lista <b>Tabulador</b> y busca escribiendo (puesto, zona, esquema…). Los <b>Sugeridos</b> para el puesto salen primero.</li></ul>
       <p>Al elegirlo se llenan solos <b>Pago Diario, Renta, Complemento y Bono</b>.</p>
@@ -2034,10 +2034,13 @@ const TUT = {
     {t:'Busca al empleado',h:`<p>En <b>🔍 Búsqueda de Empleado</b> elige cómo buscar y presiona <b>Buscar</b> (o Enter):</p>
       <ul><li><b>Por CURP</b></li><li><b>Por Usuario Beta</b></li><li><b>Por Nombre</b> (nombre o apellido; si hay varios, elige de la lista)</li></ul>
       <div class="tut-ill"><div class="tut-row"><div class="tut-fake-in">CURP ⏎</div><div class="tut-fake-btn">Buscar</div></div><div class="tut-arrow">⬇</div><div class="tut-fake-ro">✅ Empleado encontrado</div></div>`},
-    {t:'Coloca la foto (obligatoria)',h:`<p>Presiona <b>Seleccionar Foto</b> y elige una imagen JPG o PNG de máximo 2 MB.</p>
+    {t:'Coloca la foto (opcional)',h:`<p>Presiona <b>Seleccionar Foto</b> y elige una imagen JPG o PNG de máximo 2 MB.</p>
       <div class="tut-ill"><div class="tut-row"><div class="tut-foto">👤</div><div class="tut-arrow">➜</div><div class="tut-foto ok">__FOTO__</div></div></div>
-      <div class="tut-warn">⚠️ Sin foto no se puede guardar.</div>`},
-    {t:'Llena el formulario',h:`<p>Los datos del empleado ya vienen cargados. Completa solo lo que corresponde al movimiento (fechas, motivo, días, etc.) y presiona el botón de guardar para generar la <b>ficha</b>.</p>`}
+      <div class="tut-tip">💡 Sin foto también se puede guardar.</div>`},
+    {t:'Llena el formulario',h:`<p>Los datos del empleado ya vienen cargados. Completa solo lo que corresponde al movimiento (fechas, motivo, días, etc.) y presiona el botón de guardar para generar la <b>ficha</b>.</p>`},
+    {t:'Solo en Bajas: ¿Contratable?',h:`<p>En el módulo <b>Bajas</b>, elige en <b>¿Contratable?</b>:</p>
+      <ul><li><b>Contratable</b>: se le puede volver a contratar.</li><li><b>No contratable</b>: no se debe recontratar.</li></ul>
+      <div class="tut-warn">⚠️ Este campo es obligatorio en Bajas: sin elegirlo no deja guardar. Aparece también en la ficha.</div>`}
   ]}
 };
 let _tutMod='headcount', _tutPaso=0;
