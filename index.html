@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- ⚠️ CAMBIA SOLO ESTE VALOR EN CADA ACTUALIZACIÓN (ej. V.B.1.1 -> V.B.1.2). Los usuarios con otra versión abierta quedan obligados a actualizar. -->
-    <meta name="app-version" content="V.B.1.3">
+    <meta name="app-version" content="V.B.1.4">
     <title>Sistema de Gestión de Empleados - BET</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -1960,6 +1960,8 @@ function generarFichaHeadcount(){
                     </table>
                 </div>
             </div>
+            <div style="background:${colorBgSec};border-bottom:2px solid #93d502;letter-spacing:.05em;color:white;padding:.3rem .5rem;font-weight:700;font-size:.82rem;">OBSERVACIONES</div>
+            <div style="padding:.4rem .5rem;border:1px solid #bfc4b0;font-size:.73rem;min-height:2.2rem;white-space:pre-wrap;word-break:break-word;">${String(datosFormulario.observaciones||'NA').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
         </div>`;
 }
 
