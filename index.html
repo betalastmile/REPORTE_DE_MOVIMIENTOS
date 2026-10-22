@@ -324,7 +324,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
             <div class="aviso-bloqueado">Los campos sombreados se llenan automáticamente al ingresar el Usuario Beta. Solo puedes editar los campos marcados con borde blanco y las listas desplegables.</div>
             <!-- FOTO -->
             <div class="foto-box">
-                <h3>Fotografía del Empleado</h3>
+                <h3>Fotografía del Empleado <span style="color:#ef4444;">* (obligatoria)</span></h3>
                 <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;">
                     <div id="previewFoto" style="width:200px;height:200px;border:3px solid #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;">
                         <span style="color:#9ca3af;font-size:3rem;">👤</span>
@@ -770,7 +770,7 @@ function cargarFoto(event) {
     if(file.size>2*1024*1024){alert('⚠️ Máximo 2MB');return;}
     if(!file.type.startsWith('image/')){alert('⚠️ Imagen inválida');return;}
     const reader = new FileReader();
-    reader.onload = e => { fotoBase64=e.target.result; document.getElementById('previewFoto').innerHTML=`<img src="${fotoBase64}" style="width:100%;height:100%;object-fit:cover;">`; };
+    reader.onload = e => { fotoBase64=e.target.result; const _pv=document.getElementById('previewFoto'); _pv.innerHTML=`<img src="${fotoBase64}" style="width:100%;height:100%;object-fit:cover;">`; _pv.style.borderColor='#d1d5db'; };
     reader.readAsDataURL(file);
 }
 
@@ -1075,6 +1075,12 @@ function guardarModulo(modulo) {
     if(modulo === 'headcount' && (!datosFormulario.nombres || !datosFormulario.curp)){
         mostrarToast('⚠️ Por favor completa al menos Nombre y CURP', true); return;
     }
+    // La foto es OBLIGATORIA solo en Headcount (en los demás módulos es opcional)
+    if(modulo === 'headcount' && !fotoBase64){
+        const _pv = document.getElementById('previewFoto');
+        if(_pv){ _pv.style.borderColor = '#ef4444'; _pv.scrollIntoView({behavior:'smooth',block:'center'}); }
+        mostrarToast('⚠️ La fotografía del empleado es obligatoria en Headcount', true); return;
+    }
     if(modulo === 'headcount'){
         const ub = (document.getElementById('usuarioBeta').value || '').toUpperCase().trim();
         const nssVal = (document.getElementById('nss').value || '').trim();
@@ -1334,7 +1340,7 @@ const TAB_ALIAS={
     total:['SUELDO MENSUAL BRUTO','SUELDO MENSUAL TOTAL'],
     imss:['SUELDO IMSS','SUELDO MENSUAL IMSS'],
     pagoDiarioTotal:['PAGO DIARIO TOTAL'],
-    gasolina:['GASOLINA POR TOKA']
+    gasolina:['APLICA TOKA','GASOLINA POR TOKA','GASOLINA TOKA','APLICA GASOLINA']
 };
 let _tabCatP=null;
 function cargarCatalogoTabuladores(){
@@ -1614,8 +1620,19 @@ function aplicarFilaTabulador(d){
     let pdt=numTab(tabCampo(d,TAB_ALIAS.pagoDiarioTotal));
     if(pdt===''&&t!=='')pdt=Math.round(t/30*100)/100;
     set('pagoDiarioTotal',pdt===''?NA_TAB:pdt);
-    const ga=tabCampo(d,TAB_ALIAS.gasolina);
-    set('gasolinaPorToka',(ga===undefined||ga===null||ga.toString().trim()==='')?NA_TAB:ga.toString().trim());
+    set('gasolinaPorToka',gasolinaTab(d));
+}
+// Gasolina por TOKA: si la celda trae "TOKA"/"TOCA" (o cualquier valor real) => SI APLICA; si viene vacía o con "-" => NO APLICA
+function gasolinaTab(d){
+    let ga=tabCampo(d,TAB_ALIAS.gasolina);
+    if(ga===''&&d){ // respaldo: cualquier encabezado que contenga "TOKA" o "GASOLINA"
+        const k=Object.keys(d).find(k=>{const n=normTxt(k);return (n.includes('TOKA')||n.includes('TOCA')||n.includes('GASOLINA'))&&d[k]!==undefined&&d[k]!==null&&d[k].toString().trim()!=='';});
+        if(k)ga=d[k];
+    }
+    // Solo SI APLICA cuando la celda dice TOKA/TOCA/SI; vacío, "-", N/A, NO => NO APLICA
+    const v=normTxt(ga).replace(/[^A-Z0-9]/g,'');
+    if(v==='TOKA'||v==='TOCA'||v==='SI'||v==='SIAPLICA')return 'SI APLICA';
+    return 'NO APLICA';
 }
 // Respaldo: búsqueda directa por ID (acción getTabulador) si el catálogo completo no está disponible
 function aplicarDatosTabulador(d){
@@ -2011,7 +2028,7 @@ const TUT = {
       <ul><li>Presiona <b>Seleccionar Foto</b>.</li><li>Elige una imagen <b>JPG o PNG</b> de máximo <b>2 MB</b>.</li><li>Verás la vista previa dentro del cuadro. Si te equivocas, vuelve a presionar el botón y elige otra.</li></ul>
       <div class="tut-ill"><div class="tut-row"><div class="tut-foto">👤</div><div class="tut-arrow">➜</div><div class="tut-foto ok">__FOTO__</div></div><div class="tut-fake-btn">Seleccionar Foto</div></div>
       <div class="tut-tip">💡 Usa una foto de frente, con buena luz y sin lentes oscuros.</div>
-      <div class="tut-tip">💡 La foto es <b>opcional</b> en todos los módulos. Si la pones, sale en la ficha; si no, la ficha se genera sin ella.</div>`},
+      <div class="tut-tip">💡 La foto es <b>obligatoria</b> en Headcount. En Vacaciones, Bajas e Incapacidades es opcional.</div>`},
     {t:'Elige el Tabulador',h:`<p>En <b>Datos de Contratación</b> tienes dos opciones:</p>
       <ul><li>Escribe el <b>ID Tabulador</b> y presiona <b>Enter</b>, o</li><li>Abre la lista <b>Tabulador</b> y busca escribiendo (puesto, zona, esquema…). Los <b>Sugeridos</b> para el puesto salen primero.</li></ul>
       <p>Al elegirlo se llenan solos <b>Pago Diario, Renta, Complemento y Bono</b>.</p>
