@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- ⚠️ CAMBIA SOLO ESTE VALOR EN CADA ACTUALIZACIÓN (ej. V.B.1.1 -> V.B.1.2). Los usuarios con otra versión abierta quedan obligados a actualizar. -->
-    <meta name="app-version" content="V.B.1.4">
+    <meta name="app-version" content="V.B.1.5">
     <title>Sistema de Gestión de Empleados - BET</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -536,8 +536,6 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
             <h4 style="font-size:1rem;font-weight:600;color:#4a5568;margin-top:1.5rem;margin-bottom:1rem;">Dirección</h4>
             <div class="form-grid">
                 <div class="form-group"><label>Calle</label><input type="text" id="calle" name="calle" placeholder="Calle" readonly></div>
-                <div class="form-group"><label>No. Exterior</label><input type="text" id="noExt" name="noExt" placeholder="Número" readonly></div>
-                <div class="form-group"><label>No. Interior</label><input type="text" id="noInt" name="noInt" placeholder="Número/Depto" readonly></div>
                 <div class="form-group"><label>Entidad Federativa</label><input type="text" id="entidadFederativaDireccion" name="entidadFederativaDireccion" placeholder="Estado" readonly></div>
                 <div class="form-group"><label>Alcaldía/Municipio</label><input type="text" id="alcaldiaMunicipio" name="alcaldiaMunicipio" placeholder="Alcaldía/Municipio" readonly></div>
                 <div class="form-group"><label>Colonia</label><input type="text" id="colonia" name="colonia" placeholder="Colonia" readonly></div>
@@ -858,6 +856,7 @@ function limpiarFormulario(modulo) {
         form.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
         resetTabulador();
         resetNA();
+        window._bancoUB = null; window._bancoModo = null;
 
         // Limpiar campos de bancos
         document.getElementById('bancoNominaSearch').value = '';
@@ -1401,7 +1400,7 @@ async function _autoLlenarUsuarioBetaInner() {
     const ub=document.getElementById('usuarioBeta').value.trim(); if(!ub)return;
     actualizarNssObligatorio(ub);
     // Si cambió el Usuario Beta, se limpia el NSS del anterior (el nuevo se trae de la hoja)
-    if(window._ubNssPrev!==ub){const nEl=document.getElementById('nss');if(nEl)nEl.value='';['bancoNominaSearch','claveBanco','noCuentaNomina','clabeNomina','bancoRentaSearch','claveBanco2','noCuentaBancariaRenta','clabeRenta'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window._ubNssPrev=ub;if(typeof resetTabulador==='function'){resetTabulador();limpiarCamposTabulador();}}
+    if(window._ubNssPrev!==ub){const nEl=document.getElementById('nss');if(nEl)nEl.value='';['bancoNominaSearch','claveBanco','noCuentaNomina','clabeNomina','bancoRentaSearch','claveBanco2','noCuentaBancariaRenta','clabeRenta'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});window._ubNssPrev=ub;window._bancoUB=null;window._bancoModo=null;if(typeof resetTabulador==='function'){resetTabulador();limpiarCamposTabulador();}}
     if(!window._cUB)window._cUB={};
     let d;
     if(window._cUB[ub]&&nssDeUB(window._cUB[ub])){d=window._cUB[ub];aplicarDatosUB(d);}
@@ -1586,6 +1585,7 @@ async function poblarTabuladores(preRef,forzar){
 }
 function limpiarCamposTabulador(){
     ['idTabulador','puestoTabulador','periodicidadPago','esquemaContratacion','pagoDiario','rentaPago','complemento','bono','pagoDiarioTotal','sueldoMensualTotal','sueldoMensualIMSS','gasolinaPorToka'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    aplicarBancoPorEsquema();
 }
 function seleccionarTabulador(){
     const sel=document.getElementById('tabulador');const nom=sel.value;
@@ -1778,6 +1778,7 @@ function aplicarFilaTabulador(d){
         if(_e)_e.title='Columnas encontradas: ['+_cols.join(' | ')+'] • Valor leído: "'+_cols.map(k=>d[k]).join(' | ')+'"';
         if(!_cols.length)console.warn('Gasolina TOKA: el tabulador no trae ninguna columna con TOKA/GASOLINA. Columnas recibidas:',Object.keys(d||{}));
     }catch(_){}
+    aplicarBancoPorEsquema();
 }
 // Gasolina por TOKA: si la celda trae "TOKA"/"TOCA" (o cualquier valor real) => SI APLICA; si viene vacía o con "-" => NO APLICA
 function gasolinaTab(d){
@@ -1801,7 +1802,7 @@ function aplicarDatosTabulador(d){
 }
 
 function aplicarDatosUB(d){
-    const m={'USUARIO BETA':'usuarioBeta','NOMBRE(S)':'nombres','NOMBRES':'nombres','APELLIDO PATERNO':'apellidoPaterno','APELLIDO MATERNO':'apellidoMaterno','CURP':'curp','RFC':'rfc','NSS':'nss','IDMEX':'idmex','PUESTO':'puesto','DEPARTAMENTO':'departamento','FECHA REAL DE INGRESO':'fechaRealIngreso','SUCURSAL':'sucursal','FORMATO':'formato','CLIENTE':'cliente','PROYECTO':'proyecto','DETERMINANTE':'determinante','ENTIDAD FEDERATIVA':'entidadFederativa','MUNICIPIO':'municipio','FECHA DE NACIMIENTO':'fechaNacimiento','LUGAR DE NACIMIENTO':'lugarNacimiento','NACIONALIDAD':'nacionalidad','ESCOLARIDAD':'escolaridad','NO. DE LICENCIA':'noLicencia','NO. CRÉDITO INFONAVIT':'noCreditoInfonavit','CALLE':'calle','NO. EXTERIOR':'noExt','NO. INTERIOR':'noInt','COLONIA':'colonia','ALCALDÍA/MUNICIPIO':'alcaldiaMunicipio','ENTIDAD FEDERATIVA DIRECCIÓN':'entidadFederativaDireccion','C.P.':'cp','CORREO ELECTRÓNICO':'correoElectronico','TELÉFONO CELULAR':'telefonoCelular','TELÉFONO DE RECADOS':'telefonoRecados','NOMBRE CONTACTO':'nombreContacto','PLACA':'placa','MARCA':'marca','SUBMARCA':'submarca','COLOR':'color','ESQUEMA UNIDADES':'esquemaUnidades','PROPIETARIO':'propietario','ASEGURADORA':'aseguradora','NO. DE PÓLIZA':'noPoliza','ID TIENDA':'idTienda','CLAVE BANCO':'claveBanco','SEXO':'sexo','ESTADO CIVIL':'estadoCivil','ESTATUS':'estatus','AP':'ap','RECLUTADOR':'reclutador','JEFE INMEDIATO':'jefeInmediato','FUENTE DE RECLUTAMIENTO':'fuenteReclutamiento','FUENTE_RECLUTAMIENTO':'fuenteReclutamiento'};
+    const m={'USUARIO BETA':'usuarioBeta','NOMBRE(S)':'nombres','NOMBRES':'nombres','APELLIDO PATERNO':'apellidoPaterno','APELLIDO MATERNO':'apellidoMaterno','CURP':'curp','RFC':'rfc','NSS':'nss','IDMEX':'idmex','PUESTO':'puesto','DEPARTAMENTO':'departamento','FECHA REAL DE INGRESO':'fechaRealIngreso','SUCURSAL':'sucursal','FORMATO':'formato','CLIENTE':'cliente','PROYECTO':'proyecto','DETERMINANTE':'determinante','ENTIDAD FEDERATIVA':'entidadFederativa','MUNICIPIO':'municipio','FECHA DE NACIMIENTO':'fechaNacimiento','LUGAR DE NACIMIENTO':'lugarNacimiento','NACIONALIDAD':'nacionalidad','ESCOLARIDAD':'escolaridad','NO. DE LICENCIA':'noLicencia','NO. CRÉDITO INFONAVIT':'noCreditoInfonavit','CALLE':'calle','COLONIA':'colonia','ALCALDÍA/MUNICIPIO':'alcaldiaMunicipio','ENTIDAD FEDERATIVA DIRECCIÓN':'entidadFederativaDireccion','C.P.':'cp','CORREO ELECTRÓNICO':'correoElectronico','TELÉFONO CELULAR':'telefonoCelular','TELÉFONO DE RECADOS':'telefonoRecados','NOMBRE CONTACTO':'nombreContacto','PLACA':'placa','MARCA':'marca','SUBMARCA':'submarca','COLOR':'color','ESQUEMA UNIDADES':'esquemaUnidades','PROPIETARIO':'propietario','ASEGURADORA':'aseguradora','NO. DE PÓLIZA':'noPoliza','ID TIENDA':'idTienda','CLAVE BANCO':'claveBanco','SEXO':'sexo','ESTADO CIVIL':'estadoCivil','ESTATUS':'estatus','AP':'ap','RECLUTADOR':'reclutador','JEFE INMEDIATO':'jefeInmediato','FUENTE DE RECLUTAMIENTO':'fuenteReclutamiento','FUENTE_RECLUTAMIENTO':'fuenteReclutamiento'};
     const cf=new Set(['fechaRealIngreso','fechaNacimiento']);
     function pf(v){if(!v)return'';const s=v.toString().trim();if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;const mm=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(mm){const[,dd,mo,y]=mm;return y+'-'+mo.padStart(2,'0')+'-'+dd.padStart(2,'0');}const f=new Date(s);if(!isNaN(f))return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');return s;}
     Object.keys(m).forEach(c=>{if(d[c]!==undefined&&d[c]!==null&&d[c]!==''){const el=document.getElementById(m[c]);if(!el)return;el.value=cf.has(m[c])?pf(d[c]):d[c];}});
@@ -1826,12 +1827,38 @@ function aplicarDatosUB(d){
     let cr=ubCampo(d,['NO. CUENTA RENTA','NUMERO DE CUENTA RENTA','CUENTA RENTA','CUENTA BANCARIA RENTA']);
     let clr=ubCampo(d,['CLABE RENTA','CLABE INTERBANCARIA RENTA']);
     if(!clr&&cr){clr=cr;}cr='';
-    if(bn)sincBanco('nomina',bn);
-    if(br)sincBanco('renta',br);
-    if(cn){const e=document.getElementById('noCuentaNomina');if(e)e.value=cn;}
-    if(cl){const e=document.getElementById('clabeNomina');if(e)e.value=cl;}
-    if(cr){const e=document.getElementById('noCuentaBancariaRenta');if(e)e.value=cr;}
-    if(clr){const e=document.getElementById('clabeRenta');if(e)e.value=clr;}
+    // Se guarda el origen y se reparte según el ESQUEMA: ALIADO INTERNO → todo cae en Cuenta de Renta; otro esquema → Cuenta de Nómina
+    window._bancoUB={bn,cl,br,clr,cn,cr};
+    window._bancoModo=null;
+    aplicarBancoPorEsquema();
+}
+function _setBancoCampos(t,banco,cuenta,clabe){
+    const c=t==='nomina'?{s:'bancoNominaSearch',k:'claveBanco',n:'noCuentaNomina',l:'clabeNomina'}:{s:'bancoRentaSearch',k:'claveBanco2',n:'noCuentaBancariaRenta',l:'clabeRenta'};
+    const g=id=>document.getElementById(id);
+    g(c.s).value='';g(c.k).value='';g(c.n).value='';g(c.l).value='';
+    if(banco)sincBanco(t,banco);
+    if(cuenta)g(c.n).value=cuenta;
+    if(clabe)g(c.l).value=clabe;
+}
+function aplicarBancoPorEsquema(){
+    const o=window._bancoUB; if(!o)return;
+    if(!(o.bn||o.cl||o.br||o.clr||o.cn||o.cr))return;           // la hoja no trae datos bancarios: no se toca nada
+    const esq=(document.getElementById('esquemaContratacion')||{}).value||'';
+    const modo=ubClave(esq).includes('ALIADOINTERNO')?'aliado':'normal';
+    if(window._bancoModo===modo)return;                          // sin cambio de esquema: no se pisa lo que el usuario edite
+    window._bancoModo=modo;
+    if(modo==='aliado'){
+        // Datos bancarios de la hoja (Banco, Clave, Cuenta, CLABE de nómina) → Cuenta de Renta
+        _setBancoCampos('renta',o.bn||o.br,o.cn||o.cr,o.cl||o.clr);
+        // Cuenta de Nómina no aplica en este esquema
+        _setBancoCampos('nomina','','','');
+        ['bancoNominaSearch','claveBanco','noCuentaNomina','clabeNomina'].forEach(id=>{const e=document.getElementById(id);if(e){e.value='NA';e.classList.remove('campo-falta');}});
+        mostrarToast('ℹ️ Esquema ALIADO INTERNO: los datos bancarios se capturaron en Cuenta de Renta');
+    } else {
+        // Cualquier otro esquema: Nómina con los datos de nómina; Renta con los de renta
+        _setBancoCampos('nomina',o.bn,o.cn,o.cl);
+        _setBancoCampos('renta',o.br,o.cr,o.clr);
+    }
 }
 
 // ============================================================
@@ -2322,6 +2349,7 @@ const TUT = {
       <div class="tut-tip">💡 Si algo viene mal en esos campos, corrígelo en la hoja de origen, no aquí.</div>`},
     {t:'Datos de pago',h:`<p>En <b>Cuenta de Nómina</b> y <b>Cuenta de Renta</b>:</p>
       <ul><li>Busca el <b>banco</b> escribiendo su nombre y elígelo de la lista.</li><li>Captura número de cuenta, <b>CLABE</b> y link del estado de cuenta.</li></ul>
+      <div class="tut-tip">💡 Si el <b>Esquema</b> del tabulador es <b>ALIADO INTERNO</b>, los datos bancarios (banco, clave, cuenta y CLABE) se capturan solos en <b>Cuenta de Renta</b> y la <b>Cuenta de Nómina</b> queda en NA. Con cualquier otro esquema se quedan en <b>Cuenta de Nómina</b>.</div>
       <div class="tut-warn">⚠️ La CLABE debe tener exactamente <b>18 dígitos</b> (solo números), o <b>NA</b> si no aplica. Todos los campos de pago son obligatorios (NA si no aplican).</div>`},
     {t:'Datos personales y contacto',h:`<p>Completa los campos editables:</p>
       <ul><li><b>Homoclave</b> (3 caracteres): va junto al RFC. Si no tiene, déjala vacía y el sistema captura <b>000</b>. RFC y homoclave se guardan juntos en la misma columna RFC.</li><li><b>IDMEX</b>, links (IMSS, Constancia Fiscal), <b>Crédito INFONAVIT</b>: obligatorios (NA si no aplican).</li><li><b>NSS</b> (solo números). Es <b>obligatorio con número real</b> si el usuario empieza con <b>BMEXS</b> o <b>BMEXM</b>; en los demás puede ser NA.</li><li><b>Teléfono de Recados</b>: obligatorio, 10 dígitos.</li><li><b>Teléfono Celular</b>: 10 dígitos o NA.</li><li><b>Nombre Contacto</b>: obligatorio.</li></ul>
