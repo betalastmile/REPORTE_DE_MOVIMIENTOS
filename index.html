@@ -4,6 +4,8 @@
 <script>(function(){try{var t=localStorage.getItem('temaBET');if(!t)t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ⚠️ CAMBIA SOLO ESTE VALOR EN CADA ACTUALIZACIÓN (ej. V.B.1.1 -> V.B.1.2). Los usuarios con otra versión abierta quedan obligados a actualizar. -->
+    <meta name="app-version" content="V.B.1.1">
     <title>Sistema de Gestión de Empleados - BET</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -145,6 +147,14 @@
         /* LOGIN */
         #loginOverlay{display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#111111 0%,#2a2a2a 100%);align-items:center;justify-content:center;padding:1rem;}
         #loginOverlay.show{display:flex;}
+        #updateOverlay{display:none;position:fixed;inset:0;z-index:200000;background:rgba(10,12,8,.92);align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);}
+        #updateOverlay.show{display:flex;}
+        .update-box{background:#fff;color:#111;border-radius:14px;padding:2rem;width:100%;max-width:400px;text-align:center;border-top:6px solid #93d502;box-shadow:0 20px 60px rgba(0,0,0,.6);}
+        html[data-theme="dark"] .update-box{background:#171a13;color:#f1f1f1;box-shadow:0 20px 60px rgba(0,0,0,.7),0 0 0 1px #2c3125;}
+        .update-box h2{font-size:1.25rem;margin-bottom:.6rem;}
+        .update-box p{font-size:.9rem;opacity:.85;margin-bottom:.5rem;}
+        .update-box button{margin-top:1rem;width:100%;padding:.8rem;border:none;border-radius:8px;background:#93d502;color:#111;font-weight:700;font-size:1rem;cursor:pointer;}
+        .ver-tag{font-size:.7rem;opacity:.6;font-weight:600;white-space:nowrap;}
         body.sin-sesion .container{display:none;}
         .login-box{background:#fff;border-radius:14px;padding:2rem;width:100%;max-width:380px;border-top:6px solid var(--lime);box-shadow:0 20px 60px rgba(0,0,0,.5);}
         .login-box h2{font-size:1.1rem;letter-spacing:.08em;text-transform:uppercase;color:var(--black);margin-bottom:.25rem;}
@@ -284,6 +294,16 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
     };
 })();
 </script>
+<div id="updateOverlay">
+    <div class="update-box">
+        <div style="font-size:2.2rem;">🔄</div>
+        <h2>Actualización obligatoria</h2>
+        <p>Hay una nueva versión del sistema disponible.</p>
+        <p>Versión actual: <b id="updVerActual"></b> &nbsp;→&nbsp; Nueva: <b id="updVerNueva"></b></p>
+        <p style="font-size:.8rem;">Tus borradores sin guardar se conservan. Necesitas actualizar para continuar.</p>
+        <button type="button" onclick="actualizarAhora()">Actualizar ahora</button>
+    </div>
+</div>
 <div id="loginOverlay">
     <canvas id="loginFx"></canvas>
     <div id="loginLogos"></div>
@@ -298,6 +318,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
         <input type="password" id="loginClave" autocomplete="current-password" onkeydown="if(event.key==='Enter')iniciarSesion()">
         <div id="loginError"></div>
         <button type="button" id="loginBtn" onclick="iniciarSesion()">Entrar</button>
+        <div class="ver-tag" id="verTagLogin" style="text-align:center;margin-top:.9rem;"></div>
     </div>
 </div>
 <div class="container">
@@ -307,7 +328,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
             <h1>Sistema de Gestión de Empleados</h1>
             <p>Beta Last Mile &nbsp;|&nbsp; Gestión integral de personal</p>
         </div>
-        <div class="user-chip" id="userChip" style="display:none;"><button type="button" class="tut-open" onclick="abrirTutorial()">📖 Tutorial</button><button type="button" class="theme-btn" onclick="toggleTema()">🌙 Oscuro</button><span id="userNombre"></span><button type="button" onclick="cerrarSesion()">Cerrar sesión</button></div>
+        <div class="user-chip" id="userChip" style="display:none;"><button type="button" class="tut-open" onclick="abrirTutorial()">📖 Tutorial</button><button type="button" class="theme-btn" onclick="toggleTema()">🌙 Oscuro</button><span class="ver-tag" id="verTag"></span><span id="userNombre"></span><button type="button" onclick="cerrarSesion()">Cerrar sesión</button></div>
     </div>
     <div class="tabs">
         <button class="tab active" onclick="cambiarTab(0)">Headcount</button>
@@ -1621,6 +1642,12 @@ function aplicarFilaTabulador(d){
     if(pdt===''&&t!=='')pdt=Math.round(t/30*100)/100;
     set('pagoDiarioTotal',pdt===''?NA_TAB:pdt);
     set('gasolinaPorToka',gasolinaTab(d));
+    try{ // diagnóstico: al pasar el cursor sobre el campo se ve qué columna/valor se leyó del tabulador
+        const _e=document.getElementById('gasolinaPorToka');
+        const _cols=Object.keys(d||{}).filter(k=>/TOKA|TOCA|GASOLINA/i.test(k));
+        if(_e)_e.title='Columnas encontradas: ['+_cols.join(' | ')+'] • Valor leído: "'+_cols.map(k=>d[k]).join(' | ')+'"';
+        if(!_cols.length)console.warn('Gasolina TOKA: el tabulador no trae ninguna columna con TOKA/GASOLINA. Columnas recibidas:',Object.keys(d||{}));
+    }catch(_){}
 }
 // Gasolina por TOKA: si la celda trae "TOKA"/"TOCA" (o cualquier valor real) => SI APLICA; si viene vacía o con "-" => NO APLICA
 function gasolinaTab(d){
@@ -1991,7 +2018,7 @@ async function iniciarSesion(){
             return;
         }
         if(r.status === 'success'){
-            sessionStorage.setItem('sesionBET', JSON.stringify({usuario: r.usuario, clave: clave, nombre: r.nombre}));
+            sessionStorage.setItem('sesionBET', JSON.stringify({usuario: r.usuario, clave: clave, nombre: r.nombre, dia: hoyLocalBET()}));
             location.reload();   // recarga para que los catálogos se carguen ya con la sesión
             return;
         }
@@ -2007,6 +2034,68 @@ function cerrarSesion(){
     sessionStorage.removeItem('sesionBET');
     location.reload();
 }
+
+// ============================================================
+// VERSIÓN Y ACTUALIZACIÓN OBLIGATORIA
+// ============================================================
+const VERSION_APP = (document.querySelector('meta[name="app-version"]')||{}).content || '';
+let _verNueva = null;
+function mostrarVersion(){
+    const t=document.getElementById('verTag'); if(t) t.textContent=VERSION_APP; const l=document.getElementById('verTagLogin'); if(l) l.textContent=VERSION_APP;
+}
+function bloquearPorVersion(nueva){
+    _verNueva = nueva;
+    document.getElementById('updVerActual').textContent = VERSION_APP;
+    document.getElementById('updVerNueva').textContent = nueva;
+    document.getElementById('updateOverlay').classList.add('show');
+    document.body.classList.add('sin-sesion');
+}
+async function revisarVersion(){
+    if(location.protocol==='file:' || _verNueva) return;
+    try{
+        const res = await fetch(location.pathname + '?_chk=' + Date.now(), {cache:'no-store'});
+        if(!res.ok) return;
+        const m = (await res.text()).match(/<meta\s+name=["']app-version["']\s+content=["']([^"']+)["']/i);
+        if(m && m[1] !== VERSION_APP) bloquearPorVersion(m[1]);
+    }catch(_){}
+}
+function actualizarAhora(){
+    // recarga forzada saltando caché
+    location.replace(location.pathname + '?v=' + encodeURIComponent(_verNueva||Date.now()) + '&t=' + Date.now());
+}
+mostrarVersion();
+revisarVersion();
+setInterval(revisarVersion, 60000);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) revisarVersion(); });
+window.addEventListener('focus', revisarVersion);
+
+// ============================================================
+// CIERRE AUTOMÁTICO DE SESIÓN A LAS 00:00 (hora del equipo)
+// ============================================================
+function hoyLocalBET(){
+    const d=new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function vencerSesionMedianoche(){
+    if(!getSesionBET()) return;
+    try{ if(typeof guardarBorradores==='function') guardarBorradores(); }catch(_){}
+    try{ mostrarToast('🕛 Sesión cerrada automáticamente (00:00). Inicia sesión de nuevo.', true); }catch(_){}
+    setTimeout(cerrarSesion, 1500);
+}
+function revisarSesionMedianoche(){
+    const ses=getSesionBET(); if(!ses) return;
+    if(!ses.dia){ ses.dia=hoyLocalBET(); try{sessionStorage.setItem('sesionBET',JSON.stringify(ses));}catch(_){} return; }
+    if(ses.dia!==hoyLocalBET()) vencerSesionMedianoche();   // ya pasó la medianoche desde que inició sesión
+}
+function programarMedianoche(){
+    const ahora=new Date();
+    const sig=new Date(ahora.getFullYear(),ahora.getMonth(),ahora.getDate()+1,0,0,0,0);
+    setTimeout(()=>{ revisarSesionMedianoche(); programarMedianoche(); }, Math.max(1000, sig-ahora+500));
+}
+programarMedianoche();
+setInterval(revisarSesionMedianoche, 30000);                       // respaldo (equipo suspendido / pestaña inactiva)
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) revisarSesionMedianoche(); });
+window.addEventListener('focus', revisarSesionMedianoche);
 
 
 // ============================================================
@@ -2184,6 +2273,7 @@ function iniciarFxLogin(){
 (function initLogin(){
     const ses = getSesionBET();
     if(!ses){ bloqueoLogin(true); return; }
+    revisarSesionMedianoche();
     pintarUsuario(ses.nombre);
     // Revalida en segundo plano (por si cambiaron la contraseña o quitaron el acceso)
     fetch(`${SCRIPT_URL}?action=login&usuario=${encodeURIComponent(ses.usuario)}&clave=${encodeURIComponent(ses.clave)}`, {cache:'no-store'})
