@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- ⚠️ CAMBIA SOLO ESTE VALOR EN CADA ACTUALIZACIÓN (ej. V.B.1.1 -> V.B.1.2). Los usuarios con otra versión abierta quedan obligados a actualizar. -->
-    <meta name="app-version" content="V.B.1.1">
+    <meta name="app-version" content="V.B.1.2">
     <title>Sistema de Gestión de Empleados - BET</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -290,6 +290,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 if(ses) url = u + (u.indexOf('?') === -1 ? '?' : '&') + 'u=' + encodeURIComponent(ses.usuario) + '&k=' + encodeURIComponent(ses.clave);
             }
         }catch(_){}
+        try{ if(String(url).indexOf('script.google.com/macros')!==-1){ opts = Object.assign({cache:'no-store'}, opts||{}); } }catch(_){}
         return _f(url, opts);
     };
 })();
@@ -872,6 +873,7 @@ function limpiarFormulario(modulo) {
 
         // Limpiar cache de usuario beta para permitir reuso
         window._cUB = {};
+        setTimeout(()=>{ try{ refrescarDatosFondo(true); }catch(_){} }, 1500);   // trae los datos recién guardados
 
         // Scroll al inicio del formulario
         document.getElementById('tab-0').scrollTop = 0;
@@ -2034,6 +2036,58 @@ function cerrarSesion(){
     sessionStorage.removeItem('sesionBET');
     location.reload();
 }
+
+// ============================================================
+// ACTUALIZACIÓN AUTOMÁTICA DE DATOS (cada 1 min, en segundo plano)
+// NO recarga la página ni toca lo que se está capturando: solo renueva
+// los datos en memoria (búsquedas, catálogos, tabuladores y bancos).
+// ============================================================
+let _refrescando=false, _ultimoRefresco=Date.now();
+function refrescoPermitido(){
+    if(_refrescando||document.hidden) return false;
+    if(!window.getSesionBET||!getSesionBET()) return false;
+    const ld=document.getElementById('loading'); if(ld&&ld.classList.contains('show')) return false;   // hay un proceso en curso
+    const up=document.getElementById('updateOverlay'); if(up&&up.classList.contains('show')) return false;
+    return true;
+}
+async function _jsonFondo(url){
+    try{ const r=await fetch(url,{cache:'no-store'}); const j=await r.json(); return (j&&j.status==='success')?j.data:null; }catch(_){ return null; }
+}
+async function refrescarDatosFondo(forzar){
+    if(forzar){ if(_refrescando||!getSesionBET()) return; } else if(!refrescoPermitido()) return;
+    _refrescando=true;
+    try{
+        // 1) Cachés de búsqueda: la próxima búsqueda vuelve a leer Sheets
+        window._cUB={}; window._cTienda={}; window._cUnidad={};
+
+        // 2) Listas desplegables (solo se repintan si cambiaron y ninguna lista está abierta)
+        const enUso=document.activeElement&&document.activeElement.tagName==='SELECT';
+        for(const campo of Object.keys(cacheCatalogos)){
+            const d=await _jsonFondo(`${SCRIPT_URL}?action=getDatos&campo=${encodeURIComponent(campo)}`);
+            if(!d||!d.length) continue;
+            if(JSON.stringify(d)!==JSON.stringify(cacheCatalogos[campo])&&!enUso){
+                cacheCatalogos[campo]=d;
+                try{ cargarCampo(campo); }catch(_){}      // usa el caché nuevo; conserva lo seleccionado
+            }
+        }
+
+        // 3) Tabuladores (en memoria; se usan en la siguiente selección)
+        const tabs=await _jsonFondo(`${SCRIPT_URL}?action=getTabuladores`);
+        if(Array.isArray(tabs)&&tabs.length&&JSON.stringify(tabs)!==JSON.stringify(_tabCat)){
+            _tabCat=tabs;
+            const b=document.getElementById('badge-TABULADORES'); if(b) b.textContent=tabs.length+' tabuladores';
+        }
+
+        // 4) Bancos
+        const bcs=await _jsonFondo(`${SCRIPT_URL}?action=getCatalogoBancos`);
+        if(Array.isArray(bcs)&&bcs.length&&JSON.stringify(bcs)!==JSON.stringify(_bancos)) _bancos=bcs;
+
+        _ultimoRefresco=Date.now();
+    }catch(_){}
+    finally{ _refrescando=false; }
+}
+setInterval(()=>{ refrescarDatosFondo(false); }, 60000);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&Date.now()-_ultimoRefresco>60000) refrescarDatosFondo(false); });
 
 // ============================================================
 // VERSIÓN Y ACTUALIZACIÓN OBLIGATORIA
