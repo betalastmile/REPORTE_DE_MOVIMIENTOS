@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- ⚠️ CAMBIA SOLO ESTE VALOR EN CADA ACTUALIZACIÓN (ej. V.B.1.1 -> V.B.1.2). Los usuarios con otra versión abierta quedan obligados a actualizar. -->
-    <meta name="app-version" content="V.B.1.2">
+    <meta name="app-version" content="V.B.1.3">
     <title>Sistema de Gestión de Empleados - BET</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -121,6 +121,13 @@
         .search-type-row { display:flex; gap:.5rem; margin-bottom:.75rem; flex-wrap:wrap; }
         .search-type-btn { padding:.4rem .9rem; border-radius:20px; border:1px solid #cdd1c0; background:white; color:var(--mut); font-size:.75rem; font-weight:700; letter-spacing:.05em; cursor:pointer; transition:all .2s; font-family:inherit; box-shadow:none; }
         .search-type-btn.active { border-color:#111; background:#111; color:var(--lime); }
+        .aviso-na { background:#fffbeb; border:1px solid #fde68a; border-left:5px solid #f59e0b; border-radius:8px; padding:.7rem 1rem; font-size:.82rem; color:#78350f; margin-bottom:1.5rem; font-weight:600; }
+        .na-chip { margin-left:.4rem; padding:0 .5rem; font-size:.65rem; font-weight:800; line-height:1.6; border:1px solid #cdd1c0; border-radius:999px; background:#fff; color:#4d6b00; cursor:pointer; vertical-align:middle; font-family:inherit; }
+        .na-chip:hover { background:#93d502; border-color:#4d6b00; color:#111; }
+        .req-ast { color:#ef4444; font-weight:800; margin-left:.15rem; }
+        #formHeadcount .campo-falta { border-color:#ef4444 !important; box-shadow:0 0 0 3px rgba(239,68,68,.22) !important; }
+        html[data-theme="dark"] .aviso-na{ background:#3a3412; border-color:#6b5d10; color:#f3e08a; }
+        html[data-theme="dark"] .na-chip{ background:#20241a; border-color:#3d4333; color:#c8ef7a; }
         .aviso-bloqueado { background:#f8faf0; border:1px solid #d9e6b0; border-left:5px solid #111; border-radius:8px; padding:.7rem 1rem; font-size:.8rem; color:#2a2a2a; margin-bottom:1.5rem; display:flex; align-items:center; gap:.5rem; }
         .foto-box { background:#f8faf0; border:2px dashed #aabf6a; border-radius:12px; padding:2rem; margin-bottom:2rem; text-align:center; }
         .foto-box h3 { color:var(--black); margin-bottom:1rem; font-size:.95rem; letter-spacing:.1em; text-transform:uppercase; }
@@ -344,6 +351,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
         <section class="section">
             <h2 class="section-title">MÓDULO 1: HEADCOUNT</h2>
             <div class="aviso-bloqueado">Los campos sombreados se llenan automáticamente al ingresar el Usuario Beta. Solo puedes editar los campos marcados con borde blanco y las listas desplegables.</div>
+            <div class="aviso-na">⚠️ TODOS LOS CAMPOS QUE SE LLENAN MANUALMENTE SON OBLIGATORIOS (<span class="req-ast">*</span>). SI UN DATO NO APLICA, ESCRIBE <b>NA</b> O PRESIONA EL BOTÓN <b>NA</b> JUNTO AL CAMPO. EN LAS LISTAS DESPLEGABLES SIEMPRE HAY QUE ELEGIR UNA OPCIÓN (NO LLEVAN NA).</div>
             <!-- FOTO -->
             <div class="foto-box">
                 <h3>Fotografía del Empleado <span style="color:#ef4444;">* (obligatoria)</span></h3>
@@ -507,10 +515,11 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 </div>
                 <div class="form-group"><label>IDMEX</label><input type="text" id="idmex" name="idmex" placeholder="Identificación Oficial" class="campo-editable"></div>
                 <div class="form-group"><label>RFC</label><input type="text" id="rfc" name="rfc" placeholder="RFC" maxlength="13" readonly></div>
+                <div class="form-group"><label>Homoclave <small style="color:#4d6b00;font-weight:600;">(si no tiene, se captura 000)</small></label><input type="text" id="homoclave" placeholder="000" maxlength="3" autocomplete="off" class="campo-editable" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"></div>
                 <div class="form-group"><label>CURP</label><input type="text" id="curp" name="curp" placeholder="CURP" maxlength="18" readonly></div>
                 <div class="form-group">
                     <label for="nss">NSS <span id="nssReqLabel" style="display:none;color:#ef4444;font-weight:700;"> * (obligatorio para BMEXS/BMEXM)</span></label>
-                    <input type="text" id="nss" name="nss" placeholder="NSS" inputmode="numeric" autocomplete="off" oninput="this.value=this.value.replace(/\D/g,'')" class="campo-editable nss-opcional">
+                    <input type="text" id="nss" name="nss" placeholder="NSS" inputmode="numeric" autocomplete="off" oninput="soloNssONA(this)" class="campo-editable nss-opcional">
                     <span id="errorNss" style="display:none;color:#ef4444;font-size:.8rem;margin-top:.25rem;">⚠️ El NSS es obligatorio para usuarios BMEXS o BMEXM</span>
                     <span id="nssDiag" style="display:none;color:#b45309;font-size:.72rem;margin-top:.25rem;line-height:1.3;word-break:break-word;"></span>
                 </div>
@@ -848,6 +857,7 @@ function limpiarFormulario(modulo) {
         // Resetear selects a primera opción (sin borrar las opciones cargadas del catálogo)
         form.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
         resetTabulador();
+        resetNA();
 
         // Limpiar campos de bancos
         document.getElementById('bancoNominaSearch').value = '';
@@ -1067,6 +1077,102 @@ function calcularDiasVacaciones(){calcularDias('vacFechaInicio','vacFechaTermino
 function calcularDiasIncapacidad(){calcularDias('incapInicio','incapFin','incapTotalDias');}
 
 // ============================================================
+// CAMPOS MANUALES OBLIGATORIOS (si no aplica → "NA")
+// ============================================================
+const CAMPOS_NA = [
+    // listas desplegables
+    'ap','prenominista','reclutador','fuenteReclutamiento','estatus','estatusContrato','jefeInmediato','sexo','estadoCivil','escolaridad',
+    // texto / links / fechas
+    'folioVacante','idmex','nss','linkNoImss','noCreditoInfonavit','linkDescargaConstanciaFiscal','telefonoCelular',
+    'bancoNominaSearch','noCuentaNomina','clabeNomina','linkEstadoCuentaNomina',
+    'bancoRentaSearch','noCuentaBancariaRenta','clabeRenta','linkEstadoCuentaRenta',
+    'fechaCambioEsquema','fechaFirmaNuevoContrato',
+    'anoVehiculoUnidad','vigenciaPoliza','fechaVerificacion','motor','cilindros','numeroFactura','fecha','expedidaPor',
+    'observaciones'
+];
+const CLAVE_DE_BANCO = { bancoNominaSearch:'claveBanco', bancoRentaSearch:'claveBanco2' };
+
+function naEtiqueta(el){
+    const lab = el.closest('.form-group') && el.closest('.form-group').querySelector('label');
+    if(!lab) return el.id;
+    const c = lab.cloneNode(true);
+    c.querySelectorAll('small,span,button').forEach(x => x.remove());
+    return c.textContent.replace(/\s+/g,' ').trim() || el.id;
+}
+function initCamposNA(){
+    CAMPOS_NA.forEach(id => {
+        const el = document.getElementById(id);
+        if(!el || el.dataset.naInit) return;
+        el.dataset.naInit = '1';
+        const lab = el.closest('.form-group') && el.closest('.form-group').querySelector('label');
+        if(lab){
+            const ast = document.createElement('span'); ast.className = 'req-ast'; ast.textContent = '*';
+            lab.appendChild(ast);
+            if(el.tagName !== 'SELECT'){        // las listas desplegables NO llevan NA: se elige una opción
+                const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'na-chip'; btn.textContent = 'NA';
+                btn.title = 'Si este dato no aplica, márcalo como NA';
+                btn.onclick = () => naToggle(id);
+                lab.appendChild(btn);
+            }
+        }
+        const quitar = () => el.classList.remove('campo-falta');
+        el.addEventListener('input', quitar); el.addEventListener('change', quitar);
+    });
+}
+function naToggle(id){
+    const el = document.getElementById(id); if(!el || el.tagName === 'SELECT') return;
+    if(id === 'nss' && (el.value || '').trim().toUpperCase() !== 'NA'){
+        const ub = (document.getElementById('usuarioBeta').value || '').toUpperCase().trim();
+        if(USUARIOS_NSS_OBLIGATORIO.some(u => ub.startsWith(u))){ mostrarToast('⚠️ El NSS es obligatorio para usuarios BMEXS / BMEXM, no puede ser NA', true); return; }
+    }
+    const claveId = CLAVE_DE_BANCO[id], clave = claveId && document.getElementById(claveId);
+    const esNA = (el.value || '').trim().toUpperCase() === 'NA';
+    if(esNA){                                   // quitar NA
+        el.value = '';
+        if(el.dataset.naDate){ el.type = 'date'; delete el.dataset.naDate; }
+        if(clave) clave.value = '';
+    } else {                                    // poner NA
+        if(el.tagName === 'SELECT') return;     // listas: no aplica NA
+        if(el.type === 'date'){
+            el.type = 'text'; el.dataset.naDate = '1';
+        }
+        el.value = 'NA';
+        if(clave) clave.value = 'NA';
+    }
+    el.classList.remove('campo-falta');
+}
+function resetNA(){
+    CAMPOS_NA.forEach(id => {
+        const el = document.getElementById(id); if(!el) return;
+        if(el.dataset.naDate){ el.type = 'date'; delete el.dataset.naDate; }
+        el.classList.remove('campo-falta');
+    });
+}
+function validarCamposNA(){
+    const faltan = [];
+    CAMPOS_NA.forEach(id => {
+        const el = document.getElementById(id); if(!el) return;
+        let v = (el.value || '').toString().trim();
+        if(el.tagName !== 'SELECT' && /^n\/?a$/i.test(v)){                 // normaliza na / n/a / N/A → NA
+            v = 'NA'; el.value = 'NA';
+            if(el.name) datosFormulario[el.name] = 'NA';
+            const cl = CLAVE_DE_BANCO[id] && document.getElementById(CLAVE_DE_BANCO[id]);
+            if(cl && !cl.value){ cl.value = 'NA'; datosFormulario[cl.name] = 'NA'; }
+        }
+        if(!v){ el.classList.add('campo-falta'); faltan.push(el); }
+        else el.classList.remove('campo-falta');
+    });
+    if(!faltan.length) return true;
+    const nombres = faltan.slice(0,4).map(naEtiqueta).join(', ') + (faltan.length > 4 ? ' y ' + (faltan.length - 4) + ' más' : '');
+    faltan[0].scrollIntoView({behavior:'smooth', block:'center'});
+    try{ faltan[0].focus({preventScroll:true}); }catch(e){}
+    const hayNoLista = faltan.some(e => e.tagName !== 'SELECT');
+    mostrarToast('⚠️ Campos obligatorios sin llenar: ' + nombres + '. ' + (hayNoLista ? 'Si no aplica, escribe NA; en las listas elige una opción' : 'Elige una opción en cada lista'), true);
+    return false;
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initCamposNA); else initCamposNA();
+
+// ============================================================
 // GUARDAR — ✅ Llama limpiarFormulario() al final
 // ============================================================
 function guardarModulo(modulo) {
@@ -1089,6 +1195,19 @@ function guardarModulo(modulo) {
         datosFormulario.prenominista = document.getElementById('prenominista').value;
     }
 
+    // RFC + HOMOCLAVE → se guardan juntos en la misma columna RFC (si no hay homoclave, se completa con 000)
+    if(modulo === 'headcount'){
+        const _hEl = document.getElementById('homoclave');
+        const _hom = ((_hEl && _hEl.value) || '').toUpperCase().replace(/[^A-Z0-9]/g,'');
+        if(_hom && _hom.length !== 3){
+            if(_hEl){ _hEl.style.borderColor = '#ef4444'; _hEl.focus(); }
+            mostrarToast('⚠️ La Homoclave debe tener 3 caracteres (o déjala vacía para usar 000)', true); return;
+        }
+        if(_hEl) _hEl.style.borderColor = '';
+        const _rfcBase = (datosFormulario.rfc || '').toString().trim();
+        if(_rfcBase) datosFormulario.rfc = _rfcBase + (_hom || '000');
+    }
+
     // Validaciones
     if(modulo === 'bajas' && !datosFormulario.contratable){
         const _c = document.getElementById('bajaContratable');
@@ -1104,11 +1223,13 @@ function guardarModulo(modulo) {
         if(_pv){ _pv.style.borderColor = '#ef4444'; _pv.scrollIntoView({behavior:'smooth',block:'center'}); }
         mostrarToast('⚠️ La fotografía del empleado es obligatoria en Headcount', true); return;
     }
+    // Todos los campos manuales son obligatorios (si no aplica → NA)
+    if(modulo === 'headcount' && !validarCamposNA()) return;
     if(modulo === 'headcount'){
         const ub = (document.getElementById('usuarioBeta').value || '').toUpperCase().trim();
         const nssVal = (document.getElementById('nss').value || '').trim();
         const esObl = USUARIOS_NSS_OBLIGATORIO.some(u => ub.startsWith(u));
-        if(esObl && !nssVal){
+        if(esObl && (!nssVal || nssVal.toUpperCase() === 'NA')){
             mostrarToast('⚠️ El NSS es obligatorio para usuarios BMEXS / BMEXM', true);
             document.getElementById('nss').focus();
             document.getElementById('errorNss').style.display = 'block';
@@ -1119,6 +1240,7 @@ function guardarModulo(modulo) {
         for(const [cid, lbl] of clabesCheck){
             const clabeEl = document.getElementById(cid);
             if(!clabeEl) continue;
+            if((clabeEl.value || '').trim().toUpperCase() === 'NA'){ clabeEl.value = 'NA'; continue; }
             clabeEl.value = clabeEl.value.replace(/\D/g,'');
             if(clabeEl.value && clabeEl.value.length !== 18){
                 mostrarToast('⚠️ La CLABE Interbancaria ' + lbl + ' debe tener 18 dígitos', true);
@@ -1158,7 +1280,7 @@ function guardarModulo(modulo) {
         const tr = document.getElementById('telefonoRecados').value.trim();
         if(!tr){ mostrarToast('⚠️ El Teléfono de Recados es obligatorio', true); return; }
         if(tr.length !== 10){ mostrarToast('⚠️ El Teléfono de Recados debe tener 10 dígitos', true); document.getElementById('telefonoRecados').focus(); return; }
-        if(tc && tc.length !== 10){ mostrarToast('⚠️ El Teléfono Celular debe tener 10 dígitos', true); document.getElementById('telefonoCelular').focus(); return; }
+        if(tc && tc !== 'NA' && tc.length !== 10){ mostrarToast('⚠️ El Teléfono Celular debe tener 10 dígitos', true); document.getElementById('telefonoCelular').focus(); return; }
         if(tc && tr && tc === tr){ mostrarToast('⚠️ Los teléfonos no pueden ser iguales', true); return; }
         const nCont = (document.getElementById('nombreContacto').value || '').trim();
         if(!nCont){ mostrarToast('⚠️ El Nombre Contacto es obligatorio', true); document.getElementById('nombreContacto').focus(); return; }
@@ -1186,7 +1308,13 @@ function guardarModulo(modulo) {
 // ============================================================
 // Fuerza solo dígitos en campos de teléfono
 function soloNumerosTel(el){
+    // Solo el celular admite "NA" (el de recados es obligatorio y numérico)
+    if(el.id==='telefonoCelular' && /^[NAna]/.test(el.value)){ el.value = el.value.toUpperCase().replace(/[^NA]/g,'').slice(0,2); return; }
     el.value = el.value.replace(/\D/g,'').slice(0,10);
+}
+function soloNssONA(el){
+    const v = el.value.toUpperCase();
+    el.value = /^[NA]/.test(v) ? v.replace(/[^NA]/g,'').slice(0,2) : v.replace(/\D/g,'');
 }
 
 function validarTelefonosDiferentes(){
@@ -1194,10 +1322,10 @@ function validarTelefonosDiferentes(){
     const ec=document.getElementById('errorTelCelular'),er=document.getElementById('errorTelRecados');
     const ecLen=document.getElementById('errorTelCelularLen'),erLen=document.getElementById('errorTelRecadosLen');
     const ig=tc.value.trim()!==''&&tr.value.trim()!==''&&tc.value.trim()===tr.value.trim();
-    tc.style.borderColor=ig?'#ef4444':(tc.value.length>0&&tc.value.length<10?'#f59e0b':'');
+    tc.style.borderColor=ig?'#ef4444':(tc.value!=='NA'&&tc.value.length>0&&tc.value.length<10?'#f59e0b':'');
     tr.style.borderColor=ig?'#ef4444':(tr.value.length>0&&tr.value.length<10?'#f59e0b':'');
     ec.style.display=ig?'block':'none';er.style.display=ig?'block':'none';
-    if(ecLen)ecLen.style.display=(tc.value.length>0&&tc.value.length<10&&!ig)?'block':'none';
+    if(ecLen)ecLen.style.display=(tc.value!=='NA'&&tc.value.length>0&&tc.value.length<10&&!ig)?'block':'none';
     if(erLen)erLen.style.display=(tr.value.length>0&&tr.value.length<10&&!ig)?'block':'none';
 }
 
@@ -1677,6 +1805,11 @@ function aplicarDatosUB(d){
     const cf=new Set(['fechaRealIngreso','fechaNacimiento']);
     function pf(v){if(!v)return'';const s=v.toString().trim();if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;const mm=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(mm){const[,dd,mo,y]=mm;return y+'-'+mo.padStart(2,'0')+'-'+dd.padStart(2,'0');}const f=new Date(s);if(!isNaN(f))return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');return s;}
     Object.keys(m).forEach(c=>{if(d[c]!==undefined&&d[c]!==null&&d[c]!==''){const el=document.getElementById(m[c]);if(!el)return;el.value=cf.has(m[c])?pf(d[c]):d[c];}});
+    // RFC: si la hoja ya trae RFC completo (13), se separa en base (10) + homoclave (3)
+    {const rEl=document.getElementById('rfc'),hEl=document.getElementById('homoclave');
+     if(rEl&&hEl){const r=(rEl.value||'').toString().toUpperCase().replace(/\s/g,'');
+        if(r.length===13){rEl.value=r.slice(0,10);hEl.value=r.slice(10);}
+        else if(d['RFC']!==undefined&&d['RFC']!==null&&d['RFC']!=='')hEl.value='';}}
     const nssV=nssDeUB(d);
     if(nssV){const nEl=document.getElementById('nss');if(nEl){nEl.value=nssV;const er=document.getElementById('errorNss');if(er)er.style.display='none';}}
     const sc=['estatusContrato','ap','reclutador','jefeInmediato','estatus','sexo','estadoCivil','fuenteReclutamiento'];
@@ -2086,8 +2219,8 @@ async function refrescarDatosFondo(forzar){
     }catch(_){}
     finally{ _refrescando=false; }
 }
-setInterval(()=>{ refrescarDatosFondo(false); }, 60000);
-document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&Date.now()-_ultimoRefresco>60000) refrescarDatosFondo(false); });
+setInterval(()=>{ refrescarDatosFondo(false); }, 30000);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&Date.now()-_ultimoRefresco>30000) refrescarDatosFondo(false); });
 
 // ============================================================
 // VERSIÓN Y ACTUALIZACIÓN OBLIGATORIA
@@ -2162,11 +2295,18 @@ const TUT = {
       <div class="tut-tip">💡 Si dice "Usuario o contraseña incorrectos", revisa mayúsculas y espacios. Con <b>Cerrar sesión</b> (arriba a la derecha) sales de tu cuenta.</div>`},
     {t:'Llena los datos generales',h:`<p>En el módulo <b>Headcount</b>, elige en las listas desplegables:</p>
       <ul><li><b>AP</b></li><li><b>Prenominista</b></li><li><b>Reclutador</b></li><li><b>Fuente de Reclutamiento</b></li><li><b>Tipo de Movimiento</b></li></ul>
+      <p>Todas son obligatorias: elige una opción en cada lista (aquí no se usa NA).</p>
       <div class="tut-tip">💡 Junto a cada nombre aparece una etiqueta ("cargando…" → número de opciones). Espera a que termine de cargar antes de elegir.</div>`},
     {t:'Ingresa el Usuario Beta',h:`<p>Escribe el <b>Usuario Beta</b> y presiona <b>Enter</b>. Aparece "Cargando usuario, espera…" y el sistema llena solo nombre, CURP, tienda, unidad y más.</p>
       <div class="tut-ill"><div class="tut-fake-in">BMEXS12345 ⏎</div><div class="tut-arrow">⬇</div><div class="tut-fake-ro">Apellidos, nombre, CURP… (se llenan solos)</div></div>
       <div class="tut-tip">💡 Los campos <b>sombreados</b> son automáticos y no se editan. Solo captura los de borde blanco y las listas desplegables.</div>
       <div class="tut-warn">⚠️ Si sale "Usuario Beta no encontrado", revisa que esté bien escrito. Si cambias el Usuario Beta, se limpian los datos del anterior.</div>`},
+    {t:'Campos obligatorios: si no aplica, NA',h:`<p>En Headcount, <b>todos los campos que se llenan manualmente son obligatorios</b> (llevan un asterisco rojo <span style="color:#ef4444;font-weight:800;">*</span>). Esto incluye las listas desplegables, los links, las fechas, los datos de pago y los datos de la unidad.</p>
+      <p>Si un dato <b>no aplica</b>, escribe <b>NA</b> o presiona el botoncito <b>NA</b> que aparece junto al nombre del campo.</p>
+      <p>En las <b>listas desplegables</b> no se usa NA: siempre hay que <b>elegir una opción</b>.</p>
+      <div class="tut-ill"><div class="tut-row"><div class="tut-fake-in">Motor *</div><div class="tut-fake-btn">NA</div></div><div class="tut-arrow">⬇</div><div class="tut-fake-ro">NA</div></div>
+      <div class="tut-tip">💡 El botón <b>NA</b> funciona también en las fechas. Si lo presionas otra vez, quita el NA.</div>
+      <div class="tut-warn">⚠️ Si dejas un campo vacío, no se puede guardar: el sistema lo marca en rojo y te dice cuáles faltan. El <b>NSS</b> NO acepta NA en usuarios BMEXS / BMEXM.</div>`},
     {t:'Coloca la foto',h:`<p>En el recuadro <b>Fotografía del Empleado</b> (arriba del formulario):</p>
       <ul><li>Presiona <b>Seleccionar Foto</b>.</li><li>Elige una imagen <b>JPG o PNG</b> de máximo <b>2 MB</b>.</li><li>Verás la vista previa dentro del cuadro. Si te equivocas, vuelve a presionar el botón y elige otra.</li></ul>
       <div class="tut-ill"><div class="tut-row"><div class="tut-foto">👤</div><div class="tut-arrow">➜</div><div class="tut-foto ok">__FOTO__</div></div><div class="tut-fake-btn">Seleccionar Foto</div></div>
@@ -2176,15 +2316,16 @@ const TUT = {
       <ul><li>Escribe el <b>ID Tabulador</b> y presiona <b>Enter</b>, o</li><li>Abre la lista <b>Tabulador</b> y busca escribiendo (puesto, zona, esquema…). Los <b>Sugeridos</b> para el puesto salen primero.</li></ul>
       <p>Al elegirlo se llenan solos <b>Pago Diario, Renta, Complemento y Bono</b>.</p>
       <div class="tut-warn">⚠️ Sin tabulador no se puede guardar. Si algún monto queda vacío, vuelve a elegir el tabulador.</div>`},
-    {t:'Folio de vacante, tienda y unidad',h:`<p>Captura el <b>Folio Vacante</b>. Los datos de <b>Tienda / Proyecto</b> y de la <b>Unidad</b> (placa, marca, póliza…) se llenan solos con el Usuario Beta; solo revísalos.</p>
+    {t:'Folio de vacante, tienda y unidad',h:`<p>Captura el <b>Folio Vacante</b> (obligatorio; si no aplica, NA). Los datos de <b>Tienda / Proyecto</b> y de la <b>Unidad</b> (placa, marca, póliza…) se llenan solos con el Usuario Beta; solo revísalos.</p>
       <div class="tut-tip">💡 Si algo viene mal en esos campos, corrígelo en la hoja de origen, no aquí.</div>`},
     {t:'Datos de pago',h:`<p>En <b>Cuenta de Nómina</b> y <b>Cuenta de Renta</b>:</p>
-      <ul><li>Busca el <b>banco</b> escribiendo su nombre y elígelo de la lista.</li><li>Captura número de cuenta y <b>CLABE</b>.</li></ul>
-      <div class="tut-warn">⚠️ La CLABE debe tener exactamente <b>18 dígitos</b> (solo números).</div>`},
+      <ul><li>Busca el <b>banco</b> escribiendo su nombre y elígelo de la lista.</li><li>Captura número de cuenta, <b>CLABE</b> y link del estado de cuenta.</li></ul>
+      <div class="tut-warn">⚠️ La CLABE debe tener exactamente <b>18 dígitos</b> (solo números), o <b>NA</b> si no aplica. Todos los campos de pago son obligatorios (NA si no aplican).</div>`},
     {t:'Datos personales y contacto',h:`<p>Completa los campos editables:</p>
-      <ul><li><b>NSS</b> (solo números). Es <b>obligatorio</b> si el usuario empieza con <b>BMEXS</b> o <b>BMEXM</b>.</li><li><b>Teléfono de Recados</b>: obligatorio, 10 dígitos.</li><li><b>Teléfono Celular</b>: opcional, 10 dígitos.</li><li><b>Nombre Contacto</b>: obligatorio.</li></ul>
-      <div class="tut-warn">⚠️ Los dos teléfonos <b>no pueden ser iguales</b>.</div>`},
-    {t:'Guarda y genera la ficha',h:`<p>Escribe <b>Observaciones</b> si hace falta y presiona <b>💾 Guardar y Generar Ficha</b>.</p>
+      <ul><li><b>Homoclave</b> (3 caracteres): va junto al RFC. Si no tiene, déjala vacía y el sistema captura <b>000</b>. RFC y homoclave se guardan juntos en la misma columna RFC.</li><li><b>IDMEX</b>, links (IMSS, Constancia Fiscal), <b>Crédito INFONAVIT</b>: obligatorios (NA si no aplican).</li><li><b>NSS</b> (solo números). Es <b>obligatorio con número real</b> si el usuario empieza con <b>BMEXS</b> o <b>BMEXM</b>; en los demás puede ser NA.</li><li><b>Teléfono de Recados</b>: obligatorio, 10 dígitos.</li><li><b>Teléfono Celular</b>: 10 dígitos o NA.</li><li><b>Nombre Contacto</b>: obligatorio.</li></ul>
+      <div class="tut-warn">⚠️ Los dos teléfonos <b>no pueden ser iguales</b>.</div>
+      <div class="tut-tip">💡 En los datos de la <b>unidad</b> (año, vigencia de póliza, verificación, motor, cilindros, factura, fecha y expedida por) también aplica la regla: llenar o poner NA.</div>`},
+    {t:'Guarda y genera la ficha',h:`<p>Escribe <b>Observaciones</b> (obligatorio; si no hay, NA) y presiona <b>💾 Guardar y Generar Ficha</b>.</p>
       <ul><li>Se muestra la ficha lista para imprimir.</li><li>Los datos se envían a Google Sheets automáticamente.</li></ul>
       <div class="tut-tip">💡 Si sale un aviso rojo (⚠️), léelo: te dice exactamente qué campo falta o está mal.</div>
       <p><b>¡Listo!</b> Puedes repetir el proceso con el siguiente empleado.</p>`}
