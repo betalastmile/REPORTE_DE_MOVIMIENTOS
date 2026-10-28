@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- ⚠️ CAMBIA SOLO ESTE VALOR EN CADA ACTUALIZACIÓN (ej. V.B.1.1 -> V.B.1.2). Los usuarios con otra versión abierta quedan obligados a actualizar. -->
-    <meta name="app-version" content="V.B.2.1">
+    <meta name="app-version" content="V.B.2.2">
     <title>Sistema de Gestión de Empleados - BET</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -132,12 +132,21 @@
         .foto-box { background:#f8faf0; border:2px dashed #aabf6a; border-radius:12px; padding:2rem; margin-bottom:2rem; text-align:center; }
         .foto-box h3 { color:var(--black); margin-bottom:1rem; font-size:.95rem; letter-spacing:.1em; text-transform:uppercase; }
 
+
+        /* ESTATUS PLATAFORMA (USUARIOS_BETA · ESTATUS) */
+        .est-plat{margin-top:.75rem;border-radius:10px;padding:.8rem 1rem;border:2px solid;font-size:.88rem;line-height:1.5}
+        .est-plat.activo{background:#ecfdf5;border-color:#16a34a;color:#166534}
+        .est-plat.inactivo{background:#fef2f2;border-color:#dc2626;color:#991b1b}
+        .est-plat.neutro{background:#f3f4f6;border-color:#9ca3af;color:#374151}
+        .est-plat .est-tit{font-weight:800;font-size:1rem;letter-spacing:.03em}
+        .est-plat .est-fechas{margin-top:.35rem;display:flex;flex-wrap:wrap;gap:.25rem 1.25rem}
+        .est-plat .est-fechas span b{font-weight:700}
         /* CREDENCIAL (página 2 del PDF) */
         .credencial-wrap{background:#fff;color:#151515;padding:1.5rem 2rem 2rem;text-align:center;border-top:3px solid var(--lime);margin-top:1rem}
         .credencial-wrap:empty{display:none}
         .cred-titulo{font-weight:700;letter-spacing:.08em;font-size:.95rem;margin-bottom:1rem}
         .cred-hoja{display:flex;flex-direction:column;align-items:center;gap:.4cm}
-        .cred-card{position:relative;width:4.81cm;height:7.70cm;flex-shrink:0;box-shadow:0 .05cm .12cm rgba(0,0,0,.35),0 0 0 1px #d4d4d4;background:#fff;font-family:Calibri,Carlito,'Segoe UI',Arial,sans-serif;color:#000;overflow:visible}
+        .cred-card{position:relative;width:5.31cm;height:8.20cm;flex-shrink:0;box-shadow:0 .05cm .12cm rgba(0,0,0,.35),0 0 0 1px #d4d4d4;background:#fff;font-family:Calibri,Carlito,'Segoe UI',Arial,sans-serif;color:#000;overflow:visible}
         .cred-card>img.cred-bg{position:absolute;inset:0;width:100%;height:100%;display:block}
         .cred-card.reverso>img.cred-bg{transform:rotate(180deg)}
         .cred-foto{position:absolute;left:28.71%;top:13.67%;width:43.45%;height:41.26%;background:#fff;overflow:hidden}
@@ -717,6 +726,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                     <button type="button" class="btn-primary" onclick="buscarEmpleado('bajas')">Buscar</button>
                 </div>
                 <div id="resultBaja"></div>
+                <div id="estatusBaja"></div>
             </div>
             <div class="foto-box" style="padding:1.25rem;">
                 <h3>Fotografía del Empleado</h3>
@@ -854,7 +864,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
 // ============================================================
 // CONFIGURACIÓN
 // ============================================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywshx4Tsd_Cyj4vOn9dzXat7JNsdLSncgLK2YWgKPMNb0YAl5AFQizWxaDoaRFgzEG/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzZzWTan2wsHur8HW8hB4ltZPNuHnyrLNS9Qx7pft123WvODn9vy0US4_VKw18SklNT/exec';
 const LOGO_BET = `<span style="font-size:1.4rem;font-weight:900;letter-spacing:-1px;color:#1a1a1a;">B<span style="color:#8bc34a;">ET</span></span>`;
 
 // ============================================================
@@ -1063,6 +1073,41 @@ function aplicarResultadoAlFormulario(prefix,d){
 function mostrarResultadoUnico(rDiv,prefix,nombre,usuario,curp,nss,fuente){
     rDiv.innerHTML=`<div class="alert alert-success"><strong>✅ Empleado encontrado</strong> <small style="opacity:.7">(${fuente})</small><br><strong>Nombre:</strong> ${nombre||'—'}<br><strong>Usuario Beta:</strong> ${usuario||'—'}<br><strong>CURP:</strong> ${curp||'—'}${nss?`<br><strong>NSS:</strong> ${nss}`:''}</div>`;
     sv(`${prefix}Nombres`,nombre);sv(`${prefix}usuarioBeta`,usuario);sv(`${prefix}Curp`,curp);sv(`${prefix}Nss`,nss);
+    if(prefix==='baja')consultarEstatusPlataforma(curp,usuario,nss);
+}
+// ============================================================
+// ESTATUS EN PLATAFORMA (USUARIOS_BETA · columna ESTATUS (AP): A = ACTIVO, B = INACTIVO)
+// ============================================================
+window._estatusRM='';
+function _fmtFechaRM(v){
+    if(!v)return '';
+    const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m?`${m[3]}/${m[2]}/${m[1]}`:String(v);
+}
+async function consultarEstatusPlataforma(curp,usuario,nss){
+    const box=document.getElementById('estatusBaja'); if(!box)return;
+    window._estatusRM='';
+    box.innerHTML='<div class="est-plat neutro">⏳ Consultando estatus en plataforma...</div>';
+    try{
+        const q=`curp=${encodeURIComponent(curp||'')}&usuario=${encodeURIComponent(usuario||'')}&nss=${encodeURIComponent(nss||'')}`;
+        const res=await fetch(`${SCRIPT_URL}?action=getEstatusRM&${q}&_t=${Date.now()}`,{cache:'no-store'});
+        const r=await res.json();
+        if(r.status!=='success'){
+            const viejo=/no reconocida/i.test(r.message||'');
+            box.innerHTML=`<div class="est-plat neutro">⚪ <b>Sin estatus en USUARIOS_BETA</b>${viejo?' — el Code.gs publicado no tiene la acción getEstatusRM (publica una nueva versión).':(r.message?' — '+r.message:'')}</div>`;
+            return;
+        }
+        const d=r.data||{}; const e=String(d.empEstatus||'').trim().toUpperCase();
+        window._estatusRM=e;
+        if(d.nombre){const _n=document.getElementById('bajaNombres'); if(_n&&!_n.value)_n.value=String(d.nombre).toUpperCase();}
+        const fechas=(d.fechas||[]).filter(f=>f&&f.valor).map(f=>`<span><b>${f.etiqueta}:</b> ${_fmtFechaRM(f.valor)}</span>`).join('');
+        const bloqueFechas=fechas?`<div class="est-fechas">${fechas}</div>`:'';
+        if(e==='A')box.innerHTML=`<div class="est-plat activo"><div class="est-tit">🟢 ACTIVO EN PLATAFORMA</div>${d.nombre?`<div><b>${d.nombre}</b></div>`:''}${bloqueFechas}</div>`;
+        else if(e==='B')box.innerHTML=`<div class="est-plat inactivo"><div class="est-tit">🔴 INACTIVO EN PLATAFORMA</div>${d.nombre?`<div><b>${d.nombre}</b></div>`:''}${bloqueFechas}</div>`;
+        else box.innerHTML=`<div class="est-plat neutro"><div class="est-tit">⚪ Estatus no reconocido${e?' ('+e+')':''}</div>${bloqueFechas}</div>`;
+    }catch(err){
+        box.innerHTML='<div class="est-plat neutro">⚠️ No se pudo consultar el estatus en plataforma.</div>';
+    }
 }
 function cnc(a,b,c){return[a,b,c].filter(Boolean).join(' ').trim().toUpperCase();}
 function sv(id,val){const el=document.getElementById(id);if(el&&val)el.value=val;}
@@ -1290,6 +1335,12 @@ function guardarModulo(modulo) {
         const _c = document.getElementById('bajaContratable');
         if(_c){ _c.style.borderColor = '#ef4444'; _c.focus(); }
         mostrarToast('⚠️ Indica si el empleado es CONTRATABLE o NO CONTRATABLE', true); return;
+    }
+    if(modulo === 'bajas'){
+        if(window._estatusRM === 'B' && !confirm('Este empleado ya aparece como INACTIVO en plataforma. ¿Registrar la baja de todos modos?')) return;
+        datosFormulario.movimientoBaja = 'SI';          // el script marca ESTATUS = B en USUARIOS_BETA
+        datosFormulario.empEstatusNuevo = 'B';
+        datosFormulario.empEstatusPrevio = window._estatusRM || '';
     }
     if(modulo === 'headcount' && (!datosFormulario.nombres || !datosFormulario.curp)){
         mostrarToast('⚠️ Por favor completa al menos Nombre y CURP', true); return;
@@ -2563,7 +2614,7 @@ const TUT = {
     {t:'Solo la credencial (sin ficha)',h:`<p>Si necesitas <b>únicamente la credencial</b>, usa el botón <b>🪪 Generar credencial</b> (arriba a la derecha, junto a las pestañas):</p>
       <ul><li>Escribe el <b>Usuario Beta</b> y presiona <b>Enter</b>: se cargan solos nombre, puesto y área.</li><li>Elige la <b>foto</b> (JPG o PNG, máximo 2 MB). Usuario y foto son obligatorios.</li><li>Revisa la vista previa y presiona <b>🖨️ Imprimir credencial</b>.</li></ul>
       <div class="tut-ill"><div class="tut-fake-in">BMEXS12345 ⏎</div><div class="tut-arrow">⬇</div><div class="tut-fake-ro">Nombre, puesto y área (se llenan solos)</div></div>
-      <div class="tut-tip">💡 Imprímela al <b>100%</b> (sin "Ajustar a página") para que salga de <b>4.81 × 7.7 cm</b>.</div>
+      <div class="tut-tip">💡 Imprímela al <b>100%</b> (sin "Ajustar a página") para que salga de <b>5.31 × 8.2 cm</b>.</div>
       <div class="tut-warn">⚠️ Si sale "Usuario Beta no encontrado", revisa que esté bien escrito.</div>`}
   ]},
   otros:{nombre:'Vacaciones / Bajas / Incapacidades', pasos:[
