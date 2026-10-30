@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- ⚠️ CAMBIA SOLO ESTE VALOR EN CADA ACTUALIZACIÓN (ej. V.B.1.1 -> V.B.1.2). Los usuarios con otra versión abierta quedan obligados a actualizar. -->
-    <meta name="app-version" content="V.B.2.2">
+    <meta name="app-version" content="V.B.2.4">
     <title>Sistema de Gestión de Empleados - BET</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -1041,10 +1041,10 @@ async function _buscarEmpleadoInner(modulo) {
     if(tipo==='nombre'){await buscarPorNombre(prefix,termino,rDiv);return;}
     rDiv.innerHTML='<div class="alert alert-warning">🔍 Buscando...</div>';
     try{
-        const res=await fetch(`${SCRIPT_URL}?action=getUsuarioBeta&usuario=${encodeURIComponent(termino)}`);
+        const res=await fetch(`${SCRIPT_URL}?action=getUsuarioBeta&usuario=${encodeURIComponent(termino)}${modulo==='bajas'?'&est=1':''}`);
         const r=await res.json();
         if(r.status==='success'){
-            const d=r.data; aplicarResultadoAlFormulario(prefix,d);
+            const d=r.data; window._estPre={u:String(d['USUARIO BETA']||'').trim().toUpperCase(),data:d.__ESTATUS_RM||null}; aplicarResultadoAlFormulario(prefix,d);
             mostrarResultadoUnico(rDiv,prefix,cnc(d['APELLIDO PATERNO']||'',d['APELLIDO MATERNO']||'',d['NOMBRE(S)']||d['NOMBRES']||''),d['USUARIO BETA']||'',d['CURP']||termino,nssDeUB(d),'USUARIOS_BETA');
         }else{rDiv.innerHTML=`<div class="alert alert-error">❌ <strong>${termino}</strong> no encontrado.</div>`;}
     }catch(e){rDiv.innerHTML='<div class="alert alert-error">❌ Error de conexión</div>';}
@@ -1089,9 +1089,14 @@ async function consultarEstatusPlataforma(curp,usuario,nss){
     window._estatusRM='';
     box.innerHTML='<div class="est-plat neutro">⏳ Consultando estatus en plataforma...</div>';
     try{
-        const q=`curp=${encodeURIComponent(curp||'')}&usuario=${encodeURIComponent(usuario||'')}&nss=${encodeURIComponent(nss||'')}`;
-        const res=await fetch(`${SCRIPT_URL}?action=getEstatusRM&${q}&_t=${Date.now()}`,{cache:'no-store'});
-        const r=await res.json();
+        // Si la búsqueda ya trajo el estatus (?est=1) se usa directo, sin otra petición al script
+        let r=null; const pre=window._estPre; window._estPre=null;
+        if(pre&&pre.data&&String(usuario||'').trim().toUpperCase()===pre.u) r={status:'success',data:pre.data};
+        if(!r){
+            const q=`curp=${encodeURIComponent(curp||'')}&usuario=${encodeURIComponent(usuario||'')}&nss=${encodeURIComponent(nss||'')}`;
+            const res=await fetch(`${SCRIPT_URL}?action=getEstatusRM&${q}&_t=${Date.now()}`,{cache:'no-store'});
+            r=await res.json();
+        }
         if(r.status!=='success'){
             const viejo=/no reconocida/i.test(r.message||'');
             box.innerHTML=`<div class="est-plat neutro">⚪ <b>Sin estatus en USUARIOS_BETA</b>${viejo?' — el Code.gs publicado no tiene la acción getEstatusRM (publica una nueva versión).':(r.message?' — '+r.message:'')}</div>`;
@@ -1416,15 +1421,31 @@ function guardarModulo(modulo) {
 
     // Guardar en local
     if(datosFormulario.curp){
-        const _loc = {...datosFormulario}; if(modulo !== 'headcount') delete _loc.foto;   // no saturar localStorage con fotos
-        datosEmpleadosLocal[datosFormulario.curp] = {...datosEmpleadosLocal[datosFormulario.curp], ..._loc};
-        localStorage.setItem('empleadosBETA', JSON.stringify(datosEmpleadosLocal));
+        // NUNCA guardar la foto (base64) en localStorage: llena la cuota (~5MB) y rompe la generación de la ficha
+        const _loc = {...datosFormulario}; delete _loc.foto;
+        const _prev = {...datosEmpleadosLocal[datosFormulario.curp]}; delete _prev.foto;   // limpia fotos guardadas antes
+        datosEmpleadosLocal[datosFormulario.curp] = {..._prev, ..._loc};
+        try{
+            localStorage.setItem('empleadosBETA', JSON.stringify(datosEmpleadosLocal));
+        }catch(e){
+            // Cuota llena (registros viejos con foto): se limpian las fotos de todos y se reintenta; si aún falla, se omite el respaldo local
+            try{
+                Object.keys(datosEmpleadosLocal).forEach(k=>{ if(datosEmpleadosLocal[k]) delete datosEmpleadosLocal[k].foto; });
+                localStorage.setItem('empleadosBETA', JSON.stringify(datosEmpleadosLocal));
+            }catch(e2){ console.warn('localStorage lleno; se omite respaldo local', e2); }
+        }
     }
 
     // Generar ficha y mostrar modal
     const gen = { headcount: generarFichaHeadcount, vacaciones: generarFichaVacaciones, bajas: generarFichaBajas, incapacidades: generarFichaIncapacidades };
-    gen[modulo]();
-    renderCredencial(modulo==='headcount');
+    try{
+        gen[modulo]();
+        renderCredencial(modulo==='headcount');
+    }catch(e){
+        console.error('Error al generar la ficha:', e);
+        mostrarToast('❌ Error al generar la ficha: ' + (e && e.message ? e.message : e), true);
+        return;
+    }
     document.getElementById('fichaModal').classList.add('show');
     mostrarToast('✅ Ficha generada');
 
@@ -2472,34 +2493,37 @@ async function refrescarDatosFondo(forzar){
         // 1) Cachés de búsqueda: la próxima búsqueda vuelve a leer Sheets
         window._cUB={}; window._cTienda={}; window._cUnidad={};
 
-        // 2) Listas desplegables (solo se repintan si cambiaron y ninguna lista está abierta)
-        const enUso=document.activeElement&&document.activeElement.tagName==='SELECT';
-        for(const campo of Object.keys(cacheCatalogos)){
-            const d=await _jsonFondo(`${SCRIPT_URL}?action=getDatos&campo=${encodeURIComponent(campo)}`);
-            if(!d||!d.length) continue;
-            if(JSON.stringify(d)!==JSON.stringify(cacheCatalogos[campo])&&!enUso){
-                cacheCatalogos[campo]=d;
-                try{ cargarCampo(campo); }catch(_){}      // usa el caché nuevo; conserva lo seleccionado
+        // 2-4) UNA sola petición trae listas, tabuladores y bancos (antes eran ~15 peticiones cada vez)
+        const todo=await _jsonFondo(`${SCRIPT_URL}?action=getCatalogosTodos`);
+        if(todo){
+            // Listas desplegables (solo se repintan si cambiaron y ninguna lista está abierta)
+            const enUso=document.activeElement&&document.activeElement.tagName==='SELECT';
+            const cats=todo.catalogos||{};
+            for(const campo of Object.keys(cacheCatalogos)){
+                const d=cats[campo];
+                if(!d||!d.length) continue;
+                if(JSON.stringify(d)!==JSON.stringify(cacheCatalogos[campo])&&!enUso){
+                    cacheCatalogos[campo]=d;
+                    try{ cargarCampo(campo); }catch(_){}      // usa el caché nuevo; conserva lo seleccionado
+                }
             }
+            // Tabuladores (en memoria; se usan en la siguiente selección)
+            const tabs=todo.tabuladores;
+            if(Array.isArray(tabs)&&tabs.length&&JSON.stringify(tabs)!==JSON.stringify(_tabCat)){
+                _tabCat=tabs;
+                const b=document.getElementById('badge-TABULADORES'); if(b) b.textContent=tabs.length+' tabuladores';
+            }
+            // Bancos
+            const bcs=todo.bancos;
+            if(Array.isArray(bcs)&&bcs.length&&JSON.stringify(bcs)!==JSON.stringify(_bancos)) _bancos=bcs;
         }
-
-        // 3) Tabuladores (en memoria; se usan en la siguiente selección)
-        const tabs=await _jsonFondo(`${SCRIPT_URL}?action=getTabuladores`);
-        if(Array.isArray(tabs)&&tabs.length&&JSON.stringify(tabs)!==JSON.stringify(_tabCat)){
-            _tabCat=tabs;
-            const b=document.getElementById('badge-TABULADORES'); if(b) b.textContent=tabs.length+' tabuladores';
-        }
-
-        // 4) Bancos
-        const bcs=await _jsonFondo(`${SCRIPT_URL}?action=getCatalogoBancos`);
-        if(Array.isArray(bcs)&&bcs.length&&JSON.stringify(bcs)!==JSON.stringify(_bancos)) _bancos=bcs;
 
         _ultimoRefresco=Date.now();
     }catch(_){}
     finally{ _refrescando=false; }
 }
-setInterval(()=>{ refrescarDatosFondo(false); }, 30000);
-document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&Date.now()-_ultimoRefresco>30000) refrescarDatosFondo(false); });
+setInterval(()=>{ refrescarDatosFondo(false); }, 120000);   // cada 2 min (antes 30 s y ~15 peticiones)
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&Date.now()-_ultimoRefresco>120000) refrescarDatosFondo(false); });
 
 // ============================================================
 // VERSIÓN Y ACTUALIZACIÓN OBLIGATORIA
