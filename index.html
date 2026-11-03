@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- ⚠️ CAMBIA SOLO ESTE VALOR EN CADA ACTUALIZACIÓN (ej. V.B.1.1 -> V.B.1.2). Los usuarios con otra versión abierta quedan obligados a actualizar. -->
-    <meta name="app-version" content="V.B.2.4">
+    <meta name="app-version" content="V.B.2.5">
     <title>Sistema de Gestión de Empleados - BET</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -206,6 +206,52 @@
         }
         @media (max-width:768px){.container{padding:0 1rem 1.5rem}.header{margin:0 -1rem 1.25rem;padding:1rem}.header h1{font-size:1.05rem}.form-grid{grid-template-columns:1fr}.search-row{flex-direction:column}}
     
+
+        /* ===== MÓVIL AJUSTES: adaptación a pantallas de celular ===== */
+        html{-webkit-text-size-adjust:100%;}
+        img{max-width:100%;}
+        .form-grid{grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));}
+        .form-group{min-width:0;}
+        input,select,textarea{max-width:100%;min-width:0;}
+        .tabs{-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;}
+        .tab{scroll-snap-align:start;}
+        @media (max-width:768px){
+            body{padding:.5rem;}
+            .container{padding:0 .85rem 1.25rem;border-radius:10px;}
+            .header{margin:0 -.85rem 1rem;padding:.8rem .85rem;gap:.75rem;}
+            .header .logo-chip{padding:4px 8px;}
+            .header .logo-chip img{height:32px;}
+            .header h1{font-size:.95rem;letter-spacing:.05em;line-height:1.25;}
+            .header p{font-size:.66rem;letter-spacing:.08em;line-height:1.3;}
+            .tab{padding:.7rem 1rem;font-size:.74rem;}
+            .section-title{font-size:.9rem;letter-spacing:.06em;padding:.6rem .85rem;margin-bottom:1rem;}
+            .subsection-title{font-size:.74rem;padding:.5rem .8rem;margin-top:1.4rem;margin-bottom:.9rem;}
+            /* 16px evita que el navegador del celular haga zoom al tocar un campo */
+            input,select,textarea{font-size:16px;}
+            label{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .4rem;}
+            .button-container{flex-direction:column-reverse;gap:.6rem;margin-top:1.75rem;padding-top:1.1rem;}
+            .button-container button{width:100%;justify-content:center;text-align:center;}
+            button{padding:.8rem 1.1rem;}
+            .foto-box{padding:1rem;}
+            .search-row .form-group{min-width:0;width:100%;}
+            .tab-combo-lista{min-width:0;width:100%;max-height:260px;}
+            .tab-combo-item{flex-direction:column;gap:.15rem;}
+            .toast{top:.75rem;right:.75rem;left:.75rem;max-width:none;padding:.8rem 1rem;font-size:.9rem;}
+            .modal{padding:.5rem;}
+            .modal-content{max-height:94vh;}
+            .ficha-table td{padding:.45rem .5rem;font-size:.78rem;word-break:break-word;overflow-wrap:anywhere;}
+            .ficha-table td:first-child{width:38%;}
+            .cred-modal{padding:.75rem .5rem;}
+            .cred-box{padding:1rem;}
+            .btn-cred-open{margin-left:0;}
+            .login-box,.update-box{padding:1.5rem 1.25rem;}
+        }
+        @media (max-width:380px){
+            .header{flex-wrap:wrap;}
+            .header h1{font-size:.88rem;}
+            .tab{padding:.65rem .8rem;font-size:.7rem;}
+        }
+
         /* TODO EN MAYÚSCULAS */
         input[type="text"], textarea { text-transform: uppercase; }
         input[type="text"]::placeholder, textarea::placeholder { text-transform: none; }
@@ -416,7 +462,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
             <div class="aviso-bloqueado">Los campos sombreados se llenan automáticamente al ingresar el Usuario Beta. Solo puedes editar los campos marcados con borde blanco y las listas desplegables.</div>
             <div class="aviso-na">⚠️ TODOS LOS CAMPOS QUE SE LLENAN MANUALMENTE SON OBLIGATORIOS (<span class="req-ast">*</span>). SI UN DATO NO APLICA, ESCRIBE <b>NA</b> O PRESIONA EL BOTÓN <b>NA</b> JUNTO AL CAMPO. EN LAS LISTAS DESPLEGABLES SIEMPRE HAY QUE ELEGIR UNA OPCIÓN (NO LLEVAN NA).</div>
             <!-- FOTO -->
-            <div class="foto-box">
+            <div class="foto-box" id="fotoBoxHC" style="display:none;">
                 <h3>Fotografía del Empleado <span style="color:#ef4444;">* (obligatoria)</span></h3>
                 <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;">
                     <div id="previewFoto" style="width:200px;height:200px;border:3px solid #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;">
@@ -447,7 +493,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 </div>
                 <div class="form-group">
                     <label>Tipo de Movimiento <span id="badge-ESTATUS" class="catalog-badge catalog-loading">cargando...</span></label>
-                    <select id="estatus" name="estatus"><option value="">Seleccionar...</option></select>
+                    <select id="estatus" name="estatus" onchange="actualizarFotoHeadcount()"><option value="">Seleccionar...</option></select>
                 </div>
                 <div class="form-group">
                     <label>Usuario Beta <small style="color:#4d6b00;font-weight:600;">(ingresa y presiona Enter)</small></label>
@@ -551,20 +597,19 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 <div class="form-group"><label>Link Estado de Cuenta Renta</label><input type="url" id="linkEstadoCuentaRenta" name="linkEstadoCuentaRenta" placeholder="URL" class="campo-editable"></div>
             </div>
             <!-- ESQUEMA -->
+            <div id="bloqueEsquema" style="display:none;">
             <h3 class="subsection-title">Actualización de Esquema</h3>
             <div class="form-grid">
                 <div class="form-group"><label>Fecha Cambio de Esquema</label><input type="date" id="fechaCambioEsquema" name="fechaCambioEsquema" class="campo-editable"></div>
                 <div class="form-group"><label>Fecha Firma Nuevo Contrato</label><input type="date" id="fechaFirmaNuevoContrato" name="fechaFirmaNuevoContrato" class="campo-editable"></div>
+            </div>
             </div>
             <!-- DATOS PERSONALES -->
             <h3 class="subsection-title">Datos Personales</h3>
             <div class="form-grid">
                 <div class="form-group"><label>Fecha de Nacimiento</label><input type="date" id="fechaNacimiento" name="fechaNacimiento" readonly></div>
                 <div class="form-group"><label>Lugar de Nacimiento</label><input type="text" id="lugarNacimiento" name="lugarNacimiento" placeholder="Ciudad, Estado" readonly></div>
-                <div class="form-group">
-                    <label>Sexo <span id="badge-SEXO" class="catalog-badge catalog-loading">cargando...</span></label>
-                    <select id="sexo" name="sexo"><option value="">Seleccionar...</option></select>
-                </div>
+                <div class="form-group"><label>Sexo <small style="color:#4d6b00;">(auto)</small></label><input type="text" id="sexo" name="sexo" placeholder="Se llena con el usuario" readonly></div>
                 <div class="form-group">
                     <label>Estado Civil</label>
                     <select id="estadoCivil" name="estadoCivil">
@@ -678,17 +723,6 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 </div>
                 <div id="resultVac"></div>
             </div>
-            <div class="foto-box" style="padding:1.25rem;">
-                <h3>Fotografía del Empleado</h3>
-                <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem;">
-                    <div id="previewFotoVac" style="width:160px;height:160px;border:3px solid #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;">
-                        <span style="color:#9ca3af;font-size:3rem;">👤</span>
-                    </div>
-                    <input type="file" id="fotoVac" accept="image/*" style="display:none;" onchange="cargarFotoMod('vac',event)">
-                    <button type="button" onclick="document.getElementById('fotoVac').click()" class="btn-primary">Seleccionar Foto</button>
-                    <p style="color:#6b7280;font-size:.875rem;">Opcional • Formatos: JPG, PNG • Máx: 2MB</p>
-                </div>
-            </div>
             <div class="form-grid">
                 <div class="form-group"><label>Nombre Completo</label><input type="text" id="vacNombres" name="nombres" placeholder="Nombre completo" readonly></div>
                 <div class="form-group"><label>AP <span id="badge-AP-vac" class="catalog-badge catalog-loading">cargando...</span></label><select id="vacAp" name="ap"><option value="">Seleccionar...</option></select></div>
@@ -728,17 +762,6 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 <div id="resultBaja"></div>
                 <div id="estatusBaja"></div>
             </div>
-            <div class="foto-box" style="padding:1.25rem;">
-                <h3>Fotografía del Empleado</h3>
-                <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem;">
-                    <div id="previewFotoBaja" style="width:160px;height:160px;border:3px solid #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;">
-                        <span style="color:#9ca3af;font-size:3rem;">👤</span>
-                    </div>
-                    <input type="file" id="fotoBaja" accept="image/*" style="display:none;" onchange="cargarFotoMod('baja',event)">
-                    <button type="button" onclick="document.getElementById('fotoBaja').click()" class="btn-primary">Seleccionar Foto</button>
-                    <p style="color:#6b7280;font-size:.875rem;">Opcional • Formatos: JPG, PNG • Máx: 2MB</p>
-                </div>
-            </div>
             <div class="form-grid">
                 <div class="form-group"><label>Nombre Completo</label><input type="text" id="bajaNombres" name="nombres" placeholder="Nombre completo" readonly></div>
                 <div class="form-group"><label>AP <span id="badge-AP-baja" class="catalog-badge catalog-loading">cargando...</span></label><select id="bajaAp" name="ap"><option value="">Seleccionar...</option></select></div>
@@ -774,17 +797,6 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                     <button type="button" class="btn-primary" onclick="buscarEmpleado('incapacidades')">Buscar</button>
                 </div>
                 <div id="resultIncap"></div>
-            </div>
-            <div class="foto-box" style="padding:1.25rem;">
-                <h3>Fotografía del Empleado</h3>
-                <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem;">
-                    <div id="previewFotoIncap" style="width:160px;height:160px;border:3px solid #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;">
-                        <span style="color:#9ca3af;font-size:3rem;">👤</span>
-                    </div>
-                    <input type="file" id="fotoIncap" accept="image/*" style="display:none;" onchange="cargarFotoMod('incap',event)">
-                    <button type="button" onclick="document.getElementById('fotoIncap').click()" class="btn-primary">Seleccionar Foto</button>
-                    <p style="color:#6b7280;font-size:.875rem;">Opcional • Formatos: JPG, PNG • Máx: 2MB</p>
-                </div>
             </div>
             <div class="form-grid">
                 <div class="form-group"><label>Nombre Completo</label><input type="text" id="incapNombres" name="nombres" placeholder="Nombre completo" readonly></div>
@@ -864,7 +876,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
 // ============================================================
 // CONFIGURACIÓN
 // ============================================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5iWSUxpdsjyYBjf-XAz2UZA-mjlkXEW_bkDAOLzCdwNkcEQdeePKEwzSue-JXPCaX/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1NDR6iNP1OmIJinfMa1OdvCYpkSB1TZNPBjWfRZNIu-yhiEvwvBbK871d3YNKx9Za/exec';
 const LOGO_BET = `<span style="font-size:1.4rem;font-weight:900;letter-spacing:-1px;color:#1a1a1a;">B<span style="color:#8bc34a;">ET</span></span>`;
 
 // ============================================================
@@ -883,6 +895,50 @@ const USUARIOS_NSS_OBLIGATORIO = ['BMEXS', 'BMEXM'];
 // ============================================================
 // FOTO
 // ============================================================
+// La foto de Headcount solo se pide cuando el Tipo de Movimiento es ALTA, MIGRACION o REINGRESO
+function _normMov(v){ return (v||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/-/g,'').trim(); }
+function fotoRequerida(){
+    const el=document.getElementById('estatus');
+    return /\bALTA\b|MIGRACION|REINGRESO/.test(_normMov(el?el.value:''));
+}
+// Actualización de Esquema: solo aplica cuando el Tipo de Movimiento es CAMBIO DE ESQUEMA o MIGRACION
+const CAMPOS_ESQUEMA=['fechaCambioEsquema','fechaFirmaNuevoContrato'];
+function esquemaRequerido(){
+    const el=document.getElementById('estatus');
+    return /CAMBIO(\s+DE)?\s+ESQUEMA|MIGRACION/.test(_normMov(el?el.value:''));
+}
+function actualizarBloqueEsquema(){
+    const box=document.getElementById('bloqueEsquema'); if(!box) return;
+    const req=esquemaRequerido();
+    box.style.display=req?'':'none';
+    if(!req){   // si no aplica, se limpian los campos para que no se guarden ni se exijan
+        CAMPOS_ESQUEMA.forEach(id=>{
+            const el=document.getElementById(id); if(!el) return;
+            if(el.dataset.naDate){ el.type='date'; delete el.dataset.naDate; }
+            el.value=''; el.classList.remove('campo-falta');
+        });
+    }
+}
+function actualizarFotoHeadcount(){
+    actualizarBloqueEsquema();
+    const box=document.getElementById('fotoBoxHC'); if(!box) return;
+    const req=fotoRequerida();
+    box.style.display=req?'':'none';
+    if(!req){   // si ya no aplica, se descarta la foto para que no se guarde ni se imprima
+        fotoBase64='';
+        const pv=document.getElementById('previewFoto');
+        if(pv){ pv.innerHTML='<span style="color:#9ca3af;font-size:3rem;">👤</span>'; pv.style.borderColor='#d1d5db'; }
+        const inp=document.getElementById('fotoEmpleado'); if(inp) inp.value='';
+    }
+}
+window.addEventListener('load',()=>{
+    if(typeof aplicarDatosUB==='function'){
+        const _orig=aplicarDatosUB;
+        aplicarDatosUB=function(){ const r=_orig.apply(this,arguments); actualizarFotoHeadcount(); return r; };
+    }
+    actualizarFotoHeadcount();
+});
+
 function cargarFoto(event) {
     const file = event.target.files[0]; if(!file) return;
     if(file.size>2*1024*1024){alert('⚠️ Máximo 2MB');return;}
@@ -932,6 +988,7 @@ function limpiarFormulario(modulo) {
         fotoBase64 = '';
         document.getElementById('previewFoto').innerHTML = '<span style="color:#9ca3af;font-size:3rem;">👤</span>';
         document.getElementById('fotoEmpleado').value = '';
+        setTimeout(actualizarFotoHeadcount,0);
 
         // Limpiar todos los inputs y textareas del form (excepto selects de catálogo)
         const form = document.getElementById('formHeadcount');
@@ -1124,7 +1181,7 @@ function sv(id,val){const el=document.getElementById(id);if(el&&val)el.value=val
 // y variantes ("NÚMERO DE SEGURO SOCIAL"); también acepta registros locales (d.nss).
 function nssDeUB(d){
     if(!d)return '';
-    const alias=['NSS','NUMERODESEGUROSOCIAL','NOSEGUROSOCIAL','NUMSEGUROSOCIAL','SEGUROSOCIAL'];
+    const alias=['NSS','EMPNSS','NUMERODESEGUROSOCIAL','NOSEGUROSOCIAL','NUMSEGUROSOCIAL','SEGUROSOCIAL'];
     const limpio=k=>k.toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
     let v='';
     for(const k of Object.keys(d)){
@@ -1209,7 +1266,7 @@ function calcularDiasIncapacidad(){calcularDias('incapInicio','incapFin','incapT
 // ============================================================
 const CAMPOS_NA = [
     // listas desplegables
-    'ap','prenominista','reclutador','fuenteReclutamiento','estatus','estatusContrato','jefeInmediato','sexo','estadoCivil','escolaridad',
+    'ap','prenominista','reclutador','fuenteReclutamiento','estatus','estatusContrato','jefeInmediato','estadoCivil','escolaridad',
     // texto / links / fechas
     'folioVacante','idmex','nss','linkNoImss','noCreditoInfonavit','linkDescargaConstanciaFiscal','telefonoCelular',
     'bancoNominaSearch','noCuentaNomina','clabeNomina','linkEstadoCuentaNomina',
@@ -1279,6 +1336,7 @@ function validarCamposNA(){
     const faltan = [];
     CAMPOS_NA.forEach(id => {
         const el = document.getElementById(id); if(!el) return;
+        if(CAMPOS_ESQUEMA.includes(id) && !esquemaRequerido()){ el.classList.remove('campo-falta'); return; }
         let v = (el.value || '').toString().trim();
         if(el.tagName !== 'SELECT' && /^n\/?a$/i.test(v)){                 // normaliza na / n/a / N/A → NA
             v = 'NA'; el.value = 'NA';
@@ -1308,7 +1366,7 @@ function guardarModulo(modulo) {
     const fd = new FormData(form);
     datosFormulario = { modulo };
     fd.forEach((v,k) => { if(k !== 'fotoEmpleado') datosFormulario[k] = aMayus(v); });
-    if(modulo === 'headcount' && fotoBase64) datosFormulario.foto = fotoBase64;
+    if(modulo === 'headcount' && fotoBase64 && fotoRequerida()) datosFormulario.foto = fotoBase64;
     const _pf = {vacaciones:'vac',bajas:'baja',incapacidades:'incap'}[modulo];
     if(_pf){
         // La foto es opcional en Vacaciones, Bajas e Incapacidades
@@ -1350,11 +1408,12 @@ function guardarModulo(modulo) {
     if(modulo === 'headcount' && (!datosFormulario.nombres || !datosFormulario.curp)){
         mostrarToast('⚠️ Por favor completa al menos Nombre y CURP', true); return;
     }
-    // La foto es OBLIGATORIA solo en Headcount (en los demás módulos es opcional)
-    if(modulo === 'headcount' && !fotoBase64){
+    // La foto es OBLIGATORIA en Headcount solo si el Tipo de Movimiento es ALTA, MIGRACION o REINGRESO
+    // (en los demás movimientos y en los demás módulos no se pide)
+    if(modulo === 'headcount' && fotoRequerida() && !fotoBase64){
         const _pv = document.getElementById('previewFoto');
         if(_pv){ _pv.style.borderColor = '#ef4444'; _pv.scrollIntoView({behavior:'smooth',block:'center'}); }
-        mostrarToast('⚠️ La fotografía del empleado es obligatoria en Headcount', true); return;
+        mostrarToast('⚠️ La fotografía es obligatoria cuando el Tipo de Movimiento es ALTA, MIGRACIÓN o REINGRESO', true); return;
     }
     // Todos los campos manuales son obligatorios (si no aplica → NA)
     if(modulo === 'headcount' && !validarCamposNA()) return;
@@ -1487,6 +1546,7 @@ async function cargarListasDesplegables() {
         await cargarCampo(campo);
     }
     await cargarPrenominista();
+    pintarSexo();
     cargarCatalogoTabuladores();
 }
 
@@ -1528,6 +1588,7 @@ function llenarSelect(id,opciones){
     sel.innerHTML='<option value="">Seleccionar...</option>';
     opciones.forEach(op=>{const o=document.createElement('option');o.value=op;o.textContent=op;if(op===val)o.selected=true;sel.appendChild(o);});
     if(pend!==undefined)delete window._pSV[id];
+    if(id==='estatus'&&typeof actualizarFotoHeadcount==='function')actualizarFotoHeadcount();
     if(id==='periodicidadPago'&&pend!==undefined&&typeof poblarTabuladores==='function')setTimeout(()=>poblarTabuladores(''),0);
 }
 
@@ -1957,6 +2018,11 @@ function aplicarDatosUB(d){
     const cf=new Set(['fechaRealIngreso','fechaNacimiento']);
     function pf(v){if(!v)return'';const s=v.toString().trim();if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;const mm=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(mm){const[,dd,mo,y]=mm;return y+'-'+mo.padStart(2,'0')+'-'+dd.padStart(2,'0');}const f=new Date(s);if(!isNaN(f))return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');return s;}
     Object.keys(m).forEach(c=>{if(d[c]!==undefined&&d[c]!==null&&d[c]!==''){const el=document.getElementById(m[c]);if(!el)return;el.value=cf.has(m[c])?pf(d[c]):d[c];}});
+    // Encabezados de la fuente anterior (empCurp, empNss, empSexo...): se usan si el campo sigue vacío
+    {const AE={usuarioBeta:['EMPID'],nombres:['EMPNOMBRE'],apellidoPaterno:['APELLIDOPATERNO'],apellidoMaterno:['APELLIDOMATERNO'],curp:['EMPCURP'],rfc:['EMPRFC'],nss:['EMPNSS'],puesto:['PUESTO'],departamento:['DEPARTAMENTO'],
+        fechaRealIngreso:['EMPFECHAINGRESO'],fechaNacimiento:['EMPFECHANACIMIENTO'],lugarNacimiento:['EMPLUGARNACIMIENTO'],nacionalidad:['EMPNACIONALIDAD'],noLicencia:['EMPLICENCIA'],
+        calle:['EMPCALLE'],colonia:['EMPCOLONIA'],cp:['EMPCP'],correoElectronico:['EMPCORREO','EMPEMAIL'],telefonoCelular:['EMPTELCEL'],placa:['PLACAASIGNADA']};
+     Object.keys(AE).forEach(id=>{const el=document.getElementById(id);if(!el||el.value)return;const v=ubCampo(d,AE[id]);if(v!=='')el.value=cf.has(id)?pf(v):v;});}
     // RFC: si la hoja ya trae RFC completo (13), se separa en base (10) + homoclave (3)
     {const rEl=document.getElementById('rfc'),hEl=document.getElementById('homoclave');
      if(rEl&&hEl){const r=(rEl.value||'').toString().toUpperCase().replace(/\s/g,'');
@@ -1964,9 +2030,11 @@ function aplicarDatosUB(d){
         else if(d['RFC']!==undefined&&d['RFC']!==null&&d['RFC']!=='')hEl.value='';}}
     const nssV=nssDeUB(d);
     if(nssV){const nEl=document.getElementById('nss');if(nEl){nEl.value=nssV;const er=document.getElementById('errorNss');if(er)er.style.display='none';}}
-    const sc=['estatusContrato','ap','reclutador','jefeInmediato','estatus','sexo','estadoCivil','fuenteReclutamiento'];
+    const sc=['estatusContrato','ap','reclutador','jefeInmediato','estatus','estadoCivil','fuenteReclutamiento'];
     if(!window._pSV)window._pSV={};
     sc.forEach(id=>{const el=document.getElementById(id);if(!el)return;if(el.value)return;if(el.options.length<=1){const cols=Object.keys(m).filter(k=>m[k]===id);for(const c of cols){if(d[c]&&d[c]!==''){window._pSV[id]=d[c];break;}}}});
+    // SEXO automático: columna SEXO de USUARIOS_BETA; si no viene, se deduce de la CURP (posición 11: H/M)
+    aplicarSexoAuto(d);
     // Bancos y cuentas desde USUARIOS_BETA (BANCO NÓMINA, NO. CUENTA NÓMINA, BANCO RENTA, NO. CUENTA RENTA).
     // La cuenta puede ser número de cuenta o CLABE: si no hay cuenta, se usa la columna CLABE.
     const bn=ubCampo(d,['BANCO NOMINA']);
@@ -1982,6 +2050,35 @@ function aplicarDatosUB(d){
     window._bancoUB={bn,cl,br,clr,cn,cr};
     window._bancoModo=null;
     aplicarBancoPorEsquema();
+}
+// ---- SEXO automático ----
+// Clasifica cualquier variante (H, M, F, HOMBRE, MUJER, MASCULINO, FEMENINO...) como 'H' o 'M'
+function sexoClase(v){
+    const x=(v==null?'':v).toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z]/g,'');
+    if(['H','HOMBRE','MASCULINO','MASC','VARON','MALE'].includes(x))return 'H';
+    if(['M','MUJER','FEMENINO','FEM','F','FEMALE'].includes(x))return 'M';
+    return '';
+}
+// Texto de Sexo: usa la opción equivalente del catálogo SEXO si ya cargó; si no, el valor de la hoja; si no, HOMBRE/MUJER
+function pintarSexo(){
+    const el=document.getElementById('sexo'); if(!el)return;
+    const clase=window._sexoClase||'';
+    if(!clase){el.value='';return;}
+    const cat=cacheCatalogos['SEXO']||[];
+    const op=cat.find(o=>sexoClase(o)===clase);
+    el.value=op||window._sexoRaw||(clase==='H'?'HOMBRE':'MUJER');
+}
+function aplicarSexoAuto(d){
+    const el=document.getElementById('sexo'); if(!el)return;
+    const raw=(ubCampo(d,['SEXO','EMPSEXO','GENERO'])||'').toString().trim();
+    let clase=sexoClase(raw);
+    if(!clase){
+        const curp=(ubCampo(d,['CURP','EMPCURP'])||(document.getElementById('curp')||{}).value||'').toString().trim().toUpperCase();
+        if(curp.length>=11)clase=sexoClase(curp.charAt(10));
+    }
+    window._sexoClase=clase||'';
+    window._sexoRaw=clase?raw:'';
+    pintarSexo();
 }
 function _setBancoCampos(t,banco,cuenta,clabe){
     const c=t==='nomina'?{s:'bancoNominaSearch',k:'claveBanco',n:'noCuentaNomina',l:'clabeNomina'}:{s:'bancoRentaSearch',k:'claveBanco2',n:'noCuentaBancariaRenta',l:'clabeRenta'};
@@ -2614,7 +2711,7 @@ const TUT = {
       <ul><li>Presiona <b>Seleccionar Foto</b>.</li><li>Elige una imagen <b>JPG o PNG</b> de máximo <b>2 MB</b>.</li><li>Verás la vista previa dentro del cuadro. Si te equivocas, vuelve a presionar el botón y elige otra.</li></ul>
       <div class="tut-ill"><div class="tut-row"><div class="tut-foto">👤</div><div class="tut-arrow">➜</div><div class="tut-foto ok">__FOTO__</div></div><div class="tut-fake-btn">Seleccionar Foto</div></div>
       <div class="tut-tip">💡 Usa una foto de frente, con buena luz y sin lentes oscuros.</div>
-      <div class="tut-tip">💡 La foto es <b>obligatoria</b> en Headcount. En Vacaciones, Bajas e Incapacidades es opcional.</div>
+      <div class="tut-tip">💡 En Headcount la foto es <b>obligatoria solo si el Tipo de Movimiento es ALTA, MIGRACIÓN o REINGRESO</b>; con otro movimiento no se pide. En Vacaciones, Bajas e Incapacidades no se pide foto.</div>
       <div class="tut-tip">💡 Mejor <b>vertical y con el rostro centrado</b>: la foto se ajusta sola al recuadro de la ficha y de la credencial, y se recortan los bordes que sobren.</div>`},
     {t:'Elige el Tabulador',h:`<p>En <b>Datos de Contratación</b> tienes dos opciones:</p>
       <ul><li>Escribe el <b>ID Tabulador</b> y presiona <b>Enter</b>, o</li><li>Abre la lista <b>Tabulador</b> y busca escribiendo (puesto, zona, esquema…). Los <b>Sugeridos</b> para el puesto salen primero.</li></ul>
