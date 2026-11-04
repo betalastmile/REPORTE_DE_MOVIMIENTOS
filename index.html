@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- ⚠️ CAMBIA SOLO ESTE VALOR EN CADA ACTUALIZACIÓN (ej. V.B.1.1 -> V.B.1.2). Los usuarios con otra versión abierta quedan obligados a actualizar. -->
-    <meta name="app-version" content="V.B.2.5">
+    <meta name="app-version" content="V.B.2.4">
     <title>Sistema de Gestión de Empleados - BET</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -507,8 +507,8 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
             <h3 class="subsection-title">Datos de Contratación</h3>
             <div class="form-grid">
                 <div class="form-group">
-                    <label>ID Tabulador <small style="color:#4d6b00;font-weight:600;">(ingresa y presiona Enter)</small></label>
-                    <input type="text" id="idTabulador" name="idTabulador" placeholder="ID del tabulador" autocomplete="off" class="campo-editable" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarPorIdTabulador();}" onblur="buscarPorIdTabulador()" oninput="this.style.borderColor=''">
+                    <label>ID Tabulador <small style="color:#4d6b00;font-weight:600;">(de BD_RM; bloqueado)</small></label>
+                    <input type="text" id="idTabulador" name="idTabulador" placeholder="Se llena automático desde BD_RM" autocomplete="off" readonly tabindex="-1" class="campo-tabulador">
                 </div>
                 <div class="form-group">
                     <label>Puesto Tabulador <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label>
@@ -531,7 +531,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 <div class="form-group"><label>Pago Diario Total <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="text" id="pagoDiarioTotal" name="pagoDiarioTotal" placeholder="Automático" readonly class="campo-tabulador"></div>
                 <div class="form-group"><label>Gasolina por TOKA <small style="color:#4d6b00;font-weight:600;">(desde tabulador)</small></label><input type="text" id="gasolinaPorToka" name="gasolinaPorToka" placeholder="Automático" readonly class="campo-tabulador"></div>
                 <div class="form-group">
-                    <label>Tabulador <span style="color:#ef4444;font-weight:700;">*</span> <span id="badge-TABULADORES" class="catalog-badge catalog-loading">cargando...</span></label>
+                    <label>Tabulador <span style="color:#ef4444;font-weight:700;">*</span> <small style="color:#4d6b00;font-weight:600;">(según ID Tabulador)</small></label>
                     <div class="tab-combo" id="tabCombo">
                         <input type="text" id="tabuladorBuscar" placeholder="Se llena con el ID Tabulador" autocomplete="off" readonly class="campo-tabulador">
                     </div>
@@ -763,7 +763,10 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 <div id="estatusBaja"></div>
             </div>
             <div class="form-grid">
-                <div class="form-group"><label>Nombre Completo</label><input type="text" id="bajaNombres" name="nombres" placeholder="Nombre completo" readonly></div>
+                <div class="form-group"><label>Nombre Completo</label><input type="text" id="bajaNombres" name="nombreCompleto" placeholder="Nombre completo" readonly></div>
+                <div class="form-group"><label>Apellido Paterno</label><input type="text" id="bajaPaterno" name="paterno" placeholder="Apellido paterno" readonly></div>
+                <div class="form-group"><label>Apellido Materno</label><input type="text" id="bajaMaterno" name="materno" placeholder="Apellido materno" readonly></div>
+                <div class="form-group"><label>Nombre(s)</label><input type="text" id="bajaNombre" name="nombres" placeholder="Nombre(s)" readonly></div>
                 <div class="form-group"><label>AP <span id="badge-AP-baja" class="catalog-badge catalog-loading">cargando...</span></label><select id="bajaAp" name="ap"><option value="">Seleccionar...</option></select></div>
                 <div class="form-group"><label>Usuario Beta</label><input type="text" id="bajausuarioBeta" name="usuarioBeta" placeholder="Usuario Beta" readonly></div>
                 <div class="form-group"><label>CURP</label><input type="text" id="bajaCurp" name="curp" placeholder="CURP" readonly></div>
@@ -876,7 +879,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
 // ============================================================
 // CONFIGURACIÓN
 // ============================================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1NDR6iNP1OmIJinfMa1OdvCYpkSB1TZNPBjWfRZNIu-yhiEvwvBbK871d3YNKx9Za/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxlilAA1v9w5eGn3WAvzg3lxJjs33LF4C3r10XBjF8mQIAxrJpRZ5MfTgv-UjNJJJRU/exec';
 const LOGO_BET = `<span style="font-size:1.4rem;font-weight:900;letter-spacing:-1px;color:#1a1a1a;">B<span style="color:#8bc34a;">ET</span></span>`;
 
 // ============================================================
@@ -1124,6 +1127,13 @@ async function buscarPorNombre(prefix,termino,rDiv){
 }
 function seleccionarEmpleadoDeLista(prefix,idx){const e=(window._listaRes||[])[idx];if(!e)return;aplicarResultadoAlFormulario(prefix,e.raw);mostrarResultadoUnico(document.getElementById(`result${cap(prefix)}`),prefix,e.nombre,e.usuario,e.curp,e.nss,e.fuente);}
 function aplicarResultadoAlFormulario(prefix,d){
+    if(prefix==='baja'){
+        const ap=(d['APELLIDO PATERNO']||d.apellidoPaterno||'').toString().trim().toUpperCase();
+        const am=(d['APELLIDO MATERNO']||d.apellidoMaterno||'').toString().trim().toUpperCase();
+        const nm=(d['NOMBRE(S)']||d['NOMBRES']||d.nombres||'').toString().trim().toUpperCase();
+        // asignación directa (aunque venga vacío, como Apellido Materno) para no dejar datos de la búsqueda anterior
+        [['bajaPaterno',ap],['bajaMaterno',am],['bajaNombre',nm]].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v;});
+    }
     const n=cnc(d['APELLIDO PATERNO']||d.apellidoPaterno||'',d['APELLIDO MATERNO']||d.apellidoMaterno||'',d['NOMBRE(S)']||d['NOMBRES']||d.nombres||'');
     sv(`${prefix}Nombres`,n);sv(`${prefix}usuarioBeta`,d['USUARIO BETA']||d.usuarioBeta||'');sv(`${prefix}Curp`,d['CURP']||d.curp||'');sv(`${prefix}Nss`,nssDeUB(d));
 }
@@ -1161,7 +1171,6 @@ async function consultarEstatusPlataforma(curp,usuario,nss){
         }
         const d=r.data||{}; const e=String(d.empEstatus||'').trim().toUpperCase();
         window._estatusRM=e;
-        if(d.nombre){const _n=document.getElementById('bajaNombres'); if(_n&&!_n.value)_n.value=String(d.nombre).toUpperCase();}
         const fechas=(d.fechas||[]).filter(f=>f&&f.valor).map(f=>`<span><b>${f.etiqueta}:</b> ${_fmtFechaRM(f.valor)}</span>`).join('');
         const bloqueFechas=fechas?`<div class="est-fechas">${fechas}</div>`:'';
         if(e==='A')box.innerHTML=`<div class="est-plat activo"><div class="est-tit">🟢 ACTIVO EN PLATAFORMA</div>${d.nombre?`<div><b>${d.nombre}</b></div>`:''}${bloqueFechas}</div>`;
@@ -1401,6 +1410,9 @@ function guardarModulo(modulo) {
     }
     if(modulo === 'bajas'){
         if(window._estatusRM === 'B' && !confirm('Este empleado ya aparece como INACTIVO en plataforma. ¿Registrar la baja de todos modos?')) return;
+        // Se envían 4 claves; Code.gs las renombra a los encabezados: NOMBRE COMPLETO | PATERNO | MATERNO | NOMBRES
+        // (no agregar más alias: cada clave distinta crea una columna nueva en la hoja BAJAS)
+        ['nombreCompleto','paterno','materno','nombres'].forEach(k=>{datosFormulario[k]=(datosFormulario[k]||'').toString().trim().toUpperCase();});
         datosFormulario.movimientoBaja = 'SI';          // el script marca ESTATUS = B en USUARIOS_BETA
         datosFormulario.empEstatusNuevo = 'B';
         datosFormulario.empEstatusPrevio = window._estatusRM || '';
@@ -1449,8 +1461,7 @@ function guardarModulo(modulo) {
         if(!selTab.value){
             const selTabBuscar = document.getElementById('tabuladorBuscar');
             selTabBuscar.style.borderColor = '#ef4444';
-            mostrarToast('⚠️ Ingresa el ID Tabulador (llena Pago Diario, Renta, Complemento y Bono)', true);
-            document.getElementById('idTabulador').focus();
+            mostrarToast('⚠️ El usuario no tiene un ID Tabulador válido en BD_RM (Pago Diario, Renta, Complemento y Bono)', true);
             return;
         }
         selTab.style.borderColor = '';
@@ -1547,7 +1558,6 @@ async function cargarListasDesplegables() {
     }
     await cargarPrenominista();
     pintarSexo();
-    cargarCatalogoTabuladores();
 }
 
 async function cargarCampo(campo) {
@@ -1589,7 +1599,6 @@ function llenarSelect(id,opciones){
     opciones.forEach(op=>{const o=document.createElement('option');o.value=op;o.textContent=op;if(op===val)o.selected=true;sel.appendChild(o);});
     if(pend!==undefined)delete window._pSV[id];
     if(id==='estatus'&&typeof actualizarFotoHeadcount==='function')actualizarFotoHeadcount();
-    if(id==='periodicidadPago'&&pend!==undefined&&typeof poblarTabuladores==='function')setTimeout(()=>poblarTabuladores(''),0);
 }
 
 // ============================================================
@@ -1627,12 +1636,12 @@ async function _autoLlenarUsuarioBetaInner() {
     diagnosticarNssUB(d);
     const fs=(d['FORMATO SUCURSAL']||d['FORMATO_SUCURSAL']||'').toString().trim();
     const pl=(d['PLACA']||d['Placa']||'').toString().trim();
-    const it=(d['ID TABULADOR']||d['ID_TABULADOR']||d['TABULADOR']||'').toString().trim();
+    const it=ubCampo(d,['ID TABULADOR','ID_TABULADOR','IDTABULADOR','IDENTIFICADOR','ID TAB']);
     // Las 3 consultas son independientes entre sí: se lanzan al mismo tiempo
     await Promise.all([
         fs?buscarTiendaPorFormato(fs):null,
         pl?buscarUnidadPorPlaca(pl):null,
-        (async()=>{const okCat=await poblarTabuladores(it,true);if(!okCat&&it)await buscarTabulador(it);})()
+        cargarTabuladorDesdeUB(it,ub)
     ]);
 }
 
@@ -1660,8 +1669,51 @@ function aplicarDatosUnidad(d){
 }
 
 // ============================================================
-// TABULADOR
+// TABULADOR — el ID sale de USUARIOS_BETA (no editable) y el resto de la hoja
+// CONSOLIDADO_POR_ESTADO_Y_ZONA_2026 (columna "Identificador")
 // ============================================================
+window._cTabConsolidado=window._cTabConsolidado||{};
+// Consulta el ID en el consolidado y llena todos los campos del tabulador
+async function aplicarTabuladorConsolidado(id){
+    const idEl=document.getElementById('idTabulador');
+    let row=window._cTabConsolidado[id];
+    if(!row){
+        try{
+            const res=await fetch(`${SCRIPT_URL}?action=getTabuladorConsolidado&idTabulador=${encodeURIComponent(id)}&_t=${Date.now()}`,{cache:'no-store'});
+            const r=await res.json();
+            if(r.status==='success'&&r.data){row=r.data;window._cTabConsolidado[id]=row;}
+        }catch(e){mostrarToast('❌ No se pudo consultar el tabulador',true);aplicarBancoPorEsquema(true);return false;}
+    }
+    if(!row){
+        limpiarCamposTabulador();
+        const sel=document.getElementById('tabulador');if(sel){sel.innerHTML='<option value=""></option>';}
+        if(idEl){idEl.value=id;idEl.style.borderColor='#ef4444';}
+        syncTabCombo();
+        mostrarToast('⚠️ El ID Tabulador '+id+' no existe en el consolidado',true);
+        aplicarBancoPorEsquema(true);
+        return false;
+    }
+    const g=a=>(tabCampo(row,a)||'').toString().trim();
+    // El consolidado no trae nombre de tabulador: se arma con ID, puesto, esquema y ciudad
+    const nombre=[id,g(TAB_ALIAS.puesto),g(TAB_ALIAS.esquema),g(['CIUDAD'])].filter(Boolean).join(' - ');
+    const sel=document.getElementById('tabulador');
+    if(sel){sel.innerHTML='';sel.add(new Option(nombre,nombre));sel.value=nombre;}
+    aplicarFilaTabulador(row);
+    if(idEl){idEl.value=id;idEl.dataset.ultimo=id;idEl.style.borderColor='';}
+    syncTabCombo();
+    if(normTxt(g(['ESTATUS']))==='INACTIVO')mostrarToast('⚠️ El tabulador '+id+' está marcado como INACTIVO en el consolidado',true);
+    else mostrarToast('✅ Tabulador '+id+': '+(g(TAB_ALIAS.puesto)||nombre));
+    return true;
+}
+// Al cargar el usuario: el ID Tabulador viene de BD_RM (columna tabulador) dentro de getUsuarioBeta
+async function cargarTabuladorDesdeUB(itUB,ub){
+    resetTabulador();
+    const id=(itUB||'').toString().trim();
+    const idEl=document.getElementById('idTabulador');
+    if(!id){mostrarToast('⚠️ No hay ID Tabulador para este usuario en BD_RM. Debe registrarse en BD_RM para poder continuar',true);aplicarBancoPorEsquema(true);return;}
+    if(idEl)idEl.value=id;
+    await aplicarTabuladorConsolidado(id);
+}
 async function buscarTabulador(id){
     if(!id)return;
     try{
@@ -1688,10 +1740,18 @@ function tabCampo(row,aliases){
     return '';
 }
 const NA_TAB='NO APLICA';
-function numTab(v){if(v===undefined||v===null||v==='')return '';const n=parseFloat(v.toString().replace(/[$,\s]/g,''));return isNaN(n)?'':n;}
+function numTab(v){
+    if(v===undefined||v===null||v==='')return '';
+    if(typeof v==='number')return isNaN(v)?'':v;
+    let t=v.toString().replace(/[$\s]/g,'');
+    // Formato es-MX "9.600,00" o "9.600": puntos de miles y coma decimal
+    if(/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(t)||/^-?\d+,\d{1,2}$/.test(t))t=t.replace(/\./g,'').replace(',','.');
+    else t=t.replace(/,/g,'');
+    const n=parseFloat(t);return isNaN(n)?'':n;
+}
 const TAB_ALIAS={
     nombre:['TABULADOR','NOMBRE TABULADOR'],
-    id:['ID TABULADOR','ID_TABULADOR','ID'],
+    id:['ID TABULADOR','ID_TABULADOR','IDENTIFICADOR','ID'],
     puesto:['PUESTO','PUESTOS'],
     periodicidad:['PERIODICIDAD','PERIODICIDAD DE PAGO','PERIODICIDAD PAGO','PERIODICIDAD_PAGO','PERIOCIDAD','PERIOCIDAD DE PAGO'],
     esquema:['ESQUEMA DE CONTRATACION','ESQUEMA'],
@@ -1939,34 +1999,20 @@ function marcarTabActivo(idx){
     };
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
-// Busca el tabulador por ID en la hoja TABULADORES y llena todos los campos
+// ID escrito a mano (Enter o al salir del campo): busca en el consolidado y llena todos los campos
 async function buscarPorIdTabulador(){
     const inp=document.getElementById('idTabulador');if(!inp)return;
     const id=inp.value.trim();
-    if(!id)return;
+    if(!id){ // ID borrado: se limpian los datos del tabulador
+        if(inp.dataset.ultimo){delete inp.dataset.ultimo;limpiarCamposTabulador();const t=document.getElementById('tabulador');if(t)t.innerHTML='<option value=""></option>';syncTabCombo();}
+        return;
+    }
     const sel=document.getElementById('tabulador');
     // Evita buscar dos veces (Enter + blur) el mismo ID
     if(inp.dataset.ultimo===id&&sel&&sel.value)return;
     inp.dataset.ultimo=id;
-    let row=null;
-    const cat=await cargarCatalogoTabuladores();
-    if(cat){const n=normTxt(id);row=cat.find(r=>normTxt(tabCampo(r,TAB_ALIAS.id))===n)||null;}
-    if(row){
-        const nom=tabNombre(row);
-        if(nom){elegirTabulador(nom);}
-        else{aplicarFilaTabulador(row);syncTabCombo();}
-        mostrarToast('✅ Tabulador: '+(nom||id));
-        return;
-    }
-    // Respaldo: búsqueda directa por ID en el script
-    try{
-        const res=await fetch(`${SCRIPT_URL}?action=getTabulador&idTabulador=${encodeURIComponent(id)}`);
-        const r=await res.json();
-        if(r.status==='success'&&r.data){aplicarDatosTabulador(r.data);mostrarToast('✅ Tabulador: '+(r.data['TABULADOR']||id));return;}
-    }catch(e){}
-    delete inp.dataset.ultimo;
-    inp.style.borderColor='#ef4444';
-    mostrarToast('⚠️ No se encontró el ID Tabulador: '+id,true);
+    const ok=await aplicarTabuladorConsolidado(id);
+    if(!ok)delete inp.dataset.ultimo;
 }
 function aplicarFilaTabulador(d){
     const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
@@ -2049,6 +2095,8 @@ function aplicarDatosUB(d){
     // Se guarda el origen y se reparte según el ESQUEMA: ALIADO INTERNO → todo cae en Cuenta de Renta; otro esquema → Cuenta de Nómina
     window._bancoUB={bn,cl,br,clr,cn,cr};
     window._bancoModo=null;
+    // Si USUARIOS_BETA trae el esquema se usa de inicio; si no, se espera al tabulador (consolidado)
+    {const eEl=document.getElementById('esquemaContratacion');if(eEl)eEl.value=ubCampo(d,['ESQUEMA','ESQUEMA DE CONTRATACION']);}
     aplicarBancoPorEsquema();
 }
 // ---- SEXO automático ----
@@ -2088,10 +2136,12 @@ function _setBancoCampos(t,banco,cuenta,clabe){
     if(cuenta)g(c.n).value=cuenta;
     if(clabe)g(c.l).value=clabe;
 }
-function aplicarBancoPorEsquema(){
+function aplicarBancoPorEsquema(forzar){
     const o=window._bancoUB; if(!o)return;
     if(!(o.bn||o.cl||o.br||o.clr||o.cn||o.cr))return;           // la hoja no trae datos bancarios: no se toca nada
     const esq=(document.getElementById('esquemaContratacion')||{}).value||'';
+    // Mientras no se conozca el esquema (aún carga el tabulador) no se reparte; si ya no se va a conocer (forzar), se usa Nómina
+    if(!esq&&!forzar)return;
     const modo=ubClave(esq).includes('ALIADOINTERNO')?'aliado':'normal';
     if(window._bancoModo===modo)return;                          // sin cambio de esquema: no se pisa lo que el usuario edite
     window._bancoModo=modo;
@@ -2391,7 +2441,7 @@ function generarFichaBajas(){
         <div style="background:#111111;border-bottom:3px solid #93d502;letter-spacing:.05em;color:white;padding:.6rem 1rem;margin:.5rem 0 .5rem;font-weight:600;font-size:1rem;">DATOS DEL EMPLEADO</div>
         ${fotoFichaHTML()}
         <table class="ficha-table">
-            <tr><td>NOMBRE COMPLETO</td><td>${datosFormulario.nombres||'N/A'}</td></tr>
+            <tr><td>NOMBRE COMPLETO</td><td>${datosFormulario.nombreCompleto||'N/A'}</td></tr>
             <tr><td>USUARIO BETA</td><td>${datosFormulario.usuarioBeta||'N/A'}</td></tr>
             <tr><td>CURP</td><td>${datosFormulario.curp||'N/A'}</td></tr>
             <tr><td>NSS</td><td>${datosFormulario.nss||'N/A'}</td></tr>
@@ -2450,6 +2500,7 @@ function cerrarFicha(){
 
 // Nombre completo de la persona de la ficha activa (para el nombre del PDF/archivo al imprimir)
 function nombreFichaActual(){
+    if(moduloActual==='bajas'&&datosFormulario.nombreCompleto)return String(datosFormulario.nombreCompleto).replace(/[\\\/:*?"<>|]/g,'').replace(/\s+/g,' ').trim();
     let n = (moduloActual === 'headcount' || !datosFormulario.nombres || datosFormulario.apellidoPaterno)
         ? cnc(datosFormulario.apellidoPaterno||'', datosFormulario.apellidoMaterno||'', datosFormulario.nombres||'')
         : String(datosFormulario.nombres||'').trim().toUpperCase();
