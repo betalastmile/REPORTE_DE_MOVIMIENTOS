@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- ⚠️ CAMBIA SOLO ESTE VALOR EN CADA ACTUALIZACIÓN (ej. V.B.1.1 -> V.B.1.2). Los usuarios con otra versión abierta quedan obligados a actualizar. -->
-    <meta name="app-version" content="V.B.2.5">
+    <meta name="app-version" content="V.B.2.6">
     <title>Sistema de Gestión de Empleados - BET</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -244,6 +244,8 @@
             .cred-modal{padding:.75rem .5rem;}
             .cred-box{padding:1rem;}
             .btn-cred-open{margin-left:0;}
+            .btn-fichas-open{margin-left:0;}
+            .btn-fichas-open + .btn-cred-open{margin-left:.5rem;}
             .login-box,.update-box{padding:1.5rem 1.25rem;}
         }
         @media (max-width:380px){
@@ -348,6 +350,41 @@
         @keyframes sacudir{ 0%,100%{ transform:translateX(0); } 20%,60%{ transform:translateX(-8px); } 40%,80%{ transform:translateX(8px); } }
         @media (prefers-reduced-motion:reduce){ .fl-logo,.login-box,.login-box::before,.login-logo img{ animation:none !important; } .fl-logo{ opacity:.12; } }
 
+        /* ===== BOTONES DISCRETOS ===== */
+        .btn-discreto{background:transparent !important;color:rgba(255,255,255,.85) !important;border:1px solid rgba(255,255,255,.28) !important;font-size:.62rem !important;padding:.22rem .6rem !important;font-weight:600 !important;letter-spacing:.02em;box-shadow:none !important;}
+        .btn-discreto:hover{background:rgba(255,255,255,.14) !important;filter:none !important;}
+        .btn-fichas-open{margin-left:auto;align-self:center;white-space:nowrap;padding:.4rem .85rem;font-size:.68rem;font-weight:600;margin-bottom:.35rem;background:transparent;color:inherit;border:1px solid var(--line);border-radius:8px;box-shadow:none;cursor:pointer;}
+        .btn-fichas-open:hover{background:var(--lime-soft);}
+        .btn-fichas-open + .btn-cred-open{margin-left:.5rem;}
+        /* ===== MIS FICHAS ===== */
+        #fichasModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:100001;align-items:center;justify-content:center;padding:1rem;}
+        #fichasModal.show{display:flex;}
+        .fh-list{padding:1rem 1.2rem;overflow-y:auto;flex:1;max-height:60vh;display:flex;flex-direction:column;gap:.5rem;}
+        .fh-item{display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem;border:1px solid var(--line);border-radius:10px;}
+        .fh-info{flex:1;min-width:0;}
+        .fh-info b{display:block;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        .fh-info span{font-size:.74rem;opacity:.75;}
+        .fh-item button{padding:.35rem .8rem;font-size:.76rem;font-weight:700;border-radius:8px;cursor:pointer;border:1px solid var(--lime);background:var(--lime);color:#111;}
+        .fh-item button.fh-del{background:transparent;color:inherit;border-color:var(--line);}
+        .fh-nota{padding:.2rem 1.2rem 1rem;font-size:.74rem;opacity:.75;}
+        /* ===== PREGUNTAS ===== */
+        #askModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:100001;align-items:center;justify-content:center;padding:1rem;}
+        #askModal.show{display:flex;}
+        .ask-log{padding:1rem 1.2rem;overflow-y:auto;flex:1;min-height:260px;max-height:55vh;display:flex;flex-direction:column;gap:.6rem;}
+        .ask-msg{max-width:92%;padding:.6rem .85rem;border-radius:12px;font-size:.92rem;line-height:1.5;word-break:break-word;}
+        .ask-msg.u{align-self:flex-end;background:var(--lime);color:#111;border-bottom-right-radius:3px;}
+        .ask-msg.b{align-self:flex-start;background:var(--lime-soft);color:#151515;border:1px solid var(--line);border-bottom-left-radius:3px;}
+        .ask-msg.b ul{margin:.3rem 0 .3rem 1.1rem;}
+        .ask-msg.b button{margin-top:.5rem;padding:.3rem .75rem;font-size:.75rem;font-weight:700;border:1px solid var(--lime);background:#fff;color:#111;border-radius:999px;cursor:pointer;}
+        html[data-theme="dark"] .ask-msg.b{background:#20241a;color:#e8ebe0;border-color:#3d4333;}
+        html[data-theme="dark"] .ask-msg.b button{background:#171a13;color:#e8ebe0;}
+        .ask-sug{display:flex;gap:.4rem;flex-wrap:wrap;padding:0 1.2rem .6rem;}
+        .ask-sug button{padding:.3rem .7rem;font-size:.74rem;border:1px solid var(--line);border-radius:999px;background:transparent;color:inherit;cursor:pointer;}
+        .ask-sug button:hover{background:var(--lime);color:#111;border-color:var(--lime);}
+        .ask-row{display:flex;gap:.5rem;padding:.8rem 1.2rem 1rem;border-top:1px solid var(--line);}
+        .ask-row input{flex:1;}
+        .ask-row button{padding:.55rem 1.1rem;font-weight:700;background:var(--lime);color:#111;border:1px solid var(--lime);border-radius:8px;cursor:pointer;}
+        .ask-row button:disabled{opacity:.55;cursor:wait;}
         /* ===== TUTORIAL ===== */
         .tut-open{padding:.35rem .8rem;font-size:.7rem;font-weight:700;background:var(--lime);color:#111;border:1px solid var(--lime);border-radius:999px;cursor:pointer;}
         .tut-open:hover{filter:brightness(1.08);}
@@ -444,13 +481,14 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
             <h1>Sistema de Gestión de Empleados</h1>
             <p>Beta Last Mile &nbsp;|&nbsp; Gestión integral de personal</p>
         </div>
-        <div class="user-chip" id="userChip" style="display:none;"><button type="button" class="tut-open" onclick="abrirTutorial()">📖 Tutorial</button><button type="button" class="theme-btn" onclick="toggleTema()">🌙 Oscuro</button><div class="user-col"><span id="userNombre"></span><button type="button" onclick="cerrarSesion()">Cerrar sesión</button></div></div>
+        <div class="user-chip" id="userChip" style="display:none;"><button type="button" class="tut-open btn-discreto" onclick="abrirTutorial()">📖 Tutorial</button><button type="button" class="tut-open btn-discreto" onclick="abrirPregunta()">❓ Pregunta</button><div class="user-col"><button type="button" class="theme-btn btn-discreto" onclick="toggleTema()">🌙 Oscuro</button><span id="userNombre"></span><button type="button" onclick="cerrarSesion()">Cerrar sesión</button></div></div>
     </div>
     <div class="tabs">
         <button class="tab active" onclick="cambiarTab(0)">Headcount</button>
         <button class="tab" onclick="cambiarTab(1)">Vacaciones</button>
         <button class="tab" onclick="cambiarTab(2)">Bajas</button>
         <button class="tab" onclick="cambiarTab(3)">Incapacidades</button>
+        <button type="button" class="btn-fichas-open" onclick="abrirMisFichas()">🗂️ Mis fichas</button>
         <button type="button" class="btn-cred-open" onclick="abrirCredencial()">🪪 Generar credencial</button>
     </div>
 
@@ -460,7 +498,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
         <section class="section">
             <h2 class="section-title">MÓDULO 1: HEADCOUNT</h2>
             <div class="aviso-bloqueado">Los campos sombreados se llenan automáticamente al ingresar el Usuario Beta. Solo puedes editar los campos marcados con borde blanco y las listas desplegables.</div>
-            <div class="aviso-na">⚠️ TODOS LOS CAMPOS QUE SE LLENAN MANUALMENTE SON OBLIGATORIOS (<span class="req-ast">*</span>). SI UN DATO NO APLICA, ESCRIBE <b>NA</b> O PRESIONA EL BOTÓN <b>NA</b> JUNTO AL CAMPO. EN LAS LISTAS DESPLEGABLES SIEMPRE HAY QUE ELEGIR UNA OPCIÓN (NO LLEVAN NA).</div>
+            <div class="aviso-na">⚠️ TODOS LOS CAMPOS QUE SE LLENAN MANUALMENTE SON OBLIGATORIOS (<span class="req-ast">*</span>). SI UN DATO NO APLICA, ESCRIBE <b>NA</b>. EN LAS LISTAS DESPLEGABLES SIEMPRE HAY QUE ELEGIR UNA OPCIÓN (NO LLEVAN NA).</div>
             <!-- FOTO -->
             <div class="foto-box" id="fotoBoxHC" style="display:none;">
                 <h3>Fotografía del Empleado <span style="color:#ef4444;">* (obligatoria)</span></h3>
@@ -504,6 +542,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 <div class="form-group"><label>Nombre(s)</label><input type="text" id="nombres" name="nombres" placeholder="Nombre(s)" readonly></div>
             </div>
             <!-- DATOS DE CONTRATACIÓN -->
+            <div id="bloqueContr">
             <h3 class="subsection-title">Datos de Contratación</h3>
             <div class="form-grid">
                 <div class="form-group">
@@ -550,7 +589,9 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                     <select id="jefeInmediato" name="jefeInmediato"><option value="">Seleccionar...</option></select>
                 </div>
             </div>
+            </div>
             <!-- TIENDA -->
+            <div id="bloqueTienda">
             <h3 class="subsection-title">Datos de Tienda / Proyecto</h3>
             <div class="form-grid">
                 <div class="form-group id-tienda-group">
@@ -566,7 +607,9 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 <div class="form-group"><label>Entidad Federativa</label><input type="text" id="entidadFederativa" name="entidadFederativa" placeholder="Estado" readonly></div>
                 <div class="form-group"><label>Municipio</label><input type="text" id="municipio" name="municipio" placeholder="Municipio" readonly></div>
             </div>
+            </div>
             <!-- NÓMINA -->
+            <div id="bloquePago">
             <h3 class="subsection-title">Datos de Pago — Cuenta de Nómina</h3>
             <div class="form-grid">
                 <div class="form-group">
@@ -596,6 +639,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 <div class="form-group"><label>CLABE Interbancaria Renta</label><input type="text" id="clabeRenta" name="clabeInterbancariaRenta" placeholder="CLABE de 18 dígitos" inputmode="numeric" maxlength="18" class="campo-editable"></div>
                 <div class="form-group"><label>Link Estado de Cuenta Renta</label><input type="url" id="linkEstadoCuentaRenta" name="linkEstadoCuentaRenta" placeholder="URL" class="campo-editable"></div>
             </div>
+            </div>
             <!-- ESQUEMA -->
             <div id="bloqueEsquema" style="display:none;">
             <h3 class="subsection-title">Actualización de Esquema</h3>
@@ -605,6 +649,7 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
             </div>
             </div>
             <!-- DATOS PERSONALES -->
+            <div id="bloquePers">
             <h3 class="subsection-title">Datos Personales</h3>
             <div class="form-grid">
                 <div class="form-group"><label>Fecha de Nacimiento</label><input type="date" id="fechaNacimiento" name="fechaNacimiento" readonly></div>
@@ -669,7 +714,9 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                     <input type="text" id="nombreContacto" name="nombreContacto" placeholder="Nombre de la persona de recados" class="campo-editable" required>
                 </div>
             </div>
+            </div>
             <!-- UNIDAD -->
+            <div id="bloqueUnid">
             <h3 class="subsection-title">Datos de la Unidad</h3>
             <div class="form-grid">
                 <div class="form-group"><label>Marca</label><input type="text" id="marca" name="marca" placeholder="Marca" readonly></div>
@@ -685,22 +732,39 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                 <div class="form-group"><label>Aseguradora</label><input type="text" id="aseguradora" name="aseguradora" placeholder="Nombre" readonly></div>
                 <div class="form-group"><label>No. de Póliza</label><input type="text" id="noPoliza" name="noPoliza" placeholder="Número" readonly></div>
                 <div class="form-group"><label>Vigencia Póliza</label><input type="date" id="vigenciaPoliza" name="vigenciaPoliza" class="campo-editable"></div>
-                <div class="form-group"><label>Fecha Verificación</label><input type="date" id="fechaVerificacion" name="fechaVerificacion" class="campo-editable"></div>
-                <div class="form-group"><label>Motor</label><input type="text" id="motor" name="motor" placeholder="Número" class="campo-editable"></div>
-                <div class="form-group"><label>Cilindros</label><input type="text" id="cilindros" name="cilindros" placeholder="Cantidad" class="campo-editable"></div>
-                <div class="form-group"><label>Número Factura</label><input type="text" id="numeroFactura" name="numeroFactura" placeholder="Número" class="campo-editable"></div>
-                <div class="form-group"><label>Fecha Factura</label><input type="date" id="fecha" name="fecha" class="campo-editable"></div>
-                <div class="form-group"><label>Expedida Por</label><input type="text" id="expedidaPor" name="expedidaPor" placeholder="Expedida por" class="campo-editable"></div>
+                <div class="form-group"><label>Fecha Verificación</label><input type="date" id="fechaVerificacion" name="fechaVerificacion" class="campo-editable" onchange="validarFechaVerif(true)">
+                    <div id="infoVerif" style="font-size:.72rem;margin-top:.3rem;opacity:.85;"></div>
+                    <details style="font-size:.72rem;margin-top:.25rem;"><summary style="cursor:pointer;font-weight:700;">📅 Calendario de verificaciones</summary>
+                        <table style="border-collapse:collapse;margin-top:.3rem;width:100%;">
+                            <tr><th style="text-align:left;padding:.15rem .3rem;border-bottom:1px solid var(--line);">Terminación de placa</th><th style="text-align:left;padding:.15rem .3rem;border-bottom:1px solid var(--line);">Engomado</th><th style="text-align:left;padding:.15rem .3rem;border-bottom:1px solid var(--line);">Bimestres</th></tr>
+                            <tr><td style="padding:.15rem .3rem;">5 y 6</td><td>Amarillo</td><td>Ene–Feb y Jul–Ago</td></tr>
+                            <tr><td style="padding:.15rem .3rem;">7 y 8</td><td>Rosa</td><td>Feb–Mar y Ago–Sep</td></tr>
+                            <tr><td style="padding:.15rem .3rem;">3 y 4</td><td>Rojo</td><td>Mar–Abr y Sep–Oct</td></tr>
+                            <tr><td style="padding:.15rem .3rem;">1 y 2</td><td>Verde</td><td>Abr–May y Oct–Nov</td></tr>
+                            <tr><td style="padding:.15rem .3rem;">9 y 0</td><td>Azul</td><td>May–Jun y Nov–Dic</td></tr>
+                        </table>
+                    </details>
+                </div>
+                <div class="form-group"><label>Motor <small style="color:#6b7280;font-weight:600;">(opcional)</small></label><input type="text" id="motor" name="motor" placeholder="Número" class="campo-editable"></div>
+                <div class="form-group"><label>Cilindros <small style="color:#6b7280;font-weight:600;">(opcional)</small></label><input type="text" id="cilindros" name="cilindros" placeholder="Cantidad" class="campo-editable"></div>
+                <div class="form-group"><label>Número Factura <small style="color:#6b7280;font-weight:600;">(opcional)</small></label><input type="text" id="numeroFactura" name="numeroFactura" placeholder="Número" class="campo-editable"></div>
+                <div class="form-group"><label>Fecha Factura <small style="color:#6b7280;font-weight:600;">(opcional)</small></label><input type="date" id="fecha" name="fecha" class="campo-editable"></div>
+                <div class="form-group"><label>Expedida Por <small style="color:#6b7280;font-weight:600;">(opcional)</small></label><input type="text" id="expedidaPor" name="expedidaPor" placeholder="Expedida por" class="campo-editable"></div>
             </div>
+            </div>
+            <div id="bloqueInfoAd">
             <h3 class="subsection-title">Información Adicional</h3>
             <div class="form-grid">
+                <div class="form-group"><label for="linkExpediente">Link Expediente</label><input type="url" id="linkExpediente" name="linkExpediente" placeholder="URL del expediente" class="campo-editable"></div>
+                <div class="form-group"><label for="vobo">VoBo <span id="voboOpc" style="display:none;color:#6b7280;font-size:.7rem;font-weight:600;">(opcional)</span></label><input type="text" id="vobo" name="vobo" placeholder="Quién da el Visto Bueno" class="campo-editable"></div>
                 <div class="form-group" style="grid-column:1/-1;">
                     <label>Observaciones <small style="color:#6b7280;font-weight:600;">(opcional)</small></label>
                     <textarea id="observaciones" name="observaciones" placeholder="Escribe cualquier observación relevante..."></textarea>
                 </div>
             </div>
+            </div>
             <div class="button-container">
-                <button type="button" class="btn-success" onclick="guardarModulo('headcount')">💾 Guardar y Generar Ficha</button>
+                <button type="button" class="btn-success" id="btnGuardarHC" onclick="guardarModulo('headcount')">💾 Guardar y Generar Ficha</button>
             </div>
         </section>
         </form>
@@ -722,6 +786,17 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
                     <button type="button" class="btn-primary" onclick="buscarEmpleado('vacaciones')">Buscar</button>
                 </div>
                 <div id="resultVac"></div>
+            </div>
+            <div class="foto-box" id="fotoBoxVac">
+                <h3>Fotografía del Empleado <span style="color:#ef4444;">* (obligatoria)</span></h3>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;">
+                    <div id="previewFotoVac" style="width:200px;height:200px;border:3px solid #d1d5db;background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px;">
+                        <span style="color:#9ca3af;font-size:3rem;">👤</span>
+                    </div>
+                    <input type="file" id="fotoVac" accept="image/*" style="display:none;" onchange="cargarFotoMod('vac', event)">
+                    <button type="button" onclick="document.getElementById('fotoVac').click()" class="btn-primary">Seleccionar Foto</button>
+                    <p style="color:#6b7280;font-size:.875rem;">Formatos: JPG, PNG • Máx: 2MB • Foto vertical con el rostro centrado</p>
+                </div>
             </div>
             <div class="form-grid">
                 <div class="form-group"><label>Nombre Completo</label><input type="text" id="vacNombres" name="nombres" placeholder="Nombre completo" readonly></div>
@@ -873,6 +948,21 @@ window.getSesionBET = function(){ try{ return JSON.parse(sessionStorage.getItem(
         </div>
     </div>
 </div>
+<div id="fichasModal" role="dialog" aria-modal="true" aria-label="Mis fichas">
+    <div class="tut-box">
+        <div class="tut-head"><h3>🗂️ Mis fichas generadas</h3><button type="button" class="tut-x" onclick="cerrarMisFichas()" aria-label="Cerrar">✕</button></div>
+        <div class="fh-list" id="fhList"></div>
+        <div class="fh-nota">Se guardan automáticamente al generarlas, en este navegador y con tu usuario. Se conservan las últimas 50. Si borras los datos del navegador se pierden.</div>
+    </div>
+</div>
+<div id="askModal" role="dialog" aria-modal="true" aria-label="Preguntas sobre el sistema">
+    <div class="tut-box">
+        <div class="tut-head"><h3>❓ Pregunta sobre el sistema</h3><button type="button" class="tut-x" onclick="cerrarPregunta()" aria-label="Cerrar">✕</button></div>
+        <div class="ask-log" id="askLog"></div>
+        <div class="ask-sug" id="askSug"></div>
+        <div class="ask-row"><input type="text" id="askInput" placeholder="Escribe tu pregunta como quieras…" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();enviarPregunta();}"><button type="button" id="askSend" onclick="enviarPregunta()">Enviar</button></div>
+    </div>
+</div>
 <div class="loading" id="loading"><div class="spinner"></div><div class="loading-msg" id="loadingMsg">Cargando, espera...</div><div class="loading-sub">No cierres ni toques la pantalla</div></div>
 
 <script>
@@ -901,14 +991,12 @@ const USUARIOS_NSS_OBLIGATORIO = ['BMEXS', 'BMEXM'];
 // La foto de Headcount solo se pide cuando el Tipo de Movimiento es ALTA, MIGRACION o REINGRESO
 function _normMov(v){ return (v||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/-/g,'').trim(); }
 function fotoRequerida(){
-    const el=document.getElementById('estatus');
-    return /\bALTA\b|MIGRACION|REINGRESO/.test(_normMov(el?el.value:''));
+    return colObligatoria('foto');
 }
 // Actualización de Esquema: solo aplica cuando el Tipo de Movimiento es CAMBIO DE ESQUEMA o MIGRACION
 const CAMPOS_ESQUEMA=['fechaCambioEsquema','fechaFirmaNuevoContrato'];
 function esquemaRequerido(){
-    const el=document.getElementById('estatus');
-    return /CAMBIO(\s+DE)?\s+ESQUEMA|MIGRACION/.test(_normMov(el?el.value:''));
+    return colObligatoria('esq');
 }
 function actualizarBloqueEsquema(){
     const box=document.getElementById('bloqueEsquema'); if(!box) return;
@@ -924,6 +1012,7 @@ function actualizarBloqueEsquema(){
 }
 function actualizarFotoHeadcount(){
     actualizarBloqueEsquema();
+    aplicarMatrizMovimiento();
     const box=document.getElementById('fotoBoxHC'); if(!box) return;
     const req=fotoRequerida();
     box.style.display=req?'':'none';
@@ -1075,8 +1164,8 @@ function setTipoBusqueda(prefix, tipo, btn) {
     tipoBusqueda[prefix]=tipo;
     btn.closest('.search-box').querySelectorAll('.search-type-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    const lm={curp:'CURP del Empleado',usuario:'Usuario Beta',nombre:'Nombre o Apellido'};
-    const pm={curp:'Ingresa el CURP',usuario:'Ingresa el Usuario Beta',nombre:'Ingresa nombre o apellido'};
+    const lm={curp:'CURP del Empleado',usuario:'Usuario Beta',nombre:'Nombre completo (debe iniciar por Apellido Paterno)'};
+    const pm={curp:'Ingresa el CURP',usuario:'Ingresa el Usuario Beta',nombre:'Apellido Paterno, Apellido Materno y Nombre(s). Ej. PEREZ LOPEZ JUAN'};
     const lEl=document.getElementById(`labelBusqueda${cap(prefix)}`);
     const iEl=document.getElementById(`searchTerm${cap(prefix)}`);
     if(lEl)lEl.textContent=lm[tipo];
@@ -1119,7 +1208,7 @@ async function buscarPorNombre(prefix,termino,rDiv){
     locales.forEach(e=>{const k=e.curp||e.usuarioBeta||cnc(e.apellidoPaterno,e.apellidoMaterno,e.nombres);mapa[k]={nombre:cnc(e.apellidoPaterno,e.apellidoMaterno,e.nombres),usuario:e.usuarioBeta||'',curp:e.curp||'',nss:e.nss||'',raw:e,fuente:'localStorage'};});
     sheets.forEach(d=>{const n=cnc(d['APELLIDO PATERNO']||'',d['APELLIDO MATERNO']||'',d['NOMBRE(S)']||d['NOMBRES']||'');const c=d['CURP']||'';const k=c||(d['USUARIO BETA']||n);mapa[k]={nombre:n,usuario:d['USUARIO BETA']||'',curp:c,nss:nssDeUB(d),raw:d,fuente:'USUARIOS_BETA'};});
     const lista=Object.values(mapa);
-    if(!lista.length){rDiv.innerHTML=`<div class="alert alert-error">❌ Sin resultados para "<strong>${termino}</strong>"</div>`;return;}
+    if(!lista.length){rDiv.innerHTML=`<div class="alert alert-error">❌ Sin resultados para "<strong>${termino}</strong>"<br><small>Recuerda: la búsqueda por nombre debe <b>iniciar por el Apellido Paterno</b> (Apellido Paterno, Apellido Materno y Nombre).</small></div>`;return;}
     if(lista.length===1){aplicarResultadoAlFormulario(prefix,lista[0].raw);mostrarResultadoUnico(rDiv,prefix,lista[0].nombre,lista[0].usuario,lista[0].curp,lista[0].nss,lista[0].fuente);return;}
     let html=`<div style="margin-top:.75rem;"><p style="font-size:.875rem;color:#4a5568;margin-bottom:.5rem;">Se encontraron <strong>${lista.length}</strong> coincidencias:</p><div class="search-results-list">`;
     lista.forEach((e,i)=>html+=`<div class="search-results-list-item" onclick="seleccionarEmpleadoDeLista('${prefix}',${i})"><span class="sri-name">${e.nombre||'Sin nombre'}</span><span class="sri-details">Usuario: ${e.usuario||'N/A'} | CURP: ${e.curp||'N/A'} | NSS: ${e.nss||'N/A'}</span></div>`);
@@ -1273,6 +1362,102 @@ function calcularDiasIncapacidad(){calcularDias('incapInicio','incapFin','incapT
 // ============================================================
 // CAMPOS MANUALES OBLIGATORIOS (si no aplica → "NA")
 // ============================================================
+// ============================================================
+// MATRIZ DE MOVIMIENTOS → qué se solicita (y es obligatorio) según el Tipo de Movimiento
+// Columnas: foto, ap, preno, recl, fuente, contr (Datos de Contratación), tienda (Tienda/Proyecto),
+//           pago (Datos de Pago), esq (Actualización de Esquema), pers (Datos Personales), unid (Datos de Unidad),
+//           link (Link Expediente), vobo (VoBo), obs (Observaciones), ficha
+// 'vobo?' = se muestra pero es OPCIONAL. Lo que no está en la lista NO se muestra, NO se exige y se limpia.
+// Siempre se piden: Tipo de Movimiento, Usuario Beta, Apellidos y Nombres.
+// ============================================================
+const OBS_OBLIGATORIA = false;   // true = Observaciones obligatoria en los movimientos donde aparece
+const _MOV_BASE = ['foto','ap','preno','recl','fuente','contr','tienda','pago','pers','unid','link','vobo','obs','ficha'];
+const MATRIZ_MOV = [
+    { n:'ALTA',                    re:/\bALTA\b/,                      c:_MOV_BASE },
+    { n:'REINGRESO',               re:/REINGRESO/,                     c:_MOV_BASE },
+    { n:'MIGRACION',               re:/MIGRACION/,                     c:[..._MOV_BASE,'esq'] },
+    { n:'CAMBIO DE ESQUEMA',       re:/CAMBIO(\s+DE)?\s+ESQUEMA/,       c:[..._MOV_BASE,'esq'] },
+    { n:'CAMBIO DE PERIODICIDAD',  re:/PERIODICIDAD/,                  c:['ap','contr','vobo?','obs'] },
+    { n:'CAMBIO DE CUENTA',        re:/CAMBIO(\s+DE)?\s+CUENTA/,       c:['ap','pago','obs'] },
+    { n:'AJUSTE DE SUELDO',        re:/AJUSTE/,                        c:['ap','contr','vobo','obs'] },
+    { n:'CAMBIO DE PROYECTO / SUCURSAL', re:/CAMBIO(\s+DE)?\s+(PROYECTO|SUCURSAL)/, c:['ap','tienda','obs'] },
+    { n:'CAMBIO DE PUESTO',       re:/CAMBIO(\s+DE)?\s+PUESTO/,       c:['ap','contr','unid','obs'] },
+    { n:'INCAPACIDAD',             re:/INCAPACIDAD/,                   c:['ap','obs'] },
+    { n:'BAJA',                    re:/\bBAJA\b/,                      c:['ap'] },
+    { n:'VACACIONES',              re:/VACACIONES/,                    c:['foto','ap','vobo','obs','ficha'] }
+];
+// Campos manuales de cada columna (los que se limpian si la columna no aplica)
+const COL_CAMPOS = {
+    ap:['ap'], preno:['prenominista'], recl:['reclutador'], fuente:['fuenteReclutamiento'],
+    contr:['folioVacante','estatusContrato','jefeInmediato'],
+    pago:['bancoNominaSearch','noCuentaNomina','clabeNomina','linkEstadoCuentaNomina','bancoRentaSearch','noCuentaBancariaRenta','clabeRenta','linkEstadoCuentaRenta'],
+    esq:CAMPOS_ESQUEMA,
+    pers:['estadoCivil','idmex','homoclave','nss','linkNoImss','noCreditoInfonavit','linkDescargaConstanciaFiscal','escolaridad','telefonoCelular','telefonoRecados','nombreContacto'],
+    unid:['anoVehiculoUnidad','vigenciaPoliza','fechaVerificacion','motor','cilindros','numeroFactura','fecha','expedidaPor'],
+    link:['linkExpediente'], vobo:['vobo'], obs:['observaciones']
+};
+const _COL_DE_CAMPO = {}; Object.keys(COL_CAMPOS).forEach(c => COL_CAMPOS[c].forEach(id => _COL_DE_CAMPO[id] = c));
+const _CLAVE_BANCO_LIMPIAR = { bancoNominaSearch:'claveBanco', bancoRentaSearch:'claveBanco2' };
+
+function movActual(){
+    const el = document.getElementById('estatus');
+    const v = _normMov(el ? el.value : '');
+    return v ? (MATRIZ_MOV.find(m => m.re.test(v)) || null) : null;
+}
+// ¿La columna se muestra? Sin movimiento (o movimiento desconocido) se comporta como antes: todo menos foto y esquema
+// Datos de la Unidad: solo si el Puesto del Tabulador inicia con OPERADOR (y el movimiento lo incluye en la matriz)
+function esOperadorTab(){
+    const el = document.getElementById('puestoTabulador');
+    return /^OPERADOR/.test(_normMov(el ? el.value : ''));
+}
+function colAplica(col){
+    if(col === 'unid' && !esOperadorTab()) return false;
+    const m = movActual();
+    if(!m) return col !== 'foto' && col !== 'esq';
+    return m.c.includes(col) || m.c.includes(col + '?');
+}
+// ¿La columna es obligatoria? ('vobo?' se muestra pero NO es obligatoria)
+function colObligatoria(col){
+    if(col === 'unid' && !esOperadorTab()) return false;
+    const m = movActual();
+    if(!m) return col !== 'foto' && col !== 'esq';
+    return m.c.includes(col);
+}
+let _ultPuestoTab = null;
+setInterval(() => {
+    const el = document.getElementById('puestoTabulador'); if(!el) return;
+    if(el.value !== _ultPuestoTab){ _ultPuestoTab = el.value; aplicarMatrizMovimiento(); }
+}, 400);
+function limpiarCampoMov(id){
+    const el = document.getElementById(id); if(!el) return;
+    if(el.dataset.naDate){ el.type = 'date'; delete el.dataset.naDate; }
+    if(el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';
+    el.classList.remove('campo-falta'); el.style.borderColor = '';
+    const cl = _CLAVE_BANCO_LIMPIAR[id] && document.getElementById(_CLAVE_BANCO_LIMPIAR[id]); if(cl) cl.value = '';
+}
+function aplicarMatrizMovimiento(){
+    [['contr','bloqueContr'],['tienda','bloqueTienda'],['pago','bloquePago'],['pers','bloquePers'],['unid','bloqueUnid']].forEach(([col,id]) => {
+        const b = document.getElementById(id); if(b) b.style.display = colAplica(col) ? '' : 'none';
+    });
+    [['ap','ap'],['preno','prenominista'],['recl','reclutador'],['fuente','fuenteReclutamiento'],['link','linkExpediente'],['vobo','vobo'],['obs','observaciones']].forEach(([col,id]) => {
+        const el = document.getElementById(id), g = el && el.closest('.form-group'); if(g) g.style.display = colAplica(col) ? '' : 'none';
+    });
+    const ia = document.getElementById('bloqueInfoAd');
+    if(ia) ia.style.display = (colAplica('link') || colAplica('vobo') || colAplica('obs')) ? '' : 'none';
+    // lo que no aplica se limpia para que no se guarde ni se exija (esquema ya lo limpia actualizarBloqueEsquema)
+    Object.keys(COL_CAMPOS).forEach(col => { if(col !== 'esq' && !colAplica(col)) COL_CAMPOS[col].forEach(limpiarCampoMov); });
+    // VoBo: asterisco solo si es obligatorio; si es opcional se avisa
+    const vb = document.getElementById('vobo');
+    if(vb){
+        const obl = colObligatoria('vobo'), g = vb.closest('.form-group');
+        const ast = g && g.querySelector('.req-ast'); if(ast) ast.style.display = obl ? '' : 'none';
+        const opc = document.getElementById('voboOpc'); if(opc) opc.style.display = (!obl && colAplica('vobo')) ? '' : 'none';
+    }
+    // Texto del botón según si el movimiento genera ficha
+    const btn = document.getElementById('btnGuardarHC');
+    if(btn) btn.textContent = colAplica('ficha') ? '💾 Guardar y Generar Ficha' : '💾 Guardar';
+}
+
 const CAMPOS_NA = [
     // listas desplegables
     'ap','prenominista','reclutador','fuenteReclutamiento','estatus','estatusContrato','jefeInmediato','estadoCivil','escolaridad',
@@ -1280,8 +1465,8 @@ const CAMPOS_NA = [
     'folioVacante','idmex','nss','linkNoImss','noCreditoInfonavit','linkDescargaConstanciaFiscal','telefonoCelular',
     'bancoNominaSearch','noCuentaNomina','clabeNomina','linkEstadoCuentaNomina',
     'bancoRentaSearch','noCuentaBancariaRenta','clabeRenta','linkEstadoCuentaRenta',
-    'fechaCambioEsquema','fechaFirmaNuevoContrato',
-    'anoVehiculoUnidad','vigenciaPoliza','fechaVerificacion','motor','cilindros','numeroFactura','fecha','expedidaPor'
+    'fechaCambioEsquema','fechaFirmaNuevoContrato','linkExpediente','vobo',
+    'anoVehiculoUnidad','vigenciaPoliza','fechaVerificacion'
 ];
 const CLAVE_DE_BANCO = { bancoNominaSearch:'claveBanco', bancoRentaSearch:'claveBanco2' };
 
@@ -1301,12 +1486,7 @@ function initCamposNA(){
         if(lab){
             const ast = document.createElement('span'); ast.className = 'req-ast'; ast.textContent = '*';
             lab.appendChild(ast);
-            if(el.tagName !== 'SELECT'){        // las listas desplegables NO llevan NA: se elige una opción
-                const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'na-chip'; btn.textContent = 'NA';
-                btn.title = 'Si este dato no aplica, márcalo como NA';
-                btn.onclick = () => naToggle(id);
-                lab.appendChild(btn);
-            }
+            // sin botón NA: todos los campos deben llevar información real
         }
         const quitar = () => el.classList.remove('campo-falta');
         el.addEventListener('input', quitar); el.addEventListener('change', quitar);
@@ -1345,9 +1525,10 @@ function validarCamposNA(){
     const faltan = [];
     CAMPOS_NA.forEach(id => {
         const el = document.getElementById(id); if(!el) return;
-        if(CAMPOS_ESQUEMA.includes(id) && !esquemaRequerido()){ el.classList.remove('campo-falta'); return; }
+        const _col = _COL_DE_CAMPO[id];
+        if(_col && !colObligatoria(_col)){ el.classList.remove('campo-falta'); return; }
         let v = (el.value || '').toString().trim();
-        if(el.tagName !== 'SELECT' && /^n\/?a$/i.test(v)){                 // normaliza na / n/a / N/A → NA
+        if(el.tagName !== 'SELECT' && /^n\/?a$/i.test(v)){                 // normaliza na / n/a / N/A → NA (válido)
             v = 'NA'; el.value = 'NA';
             if(el.name) datosFormulario[el.name] = 'NA';
             const cl = CLAVE_DE_BANCO[id] && document.getElementById(CLAVE_DE_BANCO[id]);
@@ -1369,6 +1550,18 @@ if(document.readyState === 'loading') document.addEventListener('DOMContentLoade
 // ============================================================
 // GUARDAR — ✅ Llama limpiarFormulario() al final
 // ============================================================
+// Campos que quedan vacíos (no aplican al movimiento u opcionales) se guardan/envían como NA
+function rellenarVaciosNA(){
+    const form = document.getElementById('formHeadcount'); if(!form) return;
+    const omitir = new Set(['modulo','foto','fotoEmpleado']);
+    Array.from(form.elements).forEach(el => {
+        const k = el.name; if(!k || omitir.has(k) || el.type === 'button' || el.type === 'file' || el.type === 'submit') return;
+        if(!String(datosFormulario[k] == null ? '' : datosFormulario[k]).trim()) datosFormulario[k] = 'NA';
+    });
+    ['idTienda','bancoNomina','bancoRenta','esquemaContratacion','prenominista'].forEach(k => {
+        if(!String(datosFormulario[k] == null ? '' : datosFormulario[k]).trim()) datosFormulario[k] = 'NA';
+    });
+}
 function guardarModulo(modulo) {
     moduloActual = modulo;
     const form = document.getElementById(`form${cap(modulo)}`);
@@ -1378,8 +1571,13 @@ function guardarModulo(modulo) {
     if(modulo === 'headcount' && fotoBase64 && fotoRequerida()) datosFormulario.foto = fotoBase64;
     const _pf = {vacaciones:'vac',bajas:'baja',incapacidades:'incap'}[modulo];
     if(_pf){
-        // La foto es opcional en Vacaciones, Bajas e Incapacidades
+        // La foto es OBLIGATORIA en Vacaciones (se valida abajo); opcional en Bajas e Incapacidades
         if(fotosMod[_pf]) datosFormulario.foto = fotosMod[_pf];
+    }
+    if(modulo === 'vacaciones' && !fotosMod.vac){
+        const _pv = document.getElementById('previewFotoVac');
+        if(_pv){ _pv.style.borderColor = '#ef4444'; _pv.scrollIntoView({block:'center',behavior:'smooth'}); }
+        mostrarToast('⚠️ La fotografía es obligatoria en Vacaciones', true); return;
     }
     if(modulo === 'headcount'){
         datosFormulario.idTienda = document.getElementById('idTienda').value;
@@ -1390,7 +1588,7 @@ function guardarModulo(modulo) {
     }
 
     // RFC + HOMOCLAVE → se guardan juntos en la misma columna RFC (si no hay homoclave, se completa con 000)
-    if(modulo === 'headcount'){
+    if(modulo === 'headcount' && colObligatoria('pers')){
         const _hEl = document.getElementById('homoclave');
         const _hom = ((_hEl && _hEl.value) || '').toUpperCase().replace(/[^A-Z0-9]/g,'');
         if(_hom.length !== 3){
@@ -1425,11 +1623,14 @@ function guardarModulo(modulo) {
     if(modulo === 'headcount' && fotoRequerida() && !fotoBase64){
         const _pv = document.getElementById('previewFoto');
         if(_pv){ _pv.style.borderColor = '#ef4444'; _pv.scrollIntoView({behavior:'smooth',block:'center'}); }
-        mostrarToast('⚠️ La fotografía es obligatoria cuando el Tipo de Movimiento es ALTA, MIGRACIÓN o REINGRESO', true); return;
+        mostrarToast('⚠️ La fotografía es obligatoria cuando el Tipo de Movimiento es ALTA, REINGRESO, MIGRACIÓN, CAMBIO DE ESQUEMA o VACACIONES', true); return;
     }
     // Todos los campos manuales son obligatorios (si no aplica → NA)
     if(modulo === 'headcount' && !validarCamposNA()) return;
-    if(modulo === 'headcount'){
+    if(modulo === 'headcount' && OBS_OBLIGATORIA && colObligatoria('obs') && !(document.getElementById('observaciones').value||'').trim()){
+        document.getElementById('observaciones').focus(); mostrarToast('⚠️ Las Observaciones son obligatorias en este movimiento', true); return;
+    }
+    if(modulo === 'headcount' && colObligatoria('pers')){
         const ub = (document.getElementById('usuarioBeta').value || '').toUpperCase().trim();
         const nssVal = (document.getElementById('nss').value || '').trim();
         const esObl = USUARIOS_NSS_OBLIGATORIO.some(u => ub.startsWith(u));
@@ -1440,6 +1641,8 @@ function guardarModulo(modulo) {
             return;
         }
         document.getElementById('errorNss').style.display = 'none';
+    }
+    if(modulo === 'headcount' && colObligatoria('pago')){
         const clabesCheck = [['clabeNomina','Nómina'],['clabeRenta','Renta']];
         for(const [cid, lbl] of clabesCheck){
             const clabeEl = document.getElementById(cid);
@@ -1453,7 +1656,7 @@ function guardarModulo(modulo) {
             }
         }
     }
-    if(modulo === 'headcount'){
+    if(modulo === 'headcount' && colObligatoria('contr')){
         const folioEl = document.getElementById('folioVacante');
         folioEl.value = folioEl.value.trim();
         datosFormulario.folioVacante = folioEl.value;
@@ -1478,7 +1681,7 @@ function guardarModulo(modulo) {
             el.style.borderColor = '';
         }
     }
-    if(modulo === 'headcount'){
+    if(modulo === 'headcount' && colObligatoria('pers')){
         const tc = document.getElementById('telefonoCelular').value.trim();
         const tr = document.getElementById('telefonoRecados').value.trim();
         if(!tr){ mostrarToast('⚠️ El Teléfono de Recados es obligatorio', true); return; }
@@ -1487,6 +1690,11 @@ function guardarModulo(modulo) {
         if(tc && tr && tc === tr){ mostrarToast('⚠️ Los teléfonos no pueden ser iguales', true); return; }
         const nCont = (document.getElementById('nombreContacto').value || '').trim();
         if(!nCont){ mostrarToast('⚠️ El Nombre Contacto es obligatorio', true); document.getElementById('nombreContacto').focus(); return; }
+    }
+
+    if(modulo === 'headcount' && colObligatoria('unid') && datosFormulario.fechaVerificacion && !fechaVerifValida(datosFormulario.fechaVerificacion)){
+        const _fv = document.getElementById('fechaVerificacion'); if(_fv){ _fv.scrollIntoView({block:'center',behavior:'smooth'}); _fv.focus(); }
+        validarFechaVerif(false); return;
     }
 
     // Guardar en local
@@ -1506,6 +1714,13 @@ function guardarModulo(modulo) {
         }
     }
 
+    if(modulo === 'headcount') rellenarVaciosNA();
+    // Movimientos sin ficha (según la matriz): solo se guarda y se envía, sin ficha ni credencial
+    if(modulo === 'headcount' && !colAplica('ficha')){
+        if(!getSesionBET()){ mostrarToast('⚠️ Inicia sesión para guardar', true); bloqueoLogin(true); return; }
+        enviarASheets().then(() => limpiarFormulario('headcount'));
+        return;
+    }
     // Generar ficha y mostrar modal
     const gen = { headcount: generarFichaHeadcount, vacaciones: generarFichaVacaciones, bajas: generarFichaBajas, incapacidades: generarFichaIncapacidades };
     try{
@@ -1517,6 +1732,7 @@ function guardarModulo(modulo) {
         return;
     }
     document.getElementById('fichaModal').classList.add('show');
+    guardarFichaHistorial(modulo);
     mostrarToast('✅ Ficha generada');
 
     // Enviar a Sheets
@@ -2492,14 +2708,21 @@ function tr2(label, val){return `<tr><td style="background:#f1f7de;padding:.3rem
 // ============================================================
 
 // ✅ cerrarFicha — limpia el formulario del módulo activo al cerrar
+let _fichaReabierta = false, _fichaTituloOverride = '';
 function cerrarFicha(){
     document.getElementById('fichaModal').classList.remove('show');
+    if(_fichaReabierta){                       // ficha consultada del historial: no se toca el formulario en curso
+        _fichaReabierta = false; _fichaTituloOverride = '';
+        document.getElementById('fichaContent').innerHTML = ''; document.getElementById('credencialContent').innerHTML = '';
+        return;
+    }
     renderCredencial(false);
     if(moduloActual) limpiarFormulario(moduloActual);
 }
 
 // Nombre completo de la persona de la ficha activa (para el nombre del PDF/archivo al imprimir)
 function nombreFichaActual(){
+    if(_fichaTituloOverride) return _fichaTituloOverride;
     if(moduloActual==='bajas'&&datosFormulario.nombreCompleto)return String(datosFormulario.nombreCompleto).replace(/[\\\/:*?"<>|]/g,'').replace(/\s+/g,' ').trim();
     let n = (moduloActual === 'headcount' || !datosFormulario.nombres || datosFormulario.apellidoPaterno)
         ? cnc(datosFormulario.apellidoPaterno||'', datosFormulario.apellidoMaterno||'', datosFormulario.nombres||'')
@@ -2746,39 +2969,58 @@ const TUT = {
       <div class="tut-tip">💡 Si dice "Usuario o contraseña incorrectos", revisa mayúsculas y espacios. Con <b>Cerrar sesión</b> (arriba a la derecha) sales de tu cuenta.</div>`},
     {t:'Llena los datos generales',h:`<p>En el módulo <b>Headcount</b>, elige en las listas desplegables:</p>
       <ul><li><b>AP</b></li><li><b>Prenominista</b></li><li><b>Reclutador</b></li><li><b>Fuente de Reclutamiento</b></li><li><b>Tipo de Movimiento</b></li></ul>
-      <p>Todas son obligatorias: elige una opción en cada lista (aquí no se usa NA).</p>
+      <p>Empieza por el <b>Tipo de Movimiento</b>: según lo que elijas, el formulario muestra solo lo que ese movimiento necesita (ver el siguiente paso). Las listas que aparezcan son obligatorias: elige una opción en cada una.</p>
       <div class="tut-tip">💡 Junto a cada nombre aparece una etiqueta ("cargando…" → número de opciones). Espera a que termine de cargar antes de elegir.</div>`},
+    {t:'Qué se pide según el Tipo de Movimiento',h:`<p>El formulario <b>cambia solo</b> al elegir el Tipo de Movimiento. Lo que se muestra es <b>obligatorio</b>; lo que no aplica se <b>oculta</b>, no se pide y se limpia. Siempre se piden: Tipo de Movimiento, Usuario Beta, apellidos y nombres.</p>
+      <ul>
+        <li><b>ALTA / REINGRESO:</b> foto, AP, Prenominista, Reclutador, Fuente, Datos de Contratación, Tienda/Proyecto, Datos de Pago, Datos Personales, Datos de la Unidad*, Link Expediente, VoBo y Observaciones. <b>Genera ficha.</b></li>
+        <li><b>MIGRACIÓN / CAMBIO DE ESQUEMA:</b> lo mismo que Alta, <b>más</b> Actualización de Esquema (fechas de cambio de esquema y firma de contrato). <b>Genera ficha.</b></li>
+        <li><b>CAMBIO DE PERIODICIDAD DE PAGO:</b> AP, Datos de Contratación, VoBo (<b>opcional</b>) y Observaciones.</li>
+        <li><b>CAMBIO DE CUENTA:</b> AP, Datos de Pago y Observaciones.</li>
+        <li><b>AJUSTE DE SUELDO:</b> AP, Datos de Contratación, VoBo y Observaciones.</li>
+        <li><b>CAMBIO DE PROYECTO / CAMBIO DE SUCURSAL:</b> AP, Datos de Tienda/Proyecto y Observaciones.</li>
+        <li><b>CAMBIO DE PUESTO:</b> AP, Datos de Contratación, Datos de la Unidad* y Observaciones.</li>
+        <li><b>INCAPACIDAD:</b> AP y Observaciones.</li>
+        <li><b>BAJA:</b> solo AP.</li>
+        <li><b>VACACIONES:</b> foto, AP, VoBo y Observaciones. <b>Genera ficha.</b></li>
+      </ul>
+      <div class="tut-tip">💡 *<b>Datos de la Unidad</b> solo se piden si el <b>Puesto del Tabulador empieza con OPERADOR</b> y el movimiento es ALTA, REINGRESO, MIGRACIÓN, CAMBIO DE ESQUEMA o CAMBIO DE PUESTO. En cualquier otro caso no aparecen.</div>
+      <div class="tut-tip">💡 La <b>foto</b> es obligatoria solo en ALTA, REINGRESO, MIGRACIÓN, CAMBIO DE ESQUEMA y VACACIONES.</div>
+      <div class="tut-warn">⚠️ Si cambias el Tipo de Movimiento después de capturar, los campos que ya no aplican se borran. Revisa que elegiste el movimiento correcto antes de llenar.</div>`},
+    {t:'Link Expediente y VoBo',h:`<p>En <b>Información Adicional</b> (al final del formulario) aparecen, según el movimiento:</p>
+      <ul><li><b>Link Expediente:</b> pega la URL del expediente del empleado.</li><li><b>VoBo:</b> escribe quién da el Visto Bueno. En <b>CAMBIO DE PERIODICIDAD DE PAGO</b> es <b>opcional</b> (se indica junto al nombre); en los demás movimientos donde aparece es obligatorio.</li><li><b>Observaciones:</b> siempre opcional.</li></ul>
+      <div class="tut-tip">💡 Si el movimiento no los pide (por ejemplo BAJA), esta sección no aparece.</div>`},
     {t:'Ingresa el Usuario Beta',h:`<p>Escribe el <b>Usuario Beta</b> y presiona <b>Enter</b>. Aparece "Cargando usuario, espera…" y el sistema llena solo nombre, CURP, tienda, unidad y más.</p>
       <div class="tut-ill"><div class="tut-fake-in">BMEXS12345 ⏎</div><div class="tut-arrow">⬇</div><div class="tut-fake-ro">Apellidos, nombre, CURP… (se llenan solos)</div></div>
       <div class="tut-tip">💡 Los campos <b>sombreados</b> son automáticos y no se editan. Solo captura los de borde blanco y las listas desplegables.</div>
       <div class="tut-warn">⚠️ Si sale "Usuario Beta no encontrado", revisa que esté bien escrito. Si cambias el Usuario Beta, se limpian los datos del anterior.</div>`},
     {t:'Campos obligatorios: si no aplica, NA',h:`<p>En Headcount, <b>todos los campos que se llenan manualmente son obligatorios</b> (llevan un asterisco rojo <span style="color:#ef4444;font-weight:800;">*</span>). Esto incluye las listas desplegables, los links, las fechas, los datos de pago y los datos de la unidad.</p>
-      <p>Si un dato <b>no aplica</b>, escribe <b>NA</b> o presiona el botoncito <b>NA</b> que aparece junto al nombre del campo.</p>
-      <p>En las <b>listas desplegables</b> no se usa NA: siempre hay que <b>elegir una opción</b>.</p>
-      <div class="tut-ill"><div class="tut-row"><div class="tut-fake-in">Motor *</div><div class="tut-fake-btn">NA</div></div><div class="tut-arrow">⬇</div><div class="tut-fake-ro">NA</div></div>
-      <div class="tut-tip">💡 El botón <b>NA</b> funciona también en las fechas. Si lo presionas otra vez, quita el NA.</div>
-      <div class="tut-warn">⚠️ Si dejas un campo vacío, no se puede guardar: el sistema lo marca en rojo y te dice cuáles faltan. El <b>NSS</b> NO acepta NA en usuarios BMEXS / BMEXM.</div>`},
+      <p>Si un dato <b>no aplica</b>, escribe <b>NA</b>. En las <b>listas desplegables</b> no se usa NA: siempre hay que <b>elegir una opción</b>.</p>
+      <p>Según el <b>Tipo de Movimiento</b>, el formulario solo muestra (y exige) los campos que aplican a ese movimiento.</p>
+      <div class="tut-warn">⚠️ Si dejas un campo obligatorio vacío, no se puede guardar: el sistema lo marca en rojo y te dice cuáles faltan.</div>
+      <div class="tut-tip">💡 Los campos que <b>no aplican</b> al movimiento (los que se ocultan) y los opcionales que dejes vacíos se guardan <b>automáticamente como NA</b>; no tienes que escribir nada.</div>`},
     {t:'Coloca la foto',h:`<p>En el recuadro <b>Fotografía del Empleado</b> (arriba del formulario):</p>
       <ul><li>Presiona <b>Seleccionar Foto</b>.</li><li>Elige una imagen <b>JPG o PNG</b> de máximo <b>2 MB</b>.</li><li>Verás la vista previa dentro del cuadro. Si te equivocas, vuelve a presionar el botón y elige otra.</li></ul>
       <div class="tut-ill"><div class="tut-row"><div class="tut-foto">👤</div><div class="tut-arrow">➜</div><div class="tut-foto ok">__FOTO__</div></div><div class="tut-fake-btn">Seleccionar Foto</div></div>
       <div class="tut-tip">💡 Usa una foto de frente, con buena luz y sin lentes oscuros.</div>
-      <div class="tut-tip">💡 En Headcount la foto es <b>obligatoria solo si el Tipo de Movimiento es ALTA, MIGRACIÓN o REINGRESO</b>; con otro movimiento no se pide. En Vacaciones, Bajas e Incapacidades no se pide foto.</div>
+      <div class="tut-tip">💡 En Headcount la foto es <b>obligatoria solo si el Tipo de Movimiento es ALTA, REINGRESO, MIGRACIÓN, CAMBIO DE ESQUEMA o VACACIONES</b>; con otro movimiento no se pide. En Vacaciones, Bajas e Incapacidades no se pide foto.</div>
       <div class="tut-tip">💡 Mejor <b>vertical y con el rostro centrado</b>: la foto se ajusta sola al recuadro de la ficha y de la credencial, y se recortan los bordes que sobren.</div>`},
     {t:'Elige el Tabulador',h:`<p>En <b>Datos de Contratación</b> tienes dos opciones:</p>
       <ul><li>Escribe el <b>ID Tabulador</b> y presiona <b>Enter</b>, o</li><li>Abre la lista <b>Tabulador</b> y busca escribiendo (puesto, zona, esquema…). Los <b>Sugeridos</b> para el puesto salen primero.</li></ul>
       <p>Al elegirlo se llenan solos <b>Pago Diario, Renta, Complemento y Bono</b>.</p>
       <div class="tut-warn">⚠️ Sin tabulador no se puede guardar. Si algún monto queda vacío, vuelve a elegir el tabulador.</div>`},
-    {t:'Folio de vacante, tienda y unidad',h:`<p>Captura el <b>Folio Vacante</b> (obligatorio; si no aplica, NA). Los datos de <b>Tienda / Proyecto</b> y de la <b>Unidad</b> (placa, marca, póliza…) se llenan solos con el Usuario Beta; solo revísalos.</p>
+    {t:'Folio de vacante, tienda y unidad',h:`<p>Captura el <b>Folio Vacante</b> (obligatorio; si no aplica, NA). Los datos de <b>Tienda / Proyecto</b> y de la <b>Unidad</b> (placa, marca, póliza…) se llenan solos con el Usuario Beta; solo revísalos. Los <b>Datos de la Unidad</b> solo aparecen si el Puesto del Tabulador empieza con <b>OPERADOR</b> (y el movimiento lo pide). <b>Motor, Cilindros, Número Factura, Fecha Factura y Expedida Por son opcionales</b>. La <b>Fecha Verificación</b> solo acepta fechas dentro del <b>calendario bimestral</b> que corresponde a la terminación de la placa (abajo del campo aparece el calendario).</p>
       <div class="tut-tip">💡 Si algo viene mal en esos campos, corrígelo en la hoja de origen, no aquí.</div>`},
     {t:'Datos de pago',h:`<p>En <b>Cuenta de Nómina</b> y <b>Cuenta de Renta</b>:</p>
       <ul><li>Busca el <b>banco</b> escribiendo su nombre y elígelo de la lista.</li><li>Captura número de cuenta, <b>CLABE</b> y link del estado de cuenta.</li></ul>
-      <div class="tut-tip">💡 Si el <b>Esquema</b> del tabulador es <b>ALIADO INTERNO</b>, los datos bancarios (banco, clave, cuenta y CLABE) se capturan solos en <b>Cuenta de Renta</b> y la <b>Cuenta de Nómina</b> queda en NA. Con cualquier otro esquema se quedan en <b>Cuenta de Nómina</b>.</div>
+      <div class="tut-tip">💡 Si el <b>Esquema</b> del tabulador es <b>ALIADO INTERNO</b>, los datos bancarios (banco, clave, cuenta y CLABE) se capturan solos en <b>Cuenta de Renta</b> y la <b>Cuenta de Nómina</b> queda en NA (la marca el sistema). Con cualquier otro esquema se quedan en <b>Cuenta de Nómina</b>.</div>
       <div class="tut-warn">⚠️ La CLABE debe tener exactamente <b>18 dígitos</b> (solo números), o <b>NA</b> si no aplica. Todos los campos de pago son obligatorios (NA si no aplican).</div>`},
     {t:'Datos personales y contacto',h:`<p>Completa los campos editables:</p>
       <ul><li><b>Homoclave</b> (3 caracteres, <b>obligatoria</b>): va junto al RFC. Si no tiene, captura <b>000</b>. RFC y homoclave se guardan juntos en la misma columna RFC.</li><li><b>IDMEX</b>, links (IMSS, Constancia Fiscal), <b>Crédito INFONAVIT</b>: obligatorios (NA si no aplican).</li><li><b>NSS</b> (solo números). Es <b>obligatorio con número real</b> si el usuario empieza con <b>BMEXS</b> o <b>BMEXM</b>; en los demás puede ser NA.</li><li><b>Teléfono de Recados</b>: obligatorio, 10 dígitos.</li><li><b>Teléfono Celular</b>: 10 dígitos o NA.</li><li><b>Nombre Contacto</b>: obligatorio.</li></ul>
       <div class="tut-warn">⚠️ Los dos teléfonos <b>no pueden ser iguales</b>.</div>
       <div class="tut-tip">💡 En los datos de la <b>unidad</b> (año, vigencia de póliza, verificación, motor, cilindros, factura, fecha y expedida por) también aplica la regla: llenar o poner NA.</div>`},
     {t:'Guarda y genera la ficha',h:`<p>Escribe <b>Observaciones</b> (opcional) y presiona <b>💾 Guardar y Generar Ficha</b>.</p>
+      <div class="tut-tip">💡 Solo <b>ALTA, REINGRESO, MIGRACIÓN, CAMBIO DE ESQUEMA y VACACIONES</b> generan ficha y credencial. En los demás movimientos el botón dice <b>💾 Guardar</b>: envía los datos a Sheets, limpia el formulario y <b>no</b> muestra ficha.</div>
       <ul><li>Se muestra la ficha lista para imprimir.</li><li>Los datos se envían a Google Sheets automáticamente.</li><li>Al presionar <b>Imprimir</b>, el PDF sale con <b>2 páginas</b>: la ficha y la <b>credencial</b> (frente y reverso).</li></ul>
       <div class="tut-tip">💡 Si sale un aviso rojo (⚠️), léelo: te dice exactamente qué campo falta o está mal.</div>
       <div class="tut-tip">💡 La credencial usa la foto, el nombre, el puesto, el Usuario Beta y el área del empleado. La vigencia es siempre el 31 de diciembre del año en curso.</div>
@@ -2792,11 +3034,11 @@ const TUT = {
   otros:{nombre:'Vacaciones / Bajas / Incapacidades', pasos:[
     {t:'Elige el módulo',h:`<p>Usa las pestañas de arriba: <b>Vacaciones</b>, <b>Bajas</b> o <b>Incapacidades</b>. Todos funcionan igual.</p>`},
     {t:'Busca al empleado',h:`<p>En <b>🔍 Búsqueda de Empleado</b> elige cómo buscar y presiona <b>Buscar</b> (o Enter):</p>
-      <ul><li><b>Por CURP</b></li><li><b>Por Usuario Beta</b></li><li><b>Por Nombre</b> (nombre o apellido; si hay varios, elige de la lista)</li></ul>
+      <ul><li><b>Por CURP</b></li><li><b>Por Usuario Beta</b></li><li><b>Por Nombre</b>: <b>debe iniciar por el Apellido Paterno</b> (Apellido Paterno, Apellido Materno y Nombre; por ejemplo PEREZ LOPEZ JUAN). Si hay varios, elige de la lista</li></ul>
       <div class="tut-ill"><div class="tut-row"><div class="tut-fake-in">CURP ⏎</div><div class="tut-fake-btn">Buscar</div></div><div class="tut-arrow">⬇</div><div class="tut-fake-ro">✅ Empleado encontrado</div></div>`},
-    {t:'Coloca la foto (opcional)',h:`<p>Presiona <b>Seleccionar Foto</b> y elige una imagen JPG o PNG de máximo 2 MB.</p>
+    {t:'Coloca la foto (obligatoria en Vacaciones)',h:`<p>Presiona <b>Seleccionar Foto</b> y elige una imagen JPG o PNG de máximo 2 MB.</p>
       <div class="tut-ill"><div class="tut-row"><div class="tut-foto">👤</div><div class="tut-arrow">➜</div><div class="tut-foto ok">__FOTO__</div></div></div>
-      <div class="tut-tip">💡 Sin foto también se puede guardar.</div>`},
+      <div class="tut-warn">⚠️ En <b>Vacaciones</b> la foto es <b>obligatoria</b>: sin ella no deja guardar. En Bajas e Incapacidades es opcional.</div>`},
     {t:'Llena el formulario',h:`<p>Los datos del empleado ya vienen cargados. Completa solo lo que corresponde al movimiento (fechas, motivo, días, etc.) y presiona el botón de guardar para generar la <b>ficha</b>.</p>`},
     {t:'Solo en Bajas: ¿Contratable?',h:`<p>En el módulo <b>Bajas</b>, elige en <b>¿Contratable?</b>:</p>
       <ul><li><b>Contratable</b>: se le puede volver a contratar.</li><li><b>No contratable</b>: no se debe recontratar.</li></ul>
@@ -2830,6 +3072,243 @@ document.addEventListener('keydown',e=>{
     else if(e.key==='ArrowRight')tutMover(1);
     else if(e.key==='ArrowLeft')tutMover(-1);
 });
+
+// ============================================================
+// PREGUNTAS (asistente): responde con la matriz de movimientos y el tutorial.
+// PREGUNTAS_IA = true → además consulta a Claude vía Apps Script (action=preguntar, ver Code_preguntar.gs)
+// ============================================================
+const PREGUNTAS_IA = false;
+const _ASK_COLS = {foto:'Fotografía',ap:'AP',preno:'Prenominista',recl:'Reclutador',fuente:'Fuente de Reclutamiento',contr:'Datos de Contratación',tienda:'Datos de Tienda/Proyecto',pago:'Datos de Pago',esq:'Actualización de Esquema',pers:'Datos Personales',unid:'Datos de la Unidad (solo si el puesto del tabulador empieza con OPERADOR)',link:'Link Expediente',vobo:'VoBo',obs:'Observaciones'};
+const _ASK_KW = {foto:['foto','fotografia'],ap:['ap'],preno:['prenominista'],recl:['reclutador'],fuente:['fuente'],contr:['contratacion'],tienda:['tienda'],pago:['pago','banco','clabe'],esq:['esquema'],pers:['personales'],unid:['unidad','operador','placa','vehiculo'],link:['expediente'],vobo:['vobo','visto'],obs:['observaciones','observacion'],ficha:['ficha','credencial','imprimir']};
+const _ASK_STOP = new Set('que como cual cuales donde cuando para por con los las una uno del las este esta esto sistema debo puedo pide piden solicita solicitan hay son del al el la de en se si no mi me lo un es y o a quiero saber favor dime podrias puedes hacer tengo necesito pregunta cuando cuanto'.split(' '));
+const _ASK_SUG = ['Que se pide en un cambio de cuenta','Cuando se piden los datos de la unidad','Que movimientos generan ficha','Cuando es obligatoria la foto','Puedo poner NA'];
+let _askBusy = false;
+
+// Normaliza lo que escriba la persona: sin acentos, sin signos (¿? ¡! . , / etc.), sin importar mayúsculas, plurales ni errores de dedo
+const _ASK_VOCAB = 'ALTA REINGRESO MIGRACION CAMBIO ESQUEMA PERIODICIDAD CUENTA AJUSTE SUELDO PROYECTO SUCURSAL PUESTO INCAPACIDAD BAJA VACACIONES FICHA CREDENCIAL FOTO FOTOGRAFIA UNIDAD OPERADOR OBSERVACIONES EXPEDIENTE VOBO PRENOMINISTA RECLUTADOR FUENTE CONTRATACION TIENDA PAGO PERSONALES TABULADOR HOMOCLAVE CLABE BANCO MOVIMIENTO OBLIGATORIO PERIODICIDAD'.split(' ');
+const _ASK_SIN = {CAMBIAR:'CAMBIO',CAMBIOS:'CAMBIO',REINGRESAR:'REINGRESO',REINGRESAN:'REINGRESO',MIGRAR:'MIGRACION',DESPEDIR:'BAJA',RENUNCIA:'BAJA',DESPIDO:'BAJA',INCAPACIDADES:'INCAPACIDAD',IMPRIMIR:'FICHA',IMPRESION:'FICHA',FOTOS:'FOTO',AUMENTO:'AJUSTE',SALARIO:'SUELDO',PERIODO:'PERIODICIDAD',VEHICULO:'UNIDAD',AUTO:'UNIDAD',CARRO:'UNIDAD',CAMION:'UNIDAD'};
+function _askStem(w){ return w.length > 4 ? w.replace(/(ES|S)$/,'') : w; }
+function _askDist(a,b){   // distancia de edición con intercambio de letras contiguas
+    const m=a.length, n=b.length, d=[]; for(let i=0;i<=m;i++){ d[i]=[i]; } for(let j=1;j<=n;j++) d[0][j]=j;
+    for(let i=1;i<=m;i++) for(let j=1;j<=n;j++){
+        d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+        if(i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1]) d[i][j]=Math.min(d[i][j],d[i-2][j-2]+1);
+    }
+    return d[m][n];
+}
+function _askNormBase(t){ return _normMov(t).replace(/[^A-Z0-9 ]/g,' ').replace(/\s+/g,' ').trim(); }
+function _askNorm(t){
+    let x = ' ' + _askNormBase(t) + ' ';
+    x = x.replace(/ VISTO BUENO /g,' VOBO ').replace(/ NO APLICA /g,' NA ').replace(/ N A /g,' NA ').replace(/ DAR DE BAJA /g,' BAJA ');
+    return x.trim().split(' ').map(w => {
+        if(_ASK_SIN[w]) return _ASK_SIN[w];
+        const st = _askStem(w), ex = _ASK_VOCAB.find(v => v === w || _askStem(v) === st);
+        if(ex) return ex;
+        if(w.length >= 6){                       // error de dedo: letra de más/menos/cambiada o intercambiada
+            const tol = w.length >= 8 ? 2 : 1; let mejor = null, md = 99;
+            _ASK_VOCAB.forEach(v => { const dd = _askDist(w, v); if(dd < md){ md = dd; mejor = v; } });
+            if(mejor && md <= tol) return mejor;
+        }
+        return w;
+    }).join(' ');
+}
+function _askTokens(t, corregir){ return (corregir === false ? _askNormBase(t) : _askNorm(t)).split(' ').filter(w => w.length > 2 && !_ASK_STOP.has(w.toLowerCase())); }
+function _askTexto(html){ const d = document.createElement('div'); d.innerHTML = html; return (d.textContent || '').replace(/\s+/g,' ').trim(); }
+function _askEsc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function _askNombreMov(m){ return {ALTA:'ALTA','CAMBIO DE PROYECTO / SUCURSAL':'CAMBIO DE PROYECTO / SUCURSAL'}[m.n] || m.n; }
+function _askDescMov(m){
+    const lista = Object.keys(_ASK_COLS).filter(c => m.c.includes(c) || m.c.includes(c+'?')).map(c => _ASK_COLS[c] + (m.c.includes(c+'?') ? ' (opcional)' : ''));
+    return `<b>${_askNombreMov(m)}</b> pide: siempre Tipo de Movimiento, Usuario Beta, apellidos y nombres<ul>${lista.map(x=>`<li>${x}</li>`).join('')}</ul>${m.c.includes('ficha') ? 'Genera <b>ficha</b> y credencial.' : 'No genera ficha: el botón dice "Guardar" y solo envía a Sheets.'}`;
+}
+function _askPorColumna(col){
+    const movs = MATRIZ_MOV.filter(m => m.c.includes(col) || m.c.includes(col+'?')).map(m => _askNombreMov(m) + (m.c.includes(col+'?') ? ' (opcional)' : ''));
+    const nom = col === 'ficha' ? 'La ficha' : _ASK_COLS[col];
+    return `<b>${nom}</b> aplica en: <ul>${movs.map(x=>`<li>${x}</li>`).join('')}</ul>En los demás movimientos no se pide.` +
+        (col === 'unid' ? '<br>Además solo aparece si el <b>Puesto del Tabulador empieza con OPERADOR</b>.' : '');
+}
+function _askMejorPaso(q){
+    const qt = _askTokens(q).map(_askStem); if(!qt.length) return null;
+    let mejor = null;
+    Object.keys(TUT).forEach(mod => TUT[mod].pasos.forEach((p, i) => {
+        const cuerpo = new Set(_askTokens(_askTexto(p.h), false).map(_askStem)), tit = new Set(_askTokens(p.t, false).map(_askStem));
+        let sc = 0; qt.forEach(w => { if(tit.has(w)) sc += 3; if(cuerpo.has(w)) sc += 1; });
+        if(!mejor || sc > mejor.sc) mejor = {sc, mod, i, p};
+    }));
+    return mejor && mejor.sc >= 1 ? mejor : null;
+}
+function _askRespuestaLocal(q){
+    const n = _askNorm(q), nl = ' ' + n + ' ';
+    const preguntaPorMovs = /QUE MOVIMIENTO|EN CUALES|CUANDO|DONDE SE PIDE|CUALES|QUE MOVIMIENTOS/.test(n);
+    const movs = MATRIZ_MOV.filter(m => m.re.test(n));
+    if(movs.length && !preguntaPorMovs) return {html: movs.map(_askDescMov).join('<hr style="margin:.5rem 0;border:0;border-top:1px solid var(--line)">')};
+    if(/\bNA\b/.test(n)) return {html:'<b>Sí</b>, si un dato no aplica escribe <b>NA</b> y se acepta. Además, lo que no aplica al movimiento (campos ocultos o vacíos) el sistema lo guarda y envía automáticamente como <b>NA</b>. En las listas desplegables siempre hay que elegir una opción.'};
+    for(const col of ['unid','foto','link','vobo','obs','ficha','esq','preno','recl','fuente','pago','tienda','contr','pers','ap']){
+        if(_ASK_KW[col].some(k => nl.includes(' ' + k.toUpperCase() + ' ') || (k.length > 4 && n.includes(_askStem(k.toUpperCase()))))) return {html:_askPorColumna(col)};
+    }
+    const b = _askMejorPaso(q);
+    if(b){
+        const txt = _askTexto(b.p.h); const corto = txt.length > 520 ? txt.slice(0,520).replace(/\s+\S*$/,'') + '…' : txt;
+        return {html:`<b>${b.p.t}</b><br>${_askEsc(corto)}<br><button type="button" onclick="verPasoTutorial('${b.mod}',${b.i})">Ver en el tutorial</button>`, ctx: txt};
+    }
+    return {html:'No encontré una respuesta clara. Prueba con otras palabras o con el nombre de un movimiento (por ejemplo "Baja", "Cambio de cuenta") o de un campo (por ejemplo "foto", "VoBo", "Datos de la Unidad").', vacio:true};
+}
+function _askContextoIA(q){
+    const n = _askNorm(q), movs = MATRIZ_MOV.filter(m => m.re.test(n));
+    let ctx = 'MATRIZ (movimiento: columnas que pide; ? = opcional): ' + MATRIZ_MOV.map(m => m.n + ': ' + m.c.join(',')).join(' | ');
+    const b = _askMejorPaso(q); if(b) ctx += ' || TUTORIAL: ' + b.p.t + ' — ' + _askTexto(b.p.h).slice(0,900);
+    return ctx.slice(0,2800);
+}
+function _askAgregar(cls, html){
+    const log = document.getElementById('askLog'), d = document.createElement('div');
+    d.className = 'ask-msg ' + cls; d.innerHTML = html; log.appendChild(d); log.scrollTop = log.scrollHeight; return d;
+}
+async function enviarPregunta(texto){
+    if(_askBusy) return;
+    const inp = document.getElementById('askInput'), q = (texto || inp.value || '').trim();
+    if(!q) return;
+    inp.value = ''; _askAgregar('u', _askEsc(q));
+    const loc = _askRespuestaLocal(q);
+    if(PREGUNTAS_IA){
+        _askBusy = true; document.getElementById('askSend').disabled = true;
+        const burbuja = _askAgregar('b', 'Pensando…');
+        try{
+            const ses = (typeof getSesionBET === 'function' && getSesionBET()) || {};
+            const url = `${SCRIPT_URL}?action=preguntar&usuario=${encodeURIComponent(ses.usuario||'')}&clave=${encodeURIComponent(ses.clave||'')}&q=${encodeURIComponent(q)}&ctx=${encodeURIComponent(_askContextoIA(q))}`;
+            const r = JSON.parse(await (await fetch(url, {cache:'no-store'})).text());
+            if(r.status !== 'success' || !r.respuesta) throw new Error(r.message || 'sin respuesta');
+            burbuja.innerHTML = _askEsc(r.respuesta).replace(/\n/g,'<br>');
+        }catch(e){
+            console.warn('Pregunta IA no disponible, se usa respuesta local:', e);
+            burbuja.innerHTML = loc.html;
+        }
+        _askBusy = false; document.getElementById('askSend').disabled = false;
+        document.getElementById('askLog').scrollTop = 1e9;
+    } else {
+        _askAgregar('b', loc.html);
+    }
+}
+function abrirPregunta(){
+    const log = document.getElementById('askLog');
+    if(!log.children.length) _askAgregar('b', 'Hola 👋 Pregúntame lo que necesites del sistema: qué se pide en cada movimiento, cuándo sale la ficha, cuándo aplica la foto o los Datos de la Unidad, etc.');
+    document.getElementById('askSug').innerHTML = _ASK_SUG.map(t => `<button type="button" onclick="enviarPregunta(this.textContent)">${t}</button>`).join('');
+    document.getElementById('askModal').classList.add('show');
+    setTimeout(() => document.getElementById('askInput').focus(), 50);
+}
+function cerrarPregunta(){ document.getElementById('askModal').classList.remove('show'); }
+function verPasoTutorial(mod, i){ cerrarPregunta(); _tutMod = mod; _tutPaso = i; tutRender(); document.getElementById('tutModal').classList.add('show'); }
+document.addEventListener('keydown', e => { const el = document.getElementById('askModal'); if(el && el.classList.contains('show') && e.key === 'Escape') cerrarPregunta(); });
+
+
+// ============================================================
+// MIS FICHAS: historial local (IndexedDB) para reabrir/imprimir una ficha que no se descargó
+// ============================================================
+const FICHAS_DB = 'fichasBET', FICHAS_ST = 'fichas', FICHAS_MAX = 50;
+const _FH_MOD = {headcount:'Headcount', vacaciones:'Vacaciones', bajas:'Baja', incapacidades:'Incapacidad'};
+function _fhDb(){
+    return new Promise((res, rej) => {
+        const r = indexedDB.open(FICHAS_DB, 1);
+        r.onupgradeneeded = () => { r.result.createObjectStore(FICHAS_ST, {keyPath:'id'}); };
+        r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+    });
+}
+function _fhTodas(db){ return new Promise((res, rej) => { const q = db.transaction(FICHAS_ST).objectStore(FICHAS_ST).getAll(); q.onsuccess = () => res(q.result || []); q.onerror = () => rej(q.error); }); }
+function _fhTx(db, fn){ return new Promise((res, rej) => { const tx = db.transaction(FICHAS_ST, 'readwrite'); fn(tx.objectStore(FICHAS_ST)); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
+async function guardarFichaHistorial(modulo){
+    try{
+        const db = await _fhDb(), ses = (window.getSesionBET && getSesionBET()) || {};
+        const reg = {
+            id: Date.now() + '-' + Math.random().toString(36).slice(2,6), ts: Date.now(), usuario: ses.usuario || '',
+            modulo, nombre: nombreFichaActual() || 'SIN NOMBRE',
+            mov: modulo === 'headcount' ? (datosFormulario.estatus || '') : '',
+            ficha: document.getElementById('fichaContent').innerHTML,
+            cred: document.getElementById('credencialContent').innerHTML
+        };
+        await _fhTx(db, st => st.put(reg));
+        const todas = (await _fhTodas(db)).sort((a,b) => b.ts - a.ts);
+        if(todas.length > FICHAS_MAX) await _fhTx(db, st => todas.slice(FICHAS_MAX).forEach(f => st.delete(f.id)));
+    }catch(e){ console.warn('No se pudo guardar la ficha en el historial:', e); }
+}
+async function abrirMisFichas(){
+    const box = document.getElementById('fhList');
+    box.innerHTML = '<div style="opacity:.7">Cargando…</div>';
+    document.getElementById('fichasModal').classList.add('show');
+    try{
+        const db = await _fhDb(), ses = (window.getSesionBET && getSesionBET()) || {};
+        const lista = (await _fhTodas(db)).filter(f => !ses.usuario || !f.usuario || f.usuario === ses.usuario).sort((a,b) => b.ts - a.ts);
+        if(!lista.length){ box.innerHTML = '<div style="opacity:.7">Aún no hay fichas guardadas. Se guardan solas cada vez que generas una.</div>'; return; }
+        box.innerHTML = lista.map(f => {
+            const fecha = new Date(f.ts).toLocaleString('es-MX', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+            return `<div class="fh-item"><div class="fh-info"><b>${_askEsc(f.nombre)}</b><span>${_FH_MOD[f.modulo] || f.modulo}${f.mov ? ' · ' + _askEsc(f.mov) : ''} · ${fecha}</span></div>
+                <button type="button" onclick="abrirFichaGuardada('${f.id}')">Abrir</button>
+                <button type="button" class="fh-del" onclick="borrarFichaGuardada('${f.id}')" title="Eliminar">🗑</button></div>`;
+        }).join('');
+    }catch(e){ box.innerHTML = '<div style="color:#b91c1c">No se pudo leer el historial en este navegador.</div>'; }
+}
+async function abrirFichaGuardada(id){
+    try{
+        const db = await _fhDb();
+        const f = (await _fhTodas(db)).find(x => x.id === id); if(!f) return;
+        cerrarMisFichas();
+        _fichaReabierta = true; _fichaTituloOverride = (f.nombre || '').replace(/[\\\/:*?"<>|]/g,'').trim();
+        document.getElementById('fichaContent').innerHTML = f.ficha;
+        document.getElementById('credencialContent').innerHTML = f.cred || '';
+        document.getElementById('fichaModal').classList.add('show');
+    }catch(e){ mostrarToast('❌ No se pudo abrir la ficha', true); }
+}
+async function borrarFichaGuardada(id){
+    if(!confirm('¿Eliminar esta ficha del historial?')) return;
+    try{ const db = await _fhDb(); await _fhTx(db, st => st.delete(id)); }catch(e){}
+    abrirMisFichas();
+}
+function cerrarMisFichas(){ document.getElementById('fichasModal').classList.remove('show'); }
+document.addEventListener('keydown', e => { const el = document.getElementById('fichasModal'); if(el && el.classList.contains('show') && e.key === 'Escape') cerrarMisFichas(); });
+
+
+// ============================================================
+// CALENDARIO DE VERIFICACIONES (bimestral según la terminación de la placa)
+// ============================================================
+const VERIF_PERIODOS = {
+    5:{c:'Amarillo',m:[1,2,7,8]}, 6:{c:'Amarillo',m:[1,2,7,8]},
+    7:{c:'Rosa',m:[2,3,8,9]},     8:{c:'Rosa',m:[2,3,8,9]},
+    3:{c:'Rojo',m:[3,4,9,10]},    4:{c:'Rojo',m:[3,4,9,10]},
+    1:{c:'Verde',m:[4,5,10,11]},  2:{c:'Verde',m:[4,5,10,11]},
+    9:{c:'Azul',m:[5,6,11,12]},   0:{c:'Azul',m:[5,6,11,12]}
+};
+const _MES_N = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+function terminacionPlaca(){
+    const el = document.getElementById('placa'); const d = ((el && el.value) || '').replace(/[^0-9]/g,'');
+    return d ? parseInt(d.slice(-1), 10) : null;
+}
+function _bimestresTxt(m){ return `${_MES_N[m[0]]}–${_MES_N[m[1]]} y ${_MES_N[m[2]]}–${_MES_N[m[3]]}`; }
+function actualizarInfoVerif(){
+    const box = document.getElementById('infoVerif'); if(!box) return;
+    const t = terminacionPlaca();
+    box.innerHTML = t === null ? 'Solo se permiten fechas dentro del calendario bimestral de verificación (según la terminación de la placa).'
+        : `Placa terminación <b>${t}</b> (engomado ${VERIF_PERIODOS[t].c}): solo <b>${_bimestresTxt(VERIF_PERIODOS[t].m)}</b>.`;
+}
+// ¿La fecha cae en un bimestre permitido? (sin placa con terminación numérica no se restringe)
+function fechaVerifValida(valor){
+    if(!valor) return true;
+    const t = terminacionPlaca(); if(t === null) return true;
+    const mes = parseInt(String(valor).slice(5,7), 10);
+    return VERIF_PERIODOS[t].m.includes(mes);
+}
+function validarFechaVerif(alCambiar){
+    const el = document.getElementById('fechaVerificacion'); if(!el || !el.value) return true;
+    if(fechaVerifValida(el.value)){ el.classList.remove('campo-falta'); el.style.borderColor = ''; return true; }
+    const t = terminacionPlaca();
+    el.classList.add('campo-falta'); el.style.borderColor = '#ef4444';
+    mostrarToast(`⚠️ Fecha de verificación fuera de calendario: placa terminación ${t} solo ${_bimestresTxt(VERIF_PERIODOS[t].m)}`, true);
+    if(alCambiar) el.value = '';
+    return false;
+}
+let _ultPlacaVerif = null;
+setInterval(() => {
+    const el = document.getElementById('placa'); if(!el) return;
+    if(el.value !== _ultPlacaVerif){ _ultPlacaVerif = el.value; actualizarInfoVerif(); }
+}, 400);
+document.addEventListener('DOMContentLoaded', actualizarInfoVerif);
+
 // La primera vez que alguien entra con sesión, se muestra solo
 document.addEventListener('DOMContentLoaded',()=>{
     try{ if(window.getSesionBET&&window.getSesionBET()&&!localStorage.getItem('tutBETvisto'))setTimeout(abrirTutorial,600); }catch(_){}
