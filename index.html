@@ -1405,10 +1405,15 @@ function movActual(){
     return v ? (MATRIZ_MOV.find(m => m.re.test(v)) || null) : null;
 }
 // ¿La columna se muestra? Sin movimiento (o movimiento desconocido) se comporta como antes: todo menos foto y esquema
-// Datos de la Unidad: solo si el Puesto del Tabulador inicia con OPERADOR (y el movimiento lo incluye en la matriz)
+// Datos de la Unidad: solo si el Puesto del Tabulador inicia con OPERADOR CON o SHOPPER (y el movimiento lo incluye en la matriz)
 function esOperadorTab(){
     const el = document.getElementById('puestoTabulador');
-    return /^OPERADOR/.test(_normMov(el ? el.value : ''));
+    const v = _normMov(el ? el.value : '').replace(/\s+/g, ' ');
+    // SOLO por las palabras iniciales del Puesto Tabulador:
+    //   "OPERADOR CON ..."  -> ABRE Datos de la Unidad
+    //   "SHOPPER ..."       -> ABRE Datos de la Unidad
+    //   "OPERADOR PARA ..." (o cualquier otro) -> NO abre
+    return /^OPERADOR CON\b/.test(v) || /^SHOPPER\b/.test(v);
 }
 function colAplica(col){
     if(col === 'unid' && !esOperadorTab()) return false;
@@ -1426,7 +1431,9 @@ function colObligatoria(col){
 let _ultPuestoTab = null;
 setInterval(() => {
     const el = document.getElementById('puestoTabulador'); if(!el) return;
-    if(el.value !== _ultPuestoTab){ _ultPuestoTab = el.value; aplicarMatrizMovimiento(); }
+    const pu = document.getElementById('puesto');
+    const clave = el.value + '|' + (pu ? pu.value : '');
+    if(clave !== _ultPuestoTab){ _ultPuestoTab = clave; aplicarMatrizMovimiento(); }
 }, 400);
 function limpiarCampoMov(id){
     const el = document.getElementById(id); if(!el) return;
@@ -2984,7 +2991,7 @@ const TUT = {
         <li><b>BAJA:</b> solo AP.</li>
         <li><b>VACACIONES:</b> foto, AP, VoBo y Observaciones. <b>Genera ficha.</b></li>
       </ul>
-      <div class="tut-tip">💡 *<b>Datos de la Unidad</b> solo se piden si el <b>Puesto del Tabulador empieza con OPERADOR</b> y el movimiento es ALTA, REINGRESO, MIGRACIÓN, CAMBIO DE ESQUEMA o CAMBIO DE PUESTO. En cualquier otro caso no aparecen.</div>
+      <div class="tut-tip">💡 *<b>Datos de la Unidad</b> solo se piden si el <b>Puesto del Tabulador empieza con OPERADOR CON o SHOPPER</b> (con OPERADOR PARA no aparecen) y el movimiento es ALTA, REINGRESO, MIGRACIÓN, CAMBIO DE ESQUEMA o CAMBIO DE PUESTO. En cualquier otro caso no aparecen.</div>
       <div class="tut-tip">💡 La <b>foto</b> es obligatoria solo en ALTA, REINGRESO, MIGRACIÓN, CAMBIO DE ESQUEMA y VACACIONES.</div>
       <div class="tut-warn">⚠️ Si cambias el Tipo de Movimiento después de capturar, los campos que ya no aplican se borran. Revisa que elegiste el movimiento correcto antes de llenar.</div>`},
     {t:'Link Expediente y VoBo',h:`<p>En <b>Información Adicional</b> (al final del formulario) aparecen, según el movimiento:</p>
@@ -3124,7 +3131,7 @@ function _askPorColumna(col){
     const movs = MATRIZ_MOV.filter(m => m.c.includes(col) || m.c.includes(col+'?')).map(m => _askNombreMov(m) + (m.c.includes(col+'?') ? ' (opcional)' : ''));
     const nom = col === 'ficha' ? 'La ficha' : _ASK_COLS[col];
     return `<b>${nom}</b> aplica en: <ul>${movs.map(x=>`<li>${x}</li>`).join('')}</ul>En los demás movimientos no se pide.` +
-        (col === 'unid' ? '<br>Además solo aparece si el <b>Puesto del Tabulador empieza con OPERADOR</b>.' : '');
+        (col === 'unid' ? '<br>Además solo aparece si el <b>Puesto del Tabulador empieza con OPERADOR CON o SHOPPER</b> (nunca con OPERADOR PARA).' : '');
 }
 function _askMejorPaso(q){
     const qt = _askTokens(q).map(_askStem); if(!qt.length) return null;
